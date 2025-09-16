@@ -166,7 +166,7 @@ function SidebarContent() {
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sidebar-foreground truncate">{user.name}</p>
               <p className="text-xs text-sidebar-foreground/60 truncate">
-                {user.role === "Director-General" ? "Director General" : user.role}
+                {user.role === "Director-General" ? "System Administrator" : user.role}
               </p>
               <Badge variant="outline" className="text-xs mt-1">
                 {user.staffId}

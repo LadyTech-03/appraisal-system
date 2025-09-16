@@ -77,7 +77,7 @@ export function Topbar() {
                 <div className="text-left hidden md:block">
                   <p className="text-sm font-medium">{user?.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {user?.role === "Director-General" ? "Director General" : user?.role}
+                    {user?.role === "Director-General" ? "System Administrator" : user?.role}
                   </p>
                 </div>
               </Button>

@@ -64,7 +64,7 @@ export default function DashboardPage() {
                   <p className="text-blue-100 mb-4">Welcome to your performance management dashboard</p>
                   <div className="flex flex-wrap items-center gap-3">
                     <Badge variant="secondary" className="bg-blue-900/80 text-white border-blue-800">
-                      {user.role === "Director-General" ? "Director General" : user.role}
+                      {user.role === "Director-General" ? "System Administrator" : user.role}
                     </Badge>
                     <Badge variant="secondary" className="bg-blue-900/80 text-white border-blue-800">
                       {user.staffId}
