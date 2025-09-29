@@ -26,7 +26,7 @@ export default function DashboardPage() {
   if (!isAuthenticated || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-blue-100">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-foreground"></div>
       </div>
     )
   }
@@ -54,59 +54,66 @@ export default function DashboardPage() {
       <main className="col-start-1 md:col-start-2 overflow-y-auto p-4 md:p-6">
         <div className="space-y-6">
           {/* Hero Section */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary to-blue-700 p-6 md:p-8 text-white">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-blue-700 to-blue-800 p-6 md:p-8 text-white">
             <div className="relative z-10">
-              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                <div className="flex-1">
-                  <h1 className="text-2xl md:text-3xl font-bold mb-2">
-                    {getGreeting()}, {user.name.split(" ")[0]}!
-                  </h1>
-                  <p className="text-blue-100 mb-4">Welcome to your performance management dashboard</p>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <Badge variant="secondary" className="bg-blue-900/80 text-white border-blue-800">
-                      {user.role === "Director-General" ? "System Administrator" : user.role}
-                    </Badge>
-                    <Badge variant="secondary" className="bg-blue-900/80 text-white border-blue-800">
-                      {user.staffId}
-                    </Badge>
+              {/* Header Section */}
+              <div className="mb-8">
+                <h1 className="text-3xl md:text-4xl font-bold mb-3">
+                  {getGreeting()}, {user.name.split(" ")[0]}!
+                </h1>
+                <p className="text-blue-100 text-lg mb-6">Welcome to your performance management dashboard</p>
+              </div>
+
+              {/* User Info Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                {user.division && (
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                    <div className="text-blue-200 text-sm font-medium mb-1">Division</div>
+                    <div className="text-white font-semibold">{user.division}</div>
+                  </div>
+                )}
+                {user.unit && (
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                    <div className="text-blue-200 text-sm font-medium mb-1">Unit</div>
+                    <div className="text-white font-semibold">{user.unit}</div>
+                  </div>
+                )}
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                  <div className="text-blue-200 text-sm font-medium mb-1">Role</div>
+                  <div className="text-white font-semibold">
+                    {user.role === "Director-General" ? "System Administrator" : user.role}
                   </div>
                 </div>
-                <div className="hidden lg:flex items-center space-x-4">
-                  <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                    <Target className="w-8 h-8" />
-                  </div>
-                  <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                    <TrendingUp className="w-8 h-8" />
-                  </div>
-                  <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                    <Sparkles className="w-8 h-8" />
-                  </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                  <div className="text-blue-200 text-sm font-medium mb-1">Staff ID</div>
+                  <div className="text-white font-semibold">{user.staffId}</div>
                 </div>
               </div>
 
-              <div className="mt-6 flex flex-wrap gap-3">
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4">
                 <Button
-                  variant="secondary"
-                  className="bg-blue-900/80 text-white border-blue-800 hover:bg-blue-900"
+                  size="lg"
+                  className="bg-white text-blue-700 hover:bg-blue-50 font-semibold px-8 py-3 rounded-lg shadow-lg"
                   onClick={() => router.push("/appraisals")}
                 >
-                  View My Appraisals
+                  View Appraisals
                 </Button>
-                {(user.role.includes("Director") || user.role.includes("Head")) && (
-                  <Button
-                    variant="outline"
-                    className="border-white/50 text-white hover:bg-white/20 bg-transparent"
-                    onClick={() => router.push("/create-appraisal")}
-                  >
-                    Start New Appraisal
-                  </Button>
-                )}
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white/30 text-white hover:bg-white/20 bg-transparent font-semibold px-8 py-3 rounded-lg"
+                  onClick={() => router.push("/create-appraisal")}
+                >
+                  Start New Appraisal
+                </Button>
               </div>
             </div>
 
             {/* Background decoration */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-32 translate-x-32"></div>
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24"></div>
+            <div className="absolute top-0 right-0 w-72 h-72 bg-white/5 rounded-full -translate-y-36 translate-x-36"></div>
+            <div className="absolute bottom-0 left-0 w-56 h-56 bg-white/5 rounded-full translate-y-28 -translate-x-28"></div>
+            <div className="absolute top-1/2 right-1/4 w-32 h-32 bg-white/3 rounded-full"></div>
           </div>
 
           {/* Stats Cards */}
@@ -128,3 +135,4 @@ export default function DashboardPage() {
     </div>
   )
 }
+

@@ -316,7 +316,7 @@ export function UserManagement() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="role">Role *</Label>
+                  <Label htmlFor="role">Role/Position *</Label>
                   <Select
                     value={formData.role}
                     onValueChange={(value) => setFormData((prev) => ({ ...prev, role: value }))}
@@ -337,7 +337,7 @@ export function UserManagement() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="managerId">Manager</Label>
+                  <Label htmlFor="managerId">Manager/Reporting Authority</Label>
                   <Select
                     value={formData.managerId}
                     onValueChange={(value) => setFormData((prev) => ({ ...prev, managerId: value }))}

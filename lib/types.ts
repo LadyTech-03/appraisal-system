@@ -1,11 +1,12 @@
 export interface User {
   id: string
   name: string
-  staffId: string
   email?: string
+  staffId: string
   role: string
-  managerId?: string
   division?: string
+  unit?: string
+  managerId?: string
   region?: string
   passwordHash?: string // for local auth simulation
   createdAt: string
@@ -251,7 +252,7 @@ export interface Appraisal {
 export interface AuthState {
   user: User | null
   isAuthenticated: boolean
-  login: (email: string, password: string, role: string) => Promise<boolean>
+  login: (emailOrStaffId: string, password: string) => Promise<boolean>
   logout: () => void
   impersonate: (userId: string) => void
 }

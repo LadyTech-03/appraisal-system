@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { formatDistanceToNow } from "date-fns"
-import { Users, Eye, Edit, Plus, Clock, CheckCircle, AlertCircle, Send, Download } from "lucide-react"
+import { Users, Eye, Edit, Plus, Clock, CheckCircle, AlertCircle, Send, Download, Bell, UserCheck, UserX } from "lucide-react"
 
 export default function TeamAppraisalsPage() {
   const router = useRouter()
@@ -35,21 +35,27 @@ export default function TeamAppraisalsPage() {
   if (!isAuthenticated || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-foreground"></div>
       </div>
     )
   }
 
-  const teamAppraisals = appraisals.filter((a) => a.appraiserId === user.id)
+  // Get direct reports (subordinates)
   const subordinateIds = orgHierarchy[user.id] || []
   const subordinates = subordinateIds.map((id) => users.find((u) => u.id === id)).filter(Boolean)
+  
+  // Get appraisals submitted by direct reports
+  const teamAppraisals = appraisals.filter((a) => subordinateIds.includes(a.employeeId))
+  
+  // Get appraisals created by this manager for their team
+  const managerCreatedAppraisals = appraisals.filter((a) => a.appraiserId === user.id)
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "draft":
         return <Clock className="h-4 w-4 text-orange-500" />
       case "submitted":
-        return <Send className="h-4 w-4 text-blue-500" />
+        return <Bell className="h-4 w-4 text-blue-500" />
       case "reviewed":
         return <AlertCircle className="h-4 w-4 text-purple-500" />
       case "closed":
@@ -73,6 +79,14 @@ export default function TeamAppraisalsPage() {
         return "bg-gray-100 text-gray-800"
     }
   }
+
+  // Check if a team member has submitted an appraisal
+  const hasSubmittedAppraisal = (employeeId: string) => {
+    return teamAppraisals.some(a => a.employeeId === employeeId && a.status === "submitted")
+  }
+
+  // Get pending appraisals (submitted by team members waiting for review)
+  const pendingAppraisals = teamAppraisals.filter(a => a.status === "submitted")
 
   const handleBulkExport = () => {
     if (selectedAppraisals.length === 0) {
@@ -145,27 +159,16 @@ export default function TeamAppraisalsPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-primary">Team Appraisals</h1>
-              <p className="text-muted-foreground">Manage performance appraisals for your team members</p>
+              <p className="text-muted-foreground">Review appraisals submitted by your team members</p>
             </div>
             <div className="flex items-center space-x-3">
-              <Badge variant="secondary">{teamAppraisals.length} Active Appraisals</Badge>
-              {teamAppraisals.length > 0 && (
-                <>
-                  <Button variant="outline" onClick={selectAllAppraisals}>
-                    {selectedAppraisals.length === teamAppraisals.length ? "Deselect All" : "Select All"}
-                  </Button>
-                  {selectedAppraisals.length > 0 && (
-                    <Button variant="outline" onClick={handleBulkExport}>
-                      <Download className="h-4 w-4 mr-2" />
-                      Export Selected ({selectedAppraisals.length})
-                    </Button>
-                  )}
-                </>
+              {pendingAppraisals.length > 0 && (
+                <Badge variant="destructive" className="flex items-center gap-1">
+                  <Bell className="h-3 w-3" />
+                  {pendingAppraisals.length} Pending Review
+                </Badge>
               )}
-              <Button onClick={() => router.push("/create-appraisal")}>
-                <Plus className="h-4 w-4 mr-2" />
-                Create New Appraisal
-              </Button>
+              <Badge variant="secondary">{subordinates.length} Team Members</Badge>
             </div>
           </div>
 
@@ -184,14 +187,8 @@ export default function TeamAppraisalsPage() {
                   <p className="text-sm text-muted-foreground">Team Members</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-orange-600">
-                    {teamAppraisals.filter((a) => a.status === "draft").length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Draft Appraisals</p>
-                </div>
-                <div className="text-center">
                   <p className="text-2xl font-bold text-blue-600">
-                    {teamAppraisals.filter((a) => a.status === "submitted").length}
+                    {pendingAppraisals.length}
                   </p>
                   <p className="text-sm text-muted-foreground">Pending Review</p>
                 </div>
@@ -201,115 +198,106 @@ export default function TeamAppraisalsPage() {
                   </p>
                   <p className="text-sm text-muted-foreground">Completed</p>
                 </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-orange-600">
+                    {subordinates.length - teamAppraisals.length}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Not Started</p>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Appraisals List */}
-          {teamAppraisals.length === 0 ? (
-            <Card className="glass-card">
-              <CardContent className="p-12 text-center">
-                <Users className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Team Appraisals Yet</h3>
-                <p className="text-muted-foreground mb-6">
-                  You haven't created any appraisals for your team members yet. Start by creating a new appraisal.
-                </p>
-                <Button onClick={() => router.push("/create-appraisal")}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create First Appraisal
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-6">
-              {teamAppraisals.map((appraisal) => {
-                const employee = users.find((u) => u.id === appraisal.employeeId)
-                const completedObjectives = appraisal.objectives?.filter((obj) => obj.achievement > 0).length || 0
-                const avgCompetencyRating =
-                  appraisal.competencies?.reduce((sum, comp) => sum + comp.rating, 0) /
-                    (appraisal.competencies?.length || 1) || 0
-
-                return (
-                  <Card key={appraisal.id} className="glass-card hover:shadow-lg transition-shadow">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <input
-                            type="checkbox"
-                            checked={selectedAppraisals.includes(appraisal.id)}
-                            onChange={() => toggleAppraisalSelection(appraisal.id)}
-                            className="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2"
-                          />
-                          <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-semibold">
-                            {employee?.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
-                          </div>
-                          <div>
-                            <CardTitle className="text-lg">{employee?.name}</CardTitle>
-                            <p className="text-sm text-muted-foreground">
-                              {employee?.role} • {employee?.staffId}
+          {/* Team Members List */}
+          <div className="grid gap-4">
+            {subordinates.map((subordinate) => {
+              const subordinateAppraisal = teamAppraisals.find(a => a.employeeId === subordinate.id)
+              const hasSubmitted = hasSubmittedAppraisal(subordinate.id)
+              
+              return (
+                <Card key={subordinate.id} className="glass-card hover:shadow-lg transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-semibold text-lg">
+                          {subordinate.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold">{subordinate.name}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {subordinate.role} • {subordinate.staffId}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {subordinate.division} • {subordinate.unit}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-4">
+                        <div className="text-right">
+                          {subordinateAppraisal ? (
+                            <div className="flex items-center space-x-2">
+                              {getStatusIcon(subordinateAppraisal.status)}
+                              <Badge className={`${getStatusColor(subordinateAppraisal.status)}`}>
+                                {subordinateAppraisal.status.toUpperCase()}
+                              </Badge>
+                            </div>
+                          ) : (
+                            <div className="flex items-center space-x-2">
+                              <UserX className="h-4 w-4 text-gray-500" />
+                              <Badge variant="outline">NOT STARTED</Badge>
+                            </div>
+                          )}
+                          
+                          {subordinateAppraisal && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {subordinateAppraisal.status === "submitted" 
+                                ? `Submitted ${formatDistanceToNow(new Date(subordinateAppraisal.updatedAt), { addSuffix: true })}`
+                                : `Last updated ${formatDistanceToNow(new Date(subordinateAppraisal.updatedAt), { addSuffix: true })}`
+                              }
                             </p>
-                          </div>
+                          )}
                         </div>
-                        <div className="flex items-center space-x-2">
-                          {getStatusIcon(appraisal.status)}
-                          <Badge className={`${getStatusColor(appraisal.status)}`}>
-                            {appraisal.status.toUpperCase()}
-                          </Badge>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                        <div className="text-center">
-                          <p className="text-2xl font-bold text-primary">{appraisal.overallRating || "N/A"}</p>
-                          <p className="text-sm text-muted-foreground">Overall Rating</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-2xl font-bold text-green-600">
-                            {completedObjectives}/{appraisal.objectives?.length || 0}
-                          </p>
-                          <p className="text-sm text-muted-foreground">Objectives Progress</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-2xl font-bold text-blue-600">{avgCompetencyRating.toFixed(1)}</p>
-                          <p className="text-sm text-muted-foreground">Avg Competency</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm text-muted-foreground">
-                          <p>
-                            Period: {new Date(appraisal.periodStart).toLocaleDateString()} -{" "}
-                            {new Date(appraisal.periodEnd).toLocaleDateString()}
-                          </p>
-                          <p>Last updated {formatDistanceToNow(new Date(appraisal.updatedAt), { addSuffix: true })}</p>
-                        </div>
+                        
                         <div className="flex space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => router.push(`/appraisals/${appraisal.id}`)}
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            View
-                          </Button>
-                          {(appraisal.status === "draft" || appraisal.status === "submitted") && (
-                            <Button size="sm" onClick={() => router.push(`/appraisals/${appraisal.id}/edit`)}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit
+                          {subordinateAppraisal ? (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => router.push(`/appraisals/${subordinateAppraisal.id}`)}
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                View
+                              </Button>
+                              {subordinateAppraisal.status === "submitted" && (
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => router.push(`/appraisals/${subordinateAppraisal.id}/review`)}
+                                  className="bg-blue-600 hover:bg-blue-700"
+                                >
+                                  <Bell className="h-4 w-4 mr-2" />
+                                  Review
+                                </Button>
+                              )}
+                            </>
+                          ) : (
+                            <Button variant="outline" size="sm" disabled>
+                              <Clock className="h-4 w-4 mr-2" />
+                              No Appraisal
                             </Button>
                           )}
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
         </main>
       </div>
     </div>

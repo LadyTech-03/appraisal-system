@@ -17,12 +17,11 @@ import Image from "next/image"
 
 export default function LoginPage() {
   const router = useRouter()
-  const { login } = useAuthStore()
+  const login = useAuthStore((state) => state.login)
   const { roles } = useAppStore()
   const [formData, setFormData] = useState({
     emailOrStaffId: "",
     password: "",
-    role: "",
   })
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -34,15 +33,14 @@ export default function LoginPage() {
     setError("")
 
     try {
-      const success = await login(formData.emailOrStaffId, formData.password, formData.role)
+      const success = await login(formData.emailOrStaffId, formData.password)
       if (success) {
         router.push("/dashboard")
       } else {
-        setError("Invalid credentials. Please check your email/staff ID, password, and role.")
-        setShowRequestAccess(true)
+        setError("Invalid credentials. Please try again.")
       }
-    } catch (err) {
-      setError("An error occurred during login. Please try again.")
+    } catch (error) {
+      setError("An error occurred. Please try again.")
     } finally {
       setIsLoading(false)
     }
@@ -86,25 +84,6 @@ export default function LoginPage() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="role">Role/Position</Label>
-                <Select
-                  value={formData.role}
-                  onValueChange={(value) => setFormData((prev) => ({ ...prev, role: value }))}
-                >
-                  <SelectTrigger className="bg-input">
-                    <SelectValue placeholder="Select your role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roles.map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {role}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
               {error && (
                 <Alert variant="destructive">
                   <AlertDescription>{error}</AlertDescription>
@@ -126,7 +105,8 @@ export default function LoginPage() {
 
             <div className="mt-6 text-center text-sm text-muted-foreground">
               <p>Demo Credentials:</p>
-              <p>Email: dg@appraisal.gov | Password: admin123 | Role: Director-General</p>
+              <p>dg@appraisal.gov | admin123 | Director-General</p>
+              <p>michael.chen@appraisal.gov | password123 | Deputy Director – General, Management Services</p>
             </div>
           </CardContent>
         </Card>
@@ -141,32 +121,6 @@ export default function LoginPage() {
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 to-blue-700/30" />
-
-        {/* <div className="relative z-10 flex items-center justify-center h-full p-8">
-          <div className="text-center text-white max-w-md">
-            <div className="mb-8 flex justify-center space-x-4">
-              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                <BookOpen className="w-8 h-8" />
-              </div>
-              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                <GraduationCap className="w-8 h-8" />
-              </div>
-              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                <Award className="w-8 h-8" />
-              </div>
-            </div>
-            <h2 className="text-3xl font-bold mb-4">Excellence in Education</h2>
-            <p className="text-lg opacity-90 mb-6">
-              Empowering educational professionals through comprehensive performance management and continuous learning.
-            </p>
-            <div className="space-y-2 text-sm opacity-80">
-              <p>✓ Professional Development Tracking</p>
-              <p>✓ Competency-Based Assessments</p>
-              <p>✓ Career Growth Planning</p>
-              <p>✓ Educational Excellence Standards</p>
-            </div>
-          </div>
-        </div> */}
       </div>
     </div>
   )

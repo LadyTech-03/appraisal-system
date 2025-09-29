@@ -20,7 +20,7 @@ export function QuickActions() {
       icon: Plus,
       color: "bg-primary text-primary-foreground",
       onClick: () => router.push("/create-appraisal"),
-      show: isManager,
+      show: true,
     },
     {
       title: "View My Appraisals",
@@ -29,14 +29,6 @@ export function QuickActions() {
       color: "bg-blue-500 text-white",
       onClick: () => router.push("/appraisals"),
       show: true,
-    },
-    {
-      title: "Team Overview",
-      description: "Manage team appraisals",
-      icon: Users,
-      color: "bg-green-500 text-white",
-      onClick: () => router.push("/team-appraisals"),
-      show: isManager,
     },
     {
       title: "Export Reports",

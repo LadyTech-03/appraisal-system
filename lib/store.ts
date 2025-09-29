@@ -6,11 +6,12 @@ import type { User, Appraisal, AuthState, AppState, AccessRequest } from "./type
 const MOCK_USERS: User[] = [
   {
     id: "1",
-    name: "Dr. Sarah Johnson",
+    name: "Sarah Johnson",
     staffId: "DG001",
     email: "dg@appraisal.gov",
     role: "Director-General",
     passwordHash: "admin123", // In production, this would be properly hashed
+    division: "Management Directorate",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -22,6 +23,7 @@ const MOCK_USERS: User[] = [
     role: "Deputy Director – General, Management Services",
     managerId: "1",
     passwordHash: "password123",
+    division: "Management Directorate",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -114,6 +116,28 @@ const MOCK_USERS: User[] = [
     managerId: "2",
     division: "Management Services",
     passwordHash: "password123",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "11",
+    name: "Dr. Larry Paige",
+    staffId: "HR011",
+    email: "hr@appraisal.gov",
+    role: "HR Management & Development Division Head",
+    managerId: "2",
+    division: "Management Services",
+    passwordHash: "password123",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "12",
+    name: "Dr. Grace Mensah",
+    staffId: "DG002",
+    email: "dg2@appraisal.gov",
+    role: "Director-General",
+    passwordHash: "admin123",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -305,13 +329,12 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       isAuthenticated: false,
-      login: async (emailOrStaffId: string, password: string, role: string) => {
+      login: async (emailOrStaffId: string, password: string) => {
         const { users } = useAppStore.getState()
         const user = users.find(
           (u) =>
             (u.email === emailOrStaffId || u.staffId === emailOrStaffId) &&
-            u.passwordHash === password &&
-            u.role === role,
+            u.passwordHash === password,
         )
 
         if (user) {
@@ -394,10 +417,11 @@ export const useAppStore = create<AppState>()(
         set((state) => ({ users: [...state.users, newUser] }))
 
         if (userData.managerId && userData.managerId !== "none") {
+          const managerId = userData.managerId as string
           set((state) => ({
             orgHierarchy: {
               ...state.orgHierarchy,
-              [userData.managerId]: [...(state.orgHierarchy[userData.managerId] || []), newUser.id],
+              [managerId]: [...(state.orgHierarchy[managerId] || []), newUser.id],
             },
           }))
         }
@@ -418,7 +442,8 @@ export const useAppStore = create<AppState>()(
           }
 
           if (updates.managerId && updates.managerId !== "none") {
-            updatedOrgHierarchy[updates.managerId] = [...(updatedOrgHierarchy[updates.managerId] || []), id]
+            const managerId = updates.managerId as string
+            updatedOrgHierarchy[managerId] = [...(updatedOrgHierarchy[managerId] || []), id]
           }
 
           return {

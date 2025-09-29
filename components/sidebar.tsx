@@ -48,14 +48,6 @@ const menuItems: MenuItem[] = [
     icon: UserCheck,
     label: "Team Appraisals",
     href: "/team-appraisals",
-    roles: [
-      "Director-General",
-      "Deputy Director – General, Management Services",
-      "Deputy Director – General, Operations",
-      "HR Management & Development Division Head",
-      "Finance Division Head",
-      "Administration Division Head",
-    ],
   },
   {
     icon: Target,
