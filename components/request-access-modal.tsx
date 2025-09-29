@@ -29,7 +29,7 @@ export function RequestAccessModal({ children }: RequestAccessModalProps) {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    staffId: "",
+    employeeId: "",
     role: "",
     division: "",
     notes: "",
@@ -60,7 +60,7 @@ export function RequestAccessModal({ children }: RequestAccessModalProps) {
       addAccessRequest({
         name: formData.name,
         email: formData.email,
-        staffId: formData.staffId || undefined,
+        employeeId: formData.employeeId || undefined,
         role: formData.role,
         division: formData.division,
         notes: formData.notes || undefined,
@@ -70,7 +70,7 @@ export function RequestAccessModal({ children }: RequestAccessModalProps) {
       setFormData({
         name: "",
         email: "",
-        staffId: "",
+        employeeId: "",
         role: "",
         division: "",
         notes: "",
@@ -128,11 +128,11 @@ export function RequestAccessModal({ children }: RequestAccessModalProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="staffId">Staff ID (Optional)</Label>
+            <Label htmlFor="employeeId">Staff ID (Optional)</Label>
             <Input
-              id="staffId"
-              value={formData.staffId}
-              onChange={(e) => handleInputChange("staffId", e.target.value)}
+              id="employeeId"
+              value={formData.employeeId}
+              onChange={(e) => handleInputChange("employeeId", e.target.value)}
               placeholder="Leave blank if new staff"
             />
           </div>

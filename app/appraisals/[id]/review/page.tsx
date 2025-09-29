@@ -143,7 +143,7 @@ export default function AppraisalReviewPage() {
               <div>
                 <h1 className="text-2xl font-bold text-primary">Review Appraisal</h1>
                 <p className="text-muted-foreground">
-                  Reviewing appraisal for {employee?.name} • {employee?.staffId}
+                  Reviewing appraisal for {employee?.name} • {employee?.employeeId}
                 </p>
               </div>
             </div>

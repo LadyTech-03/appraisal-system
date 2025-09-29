@@ -24,12 +24,6 @@ export default function TeamAppraisalsPage() {
       router.push("/login")
       return
     }
-
-    const canManageTeam = user?.role.includes("Director") || user?.role.includes("Head")
-    if (!canManageTeam) {
-      router.push("/dashboard")
-      return
-    }
   }, [isAuthenticated, user, router])
 
   if (!isAuthenticated || !user) {
@@ -211,6 +205,7 @@ export default function TeamAppraisalsPage() {
           {/* Team Members List */}
           <div className="grid gap-4">
             {subordinates.map((subordinate) => {
+              if (!subordinate) return null
               const subordinateAppraisal = teamAppraisals.find(a => a.employeeId === subordinate.id)
               const hasSubmitted = hasSubmittedAppraisal(subordinate.id)
               
@@ -228,7 +223,7 @@ export default function TeamAppraisalsPage() {
                         <div>
                           <h3 className="text-lg font-semibold">{subordinate.name}</h3>
                           <p className="text-sm text-muted-foreground">
-                            {subordinate.role} • {subordinate.staffId}
+                            {subordinate.role} • {subordinate.employeeId}
                           </p>
                           <p className="text-xs text-muted-foreground">
                             {subordinate.division} • {subordinate.unit}

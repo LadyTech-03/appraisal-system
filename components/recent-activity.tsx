@@ -1,21 +1,36 @@
 "use client"
 
+import { useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useAppStore, useAuthStore } from "@/lib/store"
 import { formatDistanceToNow } from "date-fns"
 import { FileText, Clock, CheckCircle, AlertCircle, Eye } from "lucide-react"
+import { parseApiError } from "@/lib/api/api"
+import { toast } from "sonner"
 
 export function RecentActivity() {
   const { user } = useAuthStore()
-  const { appraisals, users } = useAppStore()
+  const { users, fetchDashboardOverview, dashboardOverview } = useAppStore()
+
+  useEffect(() => {
+    const fetchRecentActivity = async () => {
+      if (!user) return
+
+      try {
+        await fetchDashboardOverview()
+      } catch (error) {
+        const apiError = parseApiError(error)
+        toast.error(apiError.message)
+      }
+    }
+
+    fetchRecentActivity()
+  }, [user, fetchDashboardOverview])
 
   // Get recent appraisals related to the user
-  const recentAppraisals = appraisals
-    .filter((a) => a.employeeId === user?.id || a.appraiserId === user?.id)
-    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-    .slice(0, 5)
+  const recentAppraisals = dashboardOverview?.recentAppraisals || []
 
   const getStatusIcon = (status: string) => {
     switch (status) {

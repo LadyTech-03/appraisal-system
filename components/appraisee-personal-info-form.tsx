@@ -20,7 +20,10 @@ interface TrainingRecord {
   programme: string
 }
 
-export function AppraiseePersonalInfoForm({ onNext }: { onNext: (data: any) => void }) {
+export function AppraiseePersonalInfoForm({ onNext, initialData }: { 
+  onNext: (data: any) => void 
+  initialData?: any
+}) {
   const [formData, setFormData] = useState({
     // Period of Report
     periodFrom: "",
@@ -37,7 +40,7 @@ export function AppraiseePersonalInfoForm({ onNext }: { onNext: (data: any) => v
     // Job Information
     presentJobTitle: "",
     gradeSalary: "",
-    department: "",
+    division: "",
     dateOfAppointment: "",
     
     // Training Records
@@ -247,11 +250,11 @@ export function AppraiseePersonalInfoForm({ onNext }: { onNext: (data: any) => v
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="department">Department/Division</Label>
+                  <Label htmlFor="division">Department/Division</Label>
                   <Input
-                    id="department"
-                    value={formData.department}
-                    onChange={(e) => handleInputChange("department", e.target.value)}
+                    id="division"
+                    value={formData.division}
+                    onChange={(e) => handleInputChange("division", e.target.value)}
                     required
                   />
                 </div>

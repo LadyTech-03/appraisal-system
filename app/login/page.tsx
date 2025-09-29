@@ -7,40 +7,40 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useAuthStore, useAppStore } from "@/lib/store"
+import { useAuthStore } from "@/lib/store"
 import { Shield, BookOpen, GraduationCap, Award } from "lucide-react"
-import { RequestAccessModal } from "@/components/request-access-modal"
+import Link from "next/link"
 import Image from "next/image"
 
 export default function LoginPage() {
   const router = useRouter()
   const login = useAuthStore((state) => state.login)
-  const { roles } = useAppStore()
   const [formData, setFormData] = useState({
-    emailOrStaffId: "",
+    emailOrEmployeeId: "",
     password: "",
   })
-  const [error, setError] = useState("")
+  const errorMessage = useAuthStore((state) => state.error)
+  const clearError = useAuthStore((state) => state.clearError)
+  const [formError, setFormError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [showRequestAccess, setShowRequestAccess] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    setError("")
+    setFormError(null)
+    clearError()
 
     try {
-      const success = await login(formData.emailOrStaffId, formData.password)
+      const success = await login(formData.emailOrEmployeeId, formData.password)
       if (success) {
         router.push("/dashboard")
       } else {
-        setError("Invalid credentials. Please try again.")
+        setFormError("Invalid credentials. Please try again.")
       }
     } catch (error) {
-      setError("An error occurred. Please try again.")
+      setFormError("An error occurred. Please try again.")
     } finally {
       setIsLoading(false)
     }
@@ -59,13 +59,13 @@ export default function LoginPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="emailOrStaffId">Email or Staff ID</Label>
+                <Label htmlFor="emailOrEmployeeId">Email or Staff ID</Label>
                 <Input
-                  id="emailOrStaffId"
+                  id="emailOrEmployeeId"
                   type="text"
                   placeholder="Enter your email or staff ID"
-                  value={formData.emailOrStaffId}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, emailOrStaffId: e.target.value }))}
+                  value={formData.emailOrEmployeeId}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, emailOrEmployeeId: e.target.value }))}
                   required
                   className="bg-input"
                 />
@@ -84,9 +84,9 @@ export default function LoginPage() {
                 />
               </div>
 
-              {error && (
+              {(formError || errorMessage) && (
                 <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
+                  <AlertDescription>{formError || errorMessage}</AlertDescription>
                 </Alert>
               )}
 
@@ -95,19 +95,12 @@ export default function LoginPage() {
               </Button>
 
               <div className="text-center">
-                <RequestAccessModal>
-                  <Button type="button" variant="link" className="text-sm text-muted-foreground hover:text-primary">
-                    Don't have access? Request Access
-                  </Button>
-                </RequestAccessModal>
+                <Button asChild type="button" variant="link" className="text-sm text-muted-foreground hover:text-primary">
+                  <Link href="/register">Don't have access? Request Access</Link>
+                </Button>
               </div>
             </form>
 
-            <div className="mt-6 text-center text-sm text-muted-foreground">
-              <p>Demo Credentials:</p>
-              <p>dg@appraisal.gov | admin123 | Director-General</p>
-              <p>michael.chen@appraisal.gov | password123 | Deputy Director – General, Management Services</p>
-            </div>
           </CardContent>
         </Card>
       </div>

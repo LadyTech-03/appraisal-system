@@ -8,10 +8,7 @@ import { Topbar } from "@/components/topbar"
 import { DashboardStats } from "@/components/dashboard-stats"
 import { RecentActivity } from "@/components/recent-activity"
 import { QuickActions } from "@/components/quick-actions"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Sparkles, Target, TrendingUp } from "lucide-react"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -81,12 +78,12 @@ export default function DashboardPage() {
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
                   <div className="text-blue-200 text-sm font-medium mb-1">Role</div>
                   <div className="text-white font-semibold">
-                    {user.role === "Director-General" ? "System Administrator" : user.role}
+                    {user.role}
                   </div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
                   <div className="text-blue-200 text-sm font-medium mb-1">Staff ID</div>
-                  <div className="text-white font-semibold">{user.staffId}</div>
+                  <div className="text-white font-semibold">{user.employeeId}</div>
                 </div>
               </div>
 

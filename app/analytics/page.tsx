@@ -27,6 +27,8 @@ export default function AnalyticsPage() {
   const router = useRouter()
   const { user, isAuthenticated } = useAuthStore()
   const { appraisals, users, orgHierarchy } = useAppStore()
+  const allowedRoles = ["Director-General", "System Administrator"]
+  const canViewAnalytics = user?.role ? allowedRoles.includes(user.role) : false
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -35,7 +37,6 @@ export default function AnalyticsPage() {
     }
 
     // Check if user has permission to view analytics
-    const canViewAnalytics = user?.role.includes("Director")
     if (!canViewAnalytics) {
       router.push("/dashboard")
       return

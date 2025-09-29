@@ -2,7 +2,7 @@ export interface User {
   id: string
   name: string
   email?: string
-  staffId: string
+  employeeId: string
   role: string
   division?: string
   unit?: string
@@ -20,7 +20,94 @@ export interface Appraisal {
   periodStart: string
   periodEnd: string
   status: "draft" | "submitted" | "reviewed" | "closed"
+  employeeName?: string
+  employeeEmployeeId?: string
+  appraiserName?: string
+  appraiserEmployeeId?: string
+  objectives: {
+    id: string
+    desc: string
+    target: string
+    achievement: number
+  }[]
+  competencies: {
+    id: string
+    name: string
+    rating: number
+    comment: string
+  }[]
+  keyResultAreas: {
+    id: string
+    area: string
+    targets: string
+    resourcesRequired: string
+  }[]
+  roleSkills: {
+    id: string
+    name: string
+    rating: number
+  }[]
+  trainingNeeds: {
+    id: string
+    name: string
+    rating: number
+    comment: string
+  }[]
+  overallRating: number
+  appraiserComments: string
+  employeeComments: string
+  attachments: string[]
+  appraiserSignature: string
+  appraiserSignatureDate: string
+  appraiseeSignature: string
+  appraiseeSignatureDate: string
+  createdAt: string
+  updatedAt: string
+}
 
+export interface ComprehensiveAppraisal {
+  id: string
+  employeeId: string
+  appraiserId: string
+  periodStart: string
+  periodEnd: string
+  status: "draft" | "submitted" | "reviewed" | "closed"
+  objectives: {
+    id: string
+    desc: string
+    target: string
+    achievement: number
+  }[]
+  competencies: {
+    id: string
+    name: string
+    rating: number
+    comment: string
+  }[]
+  roleSkills: {
+    id: string
+    name: string
+    rating: number
+  }[]
+  trainingNeeds: {
+    id: string
+    name: string
+    rating: number
+    comment: string
+  }[]
+  overallRating: number
+  appraiserComments: string
+  employeeComments: string
+  attachments: string[]
+  appraiserSignature: string
+  appraiserSignatureDate: string
+  appraiseeSignature: string
+  appraiseeSignatureDate: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ComprehensiveAppraisalForm {
   // Section 1: Personal Information (auto-filled from user data)
   employeeInfo: {
     title: string
@@ -30,7 +117,8 @@ export interface Appraisal {
     gender: "Male" | "Female"
     grade: string
     position: string
-    department: string
+    unit: string
+    division: string
     appointmentDate: string
   }
 
@@ -252,16 +340,31 @@ export interface Appraisal {
 export interface AuthState {
   user: User | null
   isAuthenticated: boolean
-  login: (emailOrStaffId: string, password: string) => Promise<boolean>
-  logout: () => void
+  token: string | null
+  error: string | null
+  login: (emailOrEmployeeId: string, password: string) => Promise<boolean>
+  register: (data: {
+    employeeId: string
+    email: string
+    password: string
+    name: string
+    role: string
+    division?: string
+    unit?: string
+    managerId?: string
+    phone?: string
+  }) => Promise<void>
+  logout: () => Promise<void>
+  bootstrap: () => Promise<void>
   impersonate: (userId: string) => void
+  clearError: () => void
 }
 
 export interface AccessRequest {
   id: string
   name: string
   email: string
-  staffId?: string
+  employeeId?: string
   role: string
   division: string
   notes?: string
@@ -277,6 +380,7 @@ export interface AppState {
   roles: string[]
   orgHierarchy: Record<string, string[]>
   accessRequests: AccessRequest[]
+  dashboardOverview: DashboardOverview | null
   getReports: (managerId: string) => User[]
   filteredUsers: (query: string) => User[]
   addUser: (user: Omit<User, "id" | "createdAt" | "updatedAt">) => void
@@ -290,6 +394,23 @@ export interface AppState {
   rejectAccessRequest: (id: string) => void
   exportData: () => string
   importData: (data: string) => void
+  setUsersFromServer: (users: User[]) => void
+  setAppraisalsFromServer: (appraisals: Appraisal[]) => void
+  setAccessRequestsFromServer: (accessRequests: AccessRequest[]) => void
+  setDashboardOverview: (overview: DashboardOverview | null) => void
+  fetchDashboardOverview: () => Promise<DashboardOverview | null>
+}
+
+export interface DashboardOverview {
+  myAppraisals: number
+  pendingAppraisals: number
+  completedAppraisals: number
+  inReviewAppraisals: number
+  submittedAppraisals: number
+  averageRating: number
+  teamMembers: number
+  totalUsers: number | null
+  recentAppraisals: Appraisal[]
 }
 
 export const ROLES = [

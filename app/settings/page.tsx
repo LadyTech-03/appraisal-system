@@ -19,6 +19,7 @@ export default function SettingsPage() {
   const { exportData, importData } = useAppStore()
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
   const [importText, setImportText] = useState("")
+  const allowedRoles = ["Director-General", "System Administrator"]
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -114,7 +115,7 @@ export default function SettingsPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>Staff ID</Label>
-                  <Input value={user.staffId} disabled />
+                  <Input value={user.employeeId} disabled />
                 </div>
                 <div className="space-y-2">
                   <Label>Email</Label>
@@ -178,7 +179,7 @@ export default function SettingsPage() {
               </div>
 
               {/* Clear Data */}
-              {user.role === "Director-General" && (
+              {allowedRoles.includes(user.role) && (
                 <div className="space-y-3 pt-6 border-t border-destructive/20">
                   <h3 className="font-semibold text-destructive">Danger Zone</h3>
                   <p className="text-sm text-muted-foreground">

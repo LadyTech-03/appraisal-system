@@ -1,39 +1,38 @@
 "use client"
 
+import { useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { useAppStore, useAuthStore } from "@/lib/store"
-import { FileText, Clock, CheckCircle, Users, Target, TrendingUp } from "lucide-react"
+import { FileText, Clock, CheckCircle, Users, TrendingUp } from "lucide-react"
+import { toast } from "sonner"
+import { parseApiError } from "@/lib/api/api"
 
 export function DashboardStats() {
   const { user } = useAuthStore()
-  const { users, appraisals, orgHierarchy } = useAppStore()
+  const { dashboardOverview, fetchDashboardOverview } = useAppStore()
+  const isLoading = !dashboardOverview
 
-  // Calculate statistics based on user role
-  const myAppraisals = appraisals.filter((a) => a.employeeId === user?.id)
-  const appraisalsIManage = appraisals.filter((a) => a.appraiserId === user?.id)
-  const teamMembers = orgHierarchy[user?.id || ""] || []
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!user) return
 
-  const pendingAppraisals = [...myAppraisals, ...appraisalsIManage].filter((a) => a.status === "draft")
-  const completedAppraisals = [...myAppraisals, ...appraisalsIManage].filter((a) => a.status === "closed")
-  const inReviewAppraisals = [...myAppraisals, ...appraisalsIManage].filter((a) => a.status === "reviewed")
+      try {
+        await fetchDashboardOverview()
+      } catch (error) {
+        const apiError = parseApiError(error)
+        toast.error(apiError.message)
+      }
+    }
 
-  const comprehensiveAppraisals = [...myAppraisals, ...appraisalsIManage].filter(
-    (a) => a.coreCompetencies && a.keyResultAreas && a.keyResultAreas.length > 0,
-  )
+    fetchStats()
+  }, [user, fetchDashboardOverview])
 
-  const avgOverallRating =
-    comprehensiveAppraisals.length > 0
-      ? comprehensiveAppraisals.reduce((sum, a) => sum + (a.overallAssessment?.overallRating || 0), 0) /
-        comprehensiveAppraisals.length
-      : 0
-
-  const isManager = user?.role.includes("Director") || user?.role.includes("Head")
-  const isDG = user?.role === "Director-General"
+  const isAdmin = user?.role === "Director-General" || user?.role === "System Administrator"
 
   const stats = [
     {
       title: "My Appraisals",
-      value: myAppraisals.length,
+      value: dashboardOverview?.myAppraisals ?? 0,
       description: "Total appraisals",
       icon: FileText,
       color: "text-blue-600",
@@ -41,7 +40,7 @@ export function DashboardStats() {
     },
     {
       title: "Pending Reviews",
-      value: pendingAppraisals.length,
+      value: dashboardOverview?.pendingAppraisals ?? 0,
       description: "Awaiting action",
       icon: Clock,
       color: "text-orange-600",
@@ -49,7 +48,7 @@ export function DashboardStats() {
     },
     {
       title: "Completed",
-      value: completedAppraisals.length,
+      value: dashboardOverview?.completedAppraisals ?? 0,
       description: "This period",
       icon: CheckCircle,
       color: "text-green-600",
@@ -63,11 +62,11 @@ export function DashboardStats() {
     //   color: "text-purple-600",
     //   bgColor: "bg-purple-50",
     // },
-    ...(avgOverallRating > 0
+    ...((dashboardOverview?.averageRating || 0) > 0
       ? [
           {
             title: "Avg Rating",
-            value: avgOverallRating.toFixed(1),
+            value: (dashboardOverview?.averageRating || 0).toFixed(1),
             description: "Performance score",
             icon: TrendingUp,
             color: "text-emerald-600",
@@ -75,23 +74,21 @@ export function DashboardStats() {
           },
         ]
       : []),
-    ...(isManager
-      ? [
+    ...([
           {
             title: "Team Members",
-            value: teamMembers.length,
+            value: dashboardOverview?.teamMembers ?? 0,
             description: "Direct reports",
             icon: Users,
             color: "text-indigo-600",
             bgColor: "bg-indigo-50",
           },
-        ]
-      : []),
-    ...(isDG
+        ]),
+    ...(isAdmin
       ? [
           {
             title: "Total Users",
-            value: users.length,
+            value: dashboardOverview?.totalUsers ?? 0,
             description: "Organization wide",
             icon: Users,
             color: "text-slate-600",

@@ -27,7 +27,7 @@ export function AccessRequestsPanel() {
     setEditData({
       name: request.name,
       email: request.email,
-      staffId: request.staffId,
+      employeeId: request.employeeId,
       role: request.role,
       division: request.division,
       notes: request.notes,
@@ -138,8 +138,8 @@ export function AccessRequestsPanel() {
                         <Building className="w-4 h-4" />
                         {request.role} • {request.division}
                       </div>
-                      {request.staffId && (
-                        <div className="text-sm text-muted-foreground">Staff ID: {request.staffId}</div>
+                      {request.employeeId && (
+                        <div className="text-sm text-muted-foreground">Staff ID: {request.employeeId}</div>
                       )}
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="w-4 h-4" />
@@ -248,11 +248,11 @@ export function AccessRequestsPanel() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="edit-staffId">Staff ID</Label>
+              <Label htmlFor="edit-employeeId">Staff ID</Label>
               <Input
-                id="edit-staffId"
-                value={editData.staffId || ""}
-                onChange={(e) => setEditData((prev) => ({ ...prev, staffId: e.target.value }))}
+                id="edit-employeeId"
+                value={editData.employeeId || ""}
+                onChange={(e) => setEditData((prev) => ({ ...prev, employeeId: e.target.value }))}
               />
             </div>
 

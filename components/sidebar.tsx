@@ -33,6 +33,8 @@ interface MenuItem {
   roles?: string[]
 }
 
+const ADMIN_ROLES = ["Director-General", "System Administrator"]
+
 const menuItems: MenuItem[] = [
   {
     icon: Home,
@@ -53,14 +55,6 @@ const menuItems: MenuItem[] = [
     icon: Target,
     label: "Create Appraisal",
     href: "/create-appraisal",
-    roles: [
-      "Director-General",
-      "Deputy Director – General, Management Services",
-      "Deputy Director – General, Operations",
-      "HR Management & Development Division Head",
-      "Finance Division Head",
-      "Administration Division Head",
-    ],
   },
   {
     icon: Calendar,
@@ -71,17 +65,13 @@ const menuItems: MenuItem[] = [
     icon: BarChart3,
     label: "Analytics",
     href: "/analytics",
-    roles: [
-      "Director-General",
-      "Deputy Director – General, Management Services",
-      "Deputy Director – General, Operations",
-    ],
+    roles: ADMIN_ROLES,
   },
   {
     icon: Users,
     label: "User Management",
     href: "/admin",
-    roles: ["Director-General"],
+    roles: ADMIN_ROLES,
     // badge: "System Admin",
   },
   {
@@ -111,7 +101,7 @@ function SidebarContent() {
   const comprehensiveAppraisals = appraisals.filter(
     (a) =>
       (a.employeeId === user?.id || a.appraiserId === user?.id) &&
-      a.coreCompetencies &&
+      a.competencies &&
       a.keyResultAreas &&
       a.keyResultAreas.length > 0,
   ).length
@@ -158,10 +148,10 @@ function SidebarContent() {
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sidebar-foreground truncate">{user.name}</p>
               <p className="text-xs text-sidebar-foreground/60 truncate">
-                {user.role === "Director-General" ? "System Administrator" : user.role}
+                {user.role}
               </p>
               <Badge variant="outline" className="text-xs mt-1">
-                {user.staffId}
+                {user.employeeId}
               </Badge>
             </div>
           </div>

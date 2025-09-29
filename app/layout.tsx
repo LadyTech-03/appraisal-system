@@ -1,3 +1,5 @@
+"use client"
+
 import type React from "react"
 import type { Metadata } from "next"
 import { GeistSans } from "geist/font/sans"
@@ -5,12 +7,22 @@ import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import "./globals.css"
+import { useAuthStore } from "@/lib/store"
+import { useEffect } from "react"
 
-export const metadata: Metadata = {
-  title: "Appraisal Platform - Performance Management System",
-  description: "Comprehensive performance appraisal and management platform for organizations",
-  generator: "v0.app",
+function BootstrapSession() {
+  useEffect(() => {
+    useAuthStore.getState().bootstrap()
+  }, [])
+
+  return null
 }
+
+// export const metadata: Metadata = {
+//   title: "Appraisal Platform - Performance Management System",
+//   description: "Comprehensive performance appraisal and management platform for organizations",
+//   generator: "v0.app",
+// }
 
 export default function RootLayout({
   children,
@@ -21,6 +33,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <Suspense fallback={null}>
+          <BootstrapSession />
           {children}
           <Analytics />
         </Suspense>

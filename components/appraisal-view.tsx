@@ -65,7 +65,7 @@ export function AppraisalView({ appraisal, employee, appraiser }: AppraisalViewP
               </div>
               <div className="flex items-center space-x-3">
                 <Badge variant="outline" className="px-3 py-1">
-                  Staff ID: {employee.staffId}
+                  Employee ID: {employee.employeeId}
                 </Badge>
               </div>
             </div>
@@ -224,7 +224,7 @@ export function AppraisalView({ appraisal, employee, appraiser }: AppraisalViewP
                   <Badge variant="outline" className="text-xs">
                     {index + 1}
                   </Badge>
-                  <span className="text-sm">{need}</span>
+                  <span className="text-sm">{need.name}</span>
                 </div>
               ))}
             </div>

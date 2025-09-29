@@ -10,8 +10,8 @@ export function QuickActions() {
   const router = useRouter()
   const { user } = useAuthStore()
 
-  const isManager = user?.role.includes("Director") || user?.role.includes("Head")
-  const isDG = user?.role === "Director-General"
+  const role = user?.role || ""
+  const isAdmin = role === "Director-General" || role === "System Administrator"
 
   const actions = [
     {
@@ -36,7 +36,7 @@ export function QuickActions() {
       icon: Download,
       color: "bg-purple-500 text-white",
       onClick: () => router.push("/team-appraisals"),
-      show: isManager,
+      show: true,
     },
     {
       title: "Analytics Dashboard",
@@ -44,7 +44,7 @@ export function QuickActions() {
       icon: BarChart3,
       color: "bg-orange-500 text-white",
       onClick: () => router.push("/analytics"),
-      show: isDG,
+      show: isAdmin,
     },
     {
       title: "Appraisal History",
@@ -60,7 +60,7 @@ export function QuickActions() {
       icon: Settings,
       color: "bg-red-500 text-white",
       onClick: () => router.push("/admin"),
-      show: isDG,
+      show: isAdmin,
     },
   ].filter((action) => action.show)
 

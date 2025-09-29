@@ -41,7 +41,7 @@ function OrgNode({ user, subordinates, level, onUserSelect }: OrgNodeProps) {
                 <p className="text-xs text-muted-foreground">{user.role}</p>
                 <div className="flex items-center space-x-2 mt-1">
                   <Badge variant="outline" className="text-xs">
-                    {user.staffId}
+                    {user.employeeId}
                   </Badge>
                   {user.division && (
                     <Badge variant="secondary" className="text-xs">

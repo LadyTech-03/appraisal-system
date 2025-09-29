@@ -19,7 +19,7 @@ import { AccessRequestsPanel } from "./access-requests-panel"
 
 interface UserFormData {
   name: string
-  staffId: string
+  employeeId: string
   email: string
   role: string
   managerId: string
@@ -29,15 +29,15 @@ interface UserFormData {
 }
 
 export function UserManagement() {
-  const { users, roles, addUser, updateUser, deleteUser, exportData, importData, filteredUsers, accessRequests } =
-    useAppStore()
+  const { users, roles, addUser, updateUser, deleteUser, exportData, importData, filteredUsers, accessRequests } = useAppStore()
+  const allowedRoles = ["Director-General", "System Administrator"]
   const { user: currentUser, impersonate } = useAuthStore()
   const [activeTab, setActiveTab] = useState<"list" | "add" | "bulk" | "org" | "requests">("list")
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [formData, setFormData] = useState<UserFormData>({
     name: "",
-    staffId: "",
+    employeeId: "",
     email: "",
     role: "",
     managerId: "",
@@ -54,7 +54,7 @@ export function UserManagement() {
   const resetForm = () => {
     setFormData({
       name: "",
-      staffId: "",
+      employeeId: "",
       email: "",
       role: "",
       managerId: "",
@@ -87,7 +87,7 @@ export function UserManagement() {
     setEditingUser(user)
     setFormData({
       name: user.name,
-      staffId: user.staffId,
+      employeeId: user.employeeId,
       email: user.email || "",
       role: user.role,
       managerId: user.managerId || "",
@@ -118,7 +118,7 @@ export function UserManagement() {
           userData[header] = values[index] || ""
         })
 
-        if (userData.name && userData.staffId && userData.role) {
+        if (userData.name && userData.employeeId && userData.role) {
           addUser(userData)
         }
       }
@@ -149,7 +149,7 @@ export function UserManagement() {
     }
   }
 
-  const managerOptions = users.filter((u) => u.role.includes("Director") || u.role.includes("Head"))
+  const managerOptions = users.filter((u) => allowedRoles.includes(u.role))
 
   return (
     <div className="space-y-6">
@@ -248,14 +248,14 @@ export function UserManagement() {
                           <h4 className="font-semibold">{user.name}</h4>
                           <p className="text-sm text-muted-foreground">{user.role}</p>
                           <div className="flex items-center space-x-2 mt-1">
-                            <Badge variant="outline">{user.staffId}</Badge>
+                            <Badge variant="outline">{user.employeeId}</Badge>
                             {user.email && <Badge variant="secondary">{user.email}</Badge>}
                             {user.division && <Badge>{user.division}</Badge>}
                           </div>
                         </div>
                       </div>
                       <div className="flex space-x-2">
-                        {currentUser?.role === "Director-General" && user.id !== currentUser.id && (
+                        {allowedRoles.includes(currentUser?.role || "") && user.id !== currentUser?.id && (
                           <Button variant="outline" size="sm" onClick={() => handleImpersonate(user)}>
                             Impersonate
                           </Button>
@@ -295,11 +295,11 @@ export function UserManagement() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="staffId">Staff ID *</Label>
+                  <Label htmlFor="employeeId">Staff ID *</Label>
                   <Input
-                    id="staffId"
-                    value={formData.staffId}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, staffId: e.target.value }))}
+                    id="employeeId"
+                    value={formData.employeeId}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, employeeId: e.target.value }))}
                     required
                   />
                 </div>
@@ -410,13 +410,13 @@ export function UserManagement() {
                 id="csvData"
                 value={csvData}
                 onChange={(e) => setCsvData(e.target.value)}
-                placeholder="name,staffId,email,role,managerId,division,region,passwordHash&#10;John Doe,STF001,john@example.com,Staff Member,,HR,,password123"
+                placeholder="name,employeeId,email,role,managerId,division,region,passwordHash&#10;John Doe,STF001,john@example.com,Staff Member,,HR,,password123"
                 rows={10}
               />
             </div>
             <div className="text-sm text-muted-foreground">
-              <p>Format: name,staffId,email,role,managerId,division,region,passwordHash</p>
-              <p>Required fields: name, staffId, role</p>
+              <p>Format: name,employeeId,email,role,managerId,division,region,passwordHash</p>
+              <p>Required fields: name, employeeId, role</p>
             </div>
             <Button onClick={handleBulkImport} disabled={!csvData.trim()}>
               <Upload className="h-4 w-4 mr-2" />
