@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,11 +8,25 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CalendarIcon } from "lucide-react"
+import { CalendarIcon, Loader2, Trash2 } from "lucide-react"
 import { format } from "date-fns"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
+import { createPersonalInfo, updatePersonalInfo, getMyPersonalInfo, deletePersonalInfo, type PersonalInfoData } from "@/lib/api/personalInfo"
+import { parseApiError } from "@/lib/api/api"
+import { toast } from "sonner"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface TrainingRecord {
   institution: string
@@ -24,6 +38,9 @@ export function AppraiseePersonalInfoForm({ onNext, initialData }: {
   onNext: (data: any) => void 
   initialData?: any
 }) {
+  const [isLoading, setIsLoading] = useState(false)
+  const [isClearingForm, setIsClearingForm] = useState(false)
+  const [existingPersonalInfoId, setExistingPersonalInfoId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     // Period of Report
     periodFrom: "",
@@ -53,6 +70,47 @@ export function AppraiseePersonalInfoForm({ onNext, initialData }: {
     programme: ""
   })
 
+  // Load existing draft on mount
+  useEffect(() => {
+    const loadExistingDraft = async () => {
+      try {
+        const personalInfoRecords = await getMyPersonalInfo()
+        console.log(personalInfoRecords, 'this is the personal info records')
+        // Get the most recent record (draft)
+        if (personalInfoRecords && personalInfoRecords.length > 0) {
+          const latestRecord = personalInfoRecords[0]
+          
+          // Populate form with existing data
+          setFormData({
+            periodFrom: latestRecord.period_from.slice(0, 10)  || "",
+            periodTo: latestRecord.period_to.slice(0, 10)  || "",
+            title: latestRecord.title || "",
+            otherTitle: latestRecord.other_title || "",
+            surname: latestRecord.surname || "",
+            firstName: latestRecord.first_name || "",
+            otherNames: latestRecord.other_names || "",
+            gender: latestRecord.gender || "",
+            presentJobTitle: latestRecord.present_job_title || "",
+            gradeSalary: latestRecord.grade_salary || "",
+            division: latestRecord.division || "",
+            dateOfAppointment: latestRecord.date_of_appointment.slice(0, 10) || "",
+            trainingRecords: latestRecord.training_records || []
+          })
+          
+          // Store the ID for updates
+          setExistingPersonalInfoId(latestRecord.id)
+          
+          toast.info("Loaded your draft personal information")
+        }
+      } catch (error) {
+        // Silently fail - no draft exists yet
+        console.log("No existing draft found")
+      }
+    }
+    
+    loadExistingDraft()
+  }, [])
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
@@ -78,9 +136,90 @@ export function AppraiseePersonalInfoForm({ onNext, initialData }: {
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    onNext(formData)
+    setIsLoading(true)
+
+    try {
+      // Prepare data for API
+      const personalInfoData: PersonalInfoData = {
+        periodFrom: formData.periodFrom,
+        periodTo: formData.periodTo,
+        title: formData.title,
+        otherTitle: formData.otherTitle || undefined,
+        surname: formData.surname,
+        firstName: formData.firstName,
+        otherNames: formData.otherNames || undefined,
+        gender: formData.gender,
+        presentJobTitle: formData.presentJobTitle,
+        gradeSalary: formData.gradeSalary,
+        division: formData.division,
+        dateOfAppointment: formData.dateOfAppointment,
+        trainingRecords: formData.trainingRecords
+      }
+
+      let savedPersonalInfo
+      
+      // Update existing or create new
+      if (existingPersonalInfoId) {
+        savedPersonalInfo = await updatePersonalInfo(existingPersonalInfoId, personalInfoData)
+        toast.success("Personal information updated successfully!")
+      } else {
+        savedPersonalInfo = await createPersonalInfo(personalInfoData)
+        setExistingPersonalInfoId(savedPersonalInfo.id)
+        toast.success("Personal information saved successfully!")
+      }
+      
+      // Pass data to parent component with the saved ID
+      onNext({
+        ...formData,
+        personalInfoId: savedPersonalInfo.id
+      })
+    } catch (error) {
+      const apiError = parseApiError(error)
+      toast.error(apiError.message || "Failed to save personal information")
+      console.error("Error saving personal info:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleClearForm = async () => {
+    setIsClearingForm(true)
+    
+    try {
+      // Delete from database if exists
+      if (existingPersonalInfoId) {
+        await deletePersonalInfo(existingPersonalInfoId)
+        toast.success("Form cleared and draft deleted")
+      } else {
+        toast.success("Form cleared")
+      }
+      
+      // Reset form
+      setFormData({
+        periodFrom: "",
+        periodTo: "",
+        title: "",
+        otherTitle: "",
+        surname: "",
+        firstName: "",
+        otherNames: "",
+        gender: "",
+        presentJobTitle: "",
+        gradeSalary: "",
+        division: "",
+        dateOfAppointment: "",
+        trainingRecords: []
+      })
+      
+      setExistingPersonalInfoId(null)
+    } catch (error) {
+      const apiError = parseApiError(error)
+      toast.error(apiError.message || "Failed to clear form")
+    } finally {
+      setIsClearingForm(false)
+    }
   }
 
   return (
@@ -349,10 +488,58 @@ export function AppraiseePersonalInfoForm({ onNext, initialData }: {
             </div>
           </Card>
 
-          {/* Submit Button */}
-          <div className="flex justify-end pt-6 border-t">
-            <Button type="submit" size="lg" className="px-8">
-              Continue to Next Section
+          {/* Action Buttons */}
+          <div className="flex justify-between items-center pt-6 border-t">
+            {/* Clear Form Button */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="lg"
+                  disabled={isLoading || isClearingForm}
+                >
+                  {isClearingForm ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Clearing...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Clear Form
+                    </>
+                  )}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Clear Form?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {existingPersonalInfoId 
+                      ? "This will delete your saved draft and clear all form fields. This action cannot be undone."
+                      : "This will clear all form fields. You can fill them in again later."}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleClearForm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Clear Form
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Submit Button */}
+            <Button type="submit" size="lg" className="px-8" disabled={isLoading || isClearingForm}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {existingPersonalInfoId ? "Updating..." : "Saving..."}
+                </>
+              ) : (
+                "Continue to Next Section"
+              )}
             </Button>
           </div>
         </form>

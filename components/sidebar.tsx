@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useAuthStore, useAppStore } from "@/lib/store"
@@ -83,6 +83,7 @@ const menuItems: MenuItem[] = [
 
 function SidebarContent() {
   const router = useRouter()
+  const pathname = usePathname()
   const { user, logout } = useAuthStore()
   const { users, appraisals } = useAppStore()
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -162,7 +163,7 @@ function SidebarContent() {
       <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
         {filteredMenuItems.map((item) => {
           const Icon = item.icon
-          const isActive = typeof window !== "undefined" && window.location.pathname === item.href
+          const isActive = pathname === item.href
 
           return (
             <Button

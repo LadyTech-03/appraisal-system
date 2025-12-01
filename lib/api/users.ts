@@ -36,5 +36,20 @@ export const usersApi = {
       throw parseApiError(error)
     }
   },
+
+  async uploadSignature(file: File) {
+    try {
+      const formData = new FormData()
+      formData.append("signature", file)
+      const response = await apiClient.post("/users/signature", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      return response.data?.data
+    } catch (error) {
+      throw parseApiError(error)
+    }
+  },
 }
 
