@@ -1,0 +1,490 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import Image from "next/image"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Loader2, Trash2 } from "lucide-react"
+import { toast } from "sonner"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import {
+  createFinalSections,
+  updateFinalSections,
+  getMyFinalSections,
+  deleteFinalSections,
+  FinalSectionsData
+} from "@/lib/api/finalSections"
+import { usersApi } from "@/lib/api/users"
+import { authApi } from "@/lib/api/auth"
+
+export function FinalSectionsForm({
+  onNext,
+  onBack,
+  isReviewMode = false,
+  initialData
+}: {
+  onNext: (data: any) => void
+  onBack: () => void
+  isReviewMode?: boolean
+  initialData?: any
+}) {
+  const [isLoading, setIsLoading] = useState(false)
+  const [isClearingForm, setIsClearingForm] = useState(false)
+  const [isUploadingSignature, setIsUploadingSignature] = useState(false)
+  const [existingFinalSectionsId, setExistingFinalSectionsId] = useState<string | null>(null)
+  const [userSignatureUrl, setUserSignatureUrl] = useState<string | null>(null)
+
+  const [formData, setFormData] = useState({
+    appraiserComments: initialData?.appraiserComments || "",
+    appraiserSignatureUrl: initialData?.appraiserSignatureUrl || null as string | null,
+    appraiserDate: initialData?.appraiserDate || "",
+    careerDevelopmentComments: initialData?.careerDevelopmentComments || "",
+    assessmentDecision: initialData?.assessmentDecision || "",
+    appraiseeComments: initialData?.appraiseeComments || "",
+    appraiseeSignatureUrl: initialData?.appraiseeSignatureUrl || null as string | null,
+    appraiseeDate: initialData?.appraiseeDate || ""
+  })
+
+  // Load draft and user profile on mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // Load user profile for signature
+        const profile = await authApi.getProfile()
+        if (profile?.data?.signatureUrl) {
+          setUserSignatureUrl(profile.data.signatureUrl)
+        }
+
+        // Load existing draft
+        const sections = await getMyFinalSections()
+        if (sections && sections.length > 0) {
+          const latestSection = sections[0]
+          setFormData({
+            appraiserComments: latestSection.appraiser_comments || "",
+            appraiserSignatureUrl: latestSection.appraiser_signature_url || null,
+            appraiserDate: latestSection.appraiser_date ? latestSection.appraiser_date.slice(0, 10) : "",
+            careerDevelopmentComments: latestSection.career_development_comments || "",
+            assessmentDecision: latestSection.assessment_decision || "",
+            appraiseeComments: latestSection.appraisee_comments || "",
+            appraiseeSignatureUrl: latestSection.appraisee_signature_url || null,
+            appraiseeDate: latestSection.appraisee_date ? latestSection.appraisee_date.slice(0, 10) : ""
+          })
+          setExistingFinalSectionsId(latestSection.id)
+          toast.info("Loaded your draft final sections")
+        }
+      } catch (error) {
+        console.log("Error loading data:", error)
+      }
+    }
+    loadData()
+  }, [])
+
+  const handleSignatureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file && file.type === "image/png") {
+      setIsUploadingSignature(true)
+      try {
+        const result = await usersApi.uploadSignature(file)
+        setUserSignatureUrl(result.signatureUrl)
+        toast.success("Signature uploaded successfully")
+      } catch (error) {
+        toast.error("Failed to upload signature")
+      } finally {
+        setIsUploadingSignature(false)
+      }
+    } else if (file) {
+      toast.error("Please upload a PNG image")
+    }
+  }
+
+  const handleSign = () => {
+    if (userSignatureUrl) {
+      setFormData(prev => ({
+        ...prev,
+        appraiseeSignatureUrl: userSignatureUrl
+      }))
+      toast.success("Form signed successfully")
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    try {
+      const payload: FinalSectionsData = {
+        appraiserComments: formData.appraiserComments || undefined,
+        appraiserSignatureUrl: formData.appraiserSignatureUrl || undefined,
+        appraiserDate: formData.appraiserDate || undefined,
+        careerDevelopmentComments: formData.careerDevelopmentComments || undefined,
+        assessmentDecision: formData.assessmentDecision || undefined,
+        appraiseeComments: formData.appraiseeComments || undefined,
+        appraiseeSignatureUrl: formData.appraiseeSignatureUrl || undefined,
+        appraiseeDate: formData.appraiseeDate || undefined
+      }
+
+      let savedSections
+      if (existingFinalSectionsId) {
+        savedSections = await updateFinalSections(existingFinalSectionsId, payload)
+        toast.success("Final sections updated successfully!")
+      } else {
+        savedSections = await createFinalSections(payload)
+        setExistingFinalSectionsId(savedSections.id)
+        toast.success("Final sections saved successfully!")
+      }
+
+      onNext({ ...formData, finalSectionsId: savedSections.id })
+    } catch (error) {
+      toast.error("Failed to save final sections")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleClearForm = async () => {
+    setIsClearingForm(true)
+    try {
+      if (existingFinalSectionsId) {
+        await deleteFinalSections(existingFinalSectionsId)
+        toast.success("Form cleared and draft deleted")
+      } else {
+        toast.success("Form cleared")
+      }
+      setFormData({
+        appraiserComments: "",
+        appraiserSignatureUrl: null,
+        appraiserDate: "",
+        careerDevelopmentComments: "",
+        assessmentDecision: "",
+        appraiseeComments: "",
+        appraiseeSignatureUrl: null,
+        appraiseeDate: ""
+      })
+      setExistingFinalSectionsId(null)
+    } catch (error) {
+      toast.error("Failed to clear form")
+    } finally {
+      setIsClearingForm(false)
+    }
+  }
+
+  return (
+    <Card className="max-w-6xl mx-auto">
+      <CardHeader>
+        <CardTitle>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="px-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Section 6: Appraiser's Comments */}
+          <Card className={`p-4 ${!isReviewMode ? 'opacity-50' : ''}`}>
+            <div className="space-y-4">
+              <div className="bg-amber-800 text-white p-2 rounded">
+                <h3 className="font-bold">SECTION 6: Annual Appraisal (Continuation)</h3>
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="font-semibold">
+                  Appraiser's Comments on Performance Plan Achievements
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  (Comment on Performance Plan achievements and additional contributions made)
+                </p>
+                <Textarea
+                  value={formData.appraiserComments}
+                  onChange={(e) => setFormData(prev => ({ ...prev, appraiserComments: e.target.value }))}
+                  placeholder={isReviewMode ? "Enter appraiser's comments..." : "Completed by appraiser during review"}
+                  className="min-h-32 resize-none"
+                  disabled={!isReviewMode}
+                  rows={8}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                <div className="space-y-2">
+                  <Label className="font-semibold">APPRAISER'S SIGNATURE</Label>
+                  <div className="border-2 border-gray-300 h-24 flex items-center justify-center bg-gray-50">
+                    {formData.appraiserSignatureUrl ? (
+                      <Image
+                        src={formData.appraiserSignatureUrl}
+                        alt="Appraiser Signature"
+                        width={100}
+                        height={50}
+                        className="max-h-20 max-w-full object-contain"
+                      />
+                    ) : (
+                      <span className="text-gray-400 text-sm">
+                        {isReviewMode ? "Upload signature" : "Completed by appraiser"}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="font-semibold">DATE (dd/mm/yyyy)</Label>
+                  <Input
+                    type="date"
+                    value={formData.appraiserDate}
+                    onChange={(e) => setFormData(prev => ({ ...prev, appraiserDate: e.target.value }))}
+                    className="h-12"
+                    disabled={!isReviewMode}
+                  />
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Section 7: Career Development */}
+          <Card className={`p-4 ${!isReviewMode ? 'opacity-50' : ''}`}>
+            <div className="space-y-4">
+              <div className="bg-amber-800 text-white p-2 rounded">
+                <h3 className="font-bold">SECTION 7: Career Development</h3>
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="font-semibold underline">
+                  Training and Development - Comments and Plan
+                </Label>
+                <p className="text-sm text-muted-foreground">
+                  (To be completed by the Appraiser in discussion with the employee)
+                </p>
+                <Textarea
+                  value={formData.careerDevelopmentComments}
+                  onChange={(e) => setFormData(prev => ({ ...prev, careerDevelopmentComments: e.target.value }))}
+                  placeholder={isReviewMode ? "Enter training and development comments..." : "Completed by appraiser during review"}
+                  className="min-h-24 resize-none"
+                  disabled={!isReviewMode}
+                  rows={6}
+                />
+              </div>
+            </div>
+          </Card>
+
+          {/* Section 8: Assessment Decision */}
+          <Card className={`p-4 ${!isReviewMode ? 'opacity-50' : ''}`}>
+            <div className="space-y-4">
+              <div className="bg-amber-800 text-white p-2 rounded">
+                <h3 className="font-bold">SECTION 8: ASSESSMENT DECISION</h3>
+              </div>
+              
+              <div className="space-y-3">
+                <p className="text-sm">
+                  Assess the Appraisee's potential to perform the duties of the next grade, taking account of the assessment of performance in <strong>Section 5</strong> above.)
+                </p>
+
+                <RadioGroup
+                  value={formData.assessmentDecision}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, assessmentDecision: value }))}
+                  disabled={!isReviewMode}
+                  className="space-y-3"
+                >
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value="outstanding" id="outstanding" className="mt-1" />
+                    <Label htmlFor="outstanding" className="font-normal cursor-pointer">
+                      <span className="font-semibold">Outstanding</span> - should be promoted as soon as possible (promotion out-of-turn, study visits, commendations, salary increments and etc.)
+                    </Label>
+                  </div>
+
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value="suitable" id="suitable" className="mt-1" />
+                    <Label htmlFor="suitable" className="font-normal cursor-pointer">
+                      <span className="font-semibold">Suitable for promotion</span> (encourage through mentoring, coaching, training and etc.)
+                    </Label>
+                  </div>
+
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value="likely-ready" id="likely-ready" className="mt-1" />
+                    <Label htmlFor="likely-ready" className="font-normal cursor-pointer">
+                      <span className="font-semibold">Likely to be ready for promotion in 2 to 3 years</span> (encourage through mentoring, coaching, training and etc)
+                    </Label>
+                  </div>
+
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value="not-ready" id="not-ready" className="mt-1" />
+                    <Label htmlFor="not-ready" className="font-normal cursor-pointer">
+                      <span className="font-semibold">Not ready for promotion for at least 3years</span> (forfeit yearly increment, reassignment and etc.)
+                    </Label>
+                  </div>
+
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value="unlikely" id="unlikely" className="mt-1" />
+                    <Label htmlFor="unlikely" className="font-normal cursor-pointer">
+                      <span className="font-semibold">Unlikely to be promoted further:</span> (apply sanctions: demotion, dismissal, removal and etc)
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            </div>
+          </Card>
+
+          {/* Section 9: Appraisee's Comments */}
+          <Card className="p-4">
+            <div className="space-y-4">
+              <div className="bg-amber-800 text-white p-2 rounded">
+                <h3 className="font-bold">SECTION 9: Appraisee's Comments</h3>
+              </div>
+              
+              <div className="space-y-2">
+                <Textarea
+                  value={formData.appraiseeComments}
+                  onChange={(e) => setFormData(prev => ({ ...prev, appraiseeComments: e.target.value }))}
+                  placeholder="Enter your comments..."
+                  className="min-h-24 resize-none"
+                  rows={6}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                <div className="space-y-2">
+                  <Label className="font-semibold">APPRAISEE'S SIGNATURE</Label>
+                  {userSignatureUrl ? (
+                    <div className="space-y-2">
+                      {!formData.appraiseeSignatureUrl ? (
+                        <>
+                          <p className="text-sm text-muted-foreground">You have a signature on file</p>
+                          <Button type="button" onClick={handleSign} variant="default" size="sm">
+                            Sign
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-2 text-sm">
+                            <span className="text-green-600 font-bold">✓ Signed</span>
+                            <Button
+                              type="button"
+                              onClick={() => setFormData(prev => ({ ...prev, appraiseeSignatureUrl: null }))}
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 text-xs text-red-500"
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                          <div className="">
+                            <Image
+                              src={formData.appraiseeSignatureUrl}
+                              alt="Appraisee Signature"
+                              width={100}
+                              height={50}
+                              className="max-h-20 max-w-full object-contain"
+                            />
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label htmlFor="appraisee-signature" className="text-sm">
+                        Upload Signature to Profile (PNG)
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="appraisee-signature"
+                          type="file"
+                          accept=".png"
+                          onChange={handleSignatureUpload}
+                          disabled={isUploadingSignature}
+                          className="h-8 text-xs"
+                        />
+                        {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label className="font-semibold">DATE (dd/mm/yyyy)</Label>
+                  <Input
+                    type="date"
+                    value={formData.appraiseeDate}
+                    onChange={(e) => setFormData(prev => ({ ...prev, appraiseeDate: e.target.value }))}
+                    className="h-12"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Navigation Buttons */}
+          <div className="flex justify-between pt-6 border-t">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onBack}
+              size="lg"
+              className="px-8"
+              disabled={isLoading || isClearingForm}
+            >
+              Back to Previous Section
+            </Button>
+
+            <div className="flex gap-2">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button type="button" variant="outline" size="lg" disabled={isLoading || isClearingForm}>
+                    {isClearingForm ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Clearing...
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="mr-2 h-4 w-4" /> Clear Form
+                      </>
+                    )}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Clear Form?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {existingFinalSectionsId
+                        ? "This will delete your saved draft..."
+                        : "This will clear all form fields..."}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleClearForm}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Clear Form
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+
+              <Button
+                type="submit"
+                size="lg"
+                className="px-8"
+                disabled={isLoading || isClearingForm || !formData.appraiseeSignatureUrl || !formData.appraiseeDate}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {existingFinalSectionsId ? "Updating..." : "Saving..."}
+                  </>
+                ) : (
+                  "Submit Appraisal"
+                )}
+              </Button>
+            </div>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  )
+}
