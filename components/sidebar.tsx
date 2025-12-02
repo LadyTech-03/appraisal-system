@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -24,6 +24,7 @@ import {
 } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import Image from "next/image"
+import { getMyPersonalInfo } from "@/lib/api/personalInfo"
 
 interface MenuItem {
   icon: React.ComponentType<{ className?: string }>
@@ -41,16 +42,11 @@ const menuItems: MenuItem[] = [
     label: "Dashboard",
     href: "/dashboard",
   },
-  {
-    icon: FileText,
-    label: "My Appraisals",
-    href: "/appraisals",
-  },
-  {
-    icon: UserCheck,
-    label: "Team Appraisals",
-    href: "/team-appraisals",
-  },
+  // {
+  //   icon: FileText,
+  //   label: "My Appraisals",
+  //   href: "/appraisals",
+  // },
   {
     icon: Target,
     label: "Create Appraisal",
@@ -60,6 +56,11 @@ const menuItems: MenuItem[] = [
     icon: Calendar,
     label: "Appraisal History",
     href: "/history",
+  },
+  {
+    icon: UserCheck,
+    label: "Team Appraisals",
+    href: "/team-appraisals",
   },
   {
     icon: BarChart3,
@@ -87,6 +88,24 @@ function SidebarContent() {
   const { user, logout } = useAuthStore()
   const { users, appraisals } = useAppStore()
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [hasStartedAppraisal, setHasStartedAppraisal] = useState(false)
+
+  // Check if user has started an appraisal
+  useEffect(() => {
+    const checkAppraisalStatus = async () => {
+      try {
+        const personalInfo = await getMyPersonalInfo()
+        setHasStartedAppraisal(personalInfo && personalInfo.length > 0)
+      } catch (error) {
+        console.log("Error checking appraisal status:", error)
+        setHasStartedAppraisal(false)
+      }
+    }
+    
+    if (user) {
+      checkAppraisalStatus()
+    }
+  }, [user])
 
   const handleLogout = () => {
     logout()
@@ -164,6 +183,11 @@ function SidebarContent() {
         {filteredMenuItems.map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href
+          
+          // Dynamically change label for Create Appraisal
+          const displayLabel = item.label === "Create Appraisal" && hasStartedAppraisal 
+            ? "Continue Appraisal" 
+            : item.label
 
           return (
             <Button
@@ -175,7 +199,7 @@ function SidebarContent() {
               <Icon className={`h-4 w-4 ${isCollapsed ? "" : "mr-3"}`} />
               {!isCollapsed && (
                 <>
-                  <span className="flex-1 text-left">{item.label}</span>
+                  <span className="flex-1 text-left">{displayLabel}</span>
                   {item.badge && (
                     <Badge variant="secondary" className="text-xs">
                       {item.badge}

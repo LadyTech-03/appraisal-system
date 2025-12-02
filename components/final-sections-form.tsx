@@ -193,7 +193,7 @@ export function FinalSectionsForm({
           <Card className={`p-4 ${!isReviewMode ? 'opacity-50' : ''}`}>
             <div className="space-y-4">
               <div className="bg-amber-800 text-white p-2 rounded">
-                <h3 className="font-bold">SECTION 6: Annual Appraisal (Continuation)</h3>
+                <h3 className="font-bold">SECTION 6: Annual Appraisal</h3>
               </div>
               
               <div className="space-y-2">
@@ -216,7 +216,7 @@ export function FinalSectionsForm({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
                 <div className="space-y-2">
                   <Label className="font-semibold">APPRAISER'S SIGNATURE</Label>
-                  <div className="border-2 border-gray-300 h-24 flex items-center justify-center bg-gray-50">
+                  <div className="">
                     {formData.appraiserSignatureUrl ? (
                       <Image
                         src={formData.appraiserSignatureUrl}
@@ -227,7 +227,7 @@ export function FinalSectionsForm({
                       />
                     ) : (
                       <span className="text-gray-400 text-sm">
-                        {isReviewMode ? "Upload signature" : "Completed by appraiser"}
+                        {isReviewMode ? "Upload signature" : ""}
                       </span>
                     )}
                   </div>
@@ -290,36 +290,36 @@ export function FinalSectionsForm({
                   disabled={!isReviewMode}
                   className="space-y-3"
                 >
-                  <div className="flex items-start space-x-2">
-                    <RadioGroupItem value="outstanding" id="outstanding" className="mt-1" />
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="5" id="outstanding" className="mt-1" />
                     <Label htmlFor="outstanding" className="font-normal cursor-pointer">
                       <span className="font-semibold">Outstanding</span> - should be promoted as soon as possible (promotion out-of-turn, study visits, commendations, salary increments and etc.)
                     </Label>
                   </div>
 
-                  <div className="flex items-start space-x-2">
-                    <RadioGroupItem value="suitable" id="suitable" className="mt-1" />
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="4" id="suitable" className="mt-1" />
                     <Label htmlFor="suitable" className="font-normal cursor-pointer">
                       <span className="font-semibold">Suitable for promotion</span> (encourage through mentoring, coaching, training and etc.)
                     </Label>
                   </div>
 
-                  <div className="flex items-start space-x-2">
-                    <RadioGroupItem value="likely-ready" id="likely-ready" className="mt-1" />
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="3" id="likely-ready" className="mt-1" />
                     <Label htmlFor="likely-ready" className="font-normal cursor-pointer">
                       <span className="font-semibold">Likely to be ready for promotion in 2 to 3 years</span> (encourage through mentoring, coaching, training and etc)
                     </Label>
                   </div>
 
-                  <div className="flex items-start space-x-2">
-                    <RadioGroupItem value="not-ready" id="not-ready" className="mt-1" />
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="2" id="not-ready" className="mt-1" />
                     <Label htmlFor="not-ready" className="font-normal cursor-pointer">
                       <span className="font-semibold">Not ready for promotion for at least 3years</span> (forfeit yearly increment, reassignment and etc.)
                     </Label>
                   </div>
 
-                  <div className="flex items-start space-x-2">
-                    <RadioGroupItem value="unlikely" id="unlikely" className="mt-1" />
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="1" id="unlikely" className="mt-1" />
                     <Label htmlFor="unlikely" className="font-normal cursor-pointer">
                       <span className="font-semibold">Unlikely to be promoted further:</span> (apply sanctions: demotion, dismissal, removal and etc)
                     </Label>

@@ -236,7 +236,7 @@ export default function HistoryPage() {
                 <p className="text-muted-foreground mb-6">
                   {searchTerm || statusFilter !== "all" || yearFilter !== "all"
                     ? "No appraisals match your current filters. Try adjusting your search criteria."
-                    : "You don't have any appraisal history yet."}
+                    : "You haven't Completed any Appraisals yet."}
                 </p>
                 {(searchTerm || statusFilter !== "all" || yearFilter !== "all") && (
                   <Button
