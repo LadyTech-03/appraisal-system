@@ -13,7 +13,7 @@ import { format } from "date-fns"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
-import { createPersonalInfo, updatePersonalInfo, getMyPersonalInfo, deletePersonalInfo, type PersonalInfoData } from "@/lib/api/personalInfo"
+import { createPersonalInfo, updatePersonalInfo, getMyPersonalInfo, getPersonalInfoByUserId, deletePersonalInfo, type PersonalInfoData } from "@/lib/api/personalInfo"
 import { parseApiError } from "@/lib/api/api"
 import { toast } from "sonner"
 import {
@@ -34,9 +34,12 @@ interface TrainingRecord {
   programme: string
 }
 
-export function AppraiseePersonalInfoForm({ onNext, initialData }: { 
+export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isReviewMode = false, reviewUserId }: { 
   onNext: (data: any) => void 
   initialData?: any
+  onBack?: () => void
+  isReviewMode?: boolean
+  reviewUserId?: string
 }) {
   const [isLoading, setIsLoading] = useState(false)
   const [isClearingForm, setIsClearingForm] = useState(false)
@@ -61,7 +64,15 @@ export function AppraiseePersonalInfoForm({ onNext, initialData }: {
     dateOfAppointment: "",
     
     // Training Records
-    trainingRecords: [] as TrainingRecord[]
+    trainingRecords: [] as TrainingRecord[],
+    
+    // Appraiser Information (Section 1 B - only in review mode)
+    appraiserTitle: "",
+    appraiserOtherTitle: "",
+    appraiserSurname: "",
+    appraiserFirstName: "",
+    appraiserOtherNames: "",
+    appraiserPosition: ""
   })
 
   const [newTrainingRecord, setNewTrainingRecord] = useState<TrainingRecord>({
@@ -74,8 +85,16 @@ export function AppraiseePersonalInfoForm({ onNext, initialData }: {
   useEffect(() => {
     const loadExistingDraft = async () => {
       try {
-        const personalInfoRecords = await getMyPersonalInfo()
-        console.log(personalInfoRecords, 'this is the personal info records')
+        let personalInfoRecords
+        
+        // In review mode, fetch the specific user's personal info
+        if (isReviewMode && reviewUserId) {
+          personalInfoRecords = await getPersonalInfoByUserId(reviewUserId)
+        } else {
+          // In normal mode, fetch the logged-in user's personal info
+          personalInfoRecords = await getMyPersonalInfo()
+        }
+        
         // Get the most recent record (draft)
         if (personalInfoRecords && personalInfoRecords.length > 0) {
           const latestRecord = personalInfoRecords[0]
@@ -94,7 +113,14 @@ export function AppraiseePersonalInfoForm({ onNext, initialData }: {
             gradeSalary: latestRecord.grade_salary || "",
             division: latestRecord.division || "",
             dateOfAppointment: latestRecord.date_of_appointment.slice(0, 10) || "",
-            trainingRecords: latestRecord.training_records || []
+            trainingRecords: latestRecord.training_records || [],
+            // Appraiser fields
+            appraiserTitle: latestRecord.appraiser_title || "",
+            appraiserOtherTitle: latestRecord.appraiser_other_title || "",
+            appraiserSurname: latestRecord.appraiser_surname || "",
+            appraiserFirstName: latestRecord.appraiser_first_name || "",
+            appraiserOtherNames: latestRecord.appraiser_other_names || "",
+            appraiserPosition: latestRecord.appraiser_position || ""
           })
           
           // Store the ID for updates
@@ -155,7 +181,14 @@ export function AppraiseePersonalInfoForm({ onNext, initialData }: {
         gradeSalary: formData.gradeSalary,
         division: formData.division,
         dateOfAppointment: formData.dateOfAppointment,
-        trainingRecords: formData.trainingRecords
+        trainingRecords: formData.trainingRecords,
+        // Appraiser fields (only sent if filled in review mode)
+        appraiserTitle: formData.appraiserTitle || undefined,
+        appraiserOtherTitle: formData.appraiserOtherTitle || undefined,
+        appraiserSurname: formData.appraiserSurname || undefined,
+        appraiserFirstName: formData.appraiserFirstName || undefined,
+        appraiserOtherNames: formData.appraiserOtherNames || undefined,
+        appraiserPosition: formData.appraiserPosition || undefined
       }
 
       let savedPersonalInfo
@@ -188,32 +221,53 @@ export function AppraiseePersonalInfoForm({ onNext, initialData }: {
     setIsClearingForm(true)
     
     try {
-      // Delete from database if exists
-      if (existingPersonalInfoId) {
-        await deletePersonalInfo(existingPersonalInfoId)
-        toast.success("Form cleared and draft deleted")
+      if (isReviewMode) {
+        // In review mode, only clear appraiser fields (Section 1 B)
+        setFormData(prev => ({
+          ...prev,
+          appraiserTitle: "",
+          appraiserOtherTitle: "",
+          appraiserSurname: "",
+          appraiserFirstName: "",
+          appraiserOtherNames: "",
+          appraiserPosition: ""
+        }))
+        toast.success("Appraiser information cleared")
       } else {
-        toast.success("Form cleared")
+        // In normal mode, delete from database and clear appraisee fields (Section 1 A)
+        if (existingPersonalInfoId) {
+          await deletePersonalInfo(existingPersonalInfoId)
+          toast.success("Form cleared and draft deleted")
+        } else {
+          toast.success("Form cleared")
+        }
+        
+        // Reset appraisee form fields only
+        setFormData({
+          periodFrom: "",
+          periodTo: "",
+          title: "",
+          otherTitle: "",
+          surname: "",
+          firstName: "",
+          otherNames: "",
+          gender: "",
+          presentJobTitle: "",
+          gradeSalary: "",
+          division: "",
+          dateOfAppointment: "",
+          trainingRecords: [],
+          // Keep appraiser fields as they are
+          appraiserTitle: "",
+          appraiserOtherTitle: "",
+          appraiserSurname: "",
+          appraiserFirstName: "",
+          appraiserOtherNames: "",
+          appraiserPosition: ""
+        })
+        
+        setExistingPersonalInfoId(null)
       }
-      
-      // Reset form
-      setFormData({
-        periodFrom: "",
-        periodTo: "",
-        title: "",
-        otherTitle: "",
-        surname: "",
-        firstName: "",
-        otherNames: "",
-        gender: "",
-        presentJobTitle: "",
-        gradeSalary: "",
-        division: "",
-        dateOfAppointment: "",
-        trainingRecords: []
-      })
-      
-      setExistingPersonalInfoId(null)
     } catch (error) {
       const apiError = parseApiError(error)
       toast.error(apiError.message || "Failed to clear form")
@@ -487,6 +541,106 @@ export function AppraiseePersonalInfoForm({ onNext, initialData }: {
               )}
             </div>
           </Card>
+
+          {/* Section 1 B: Appraiser's Information (Only visible in review mode) */}
+          {isReviewMode && (
+            <Card className="p-4 border-2 border-blue-200 bg-blue-50/50">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Badge variant="default" className="text-sm font-semibold">SECTION 1 B: APPRAISER'S INFORMATION</Badge>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Title with Checkboxes */}
+                  <div className="space-y-2">
+                    <Label>Title:</Label>
+                    <div className="flex flex-wrap gap-4">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="appraiser-mr"
+                          checked={formData.appraiserTitle === "Mr."}
+                          onCheckedChange={() => handleInputChange("appraiserTitle", "Mr.")}
+                        />
+                        <Label htmlFor="appraiser-mr">Mr.</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="appraiser-mrs"
+                          checked={formData.appraiserTitle === "Mrs."}
+                          onCheckedChange={() => handleInputChange("appraiserTitle", "Mrs.")}
+                        />
+                        <Label htmlFor="appraiser-mrs">Mrs.</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="appraiser-ms"
+                          checked={formData.appraiserTitle === "Ms."}
+                          onCheckedChange={() => handleInputChange("appraiserTitle", "Ms.")}
+                        />
+                        <Label htmlFor="appraiser-ms">Ms.</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="appraiser-other"
+                          checked={formData.appraiserTitle === "Other"}
+                          onCheckedChange={() => handleInputChange("appraiserTitle", "Other")}
+                        />
+                        <Label htmlFor="appraiser-other">Other (Pls. specify):</Label>
+                      </div>
+                      {formData.appraiserTitle === "Other" && (
+                        <Input
+                          value={formData.appraiserOtherTitle}
+                          onChange={(e) => handleInputChange("appraiserOtherTitle", e.target.value)}
+                          placeholder="Specify title"
+                          className="w-64"
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Name Fields */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="appraiserSurname">Surname:</Label>
+                      <Input
+                        id="appraiserSurname"
+                        value={formData.appraiserSurname}
+                        onChange={(e) => handleInputChange("appraiserSurname", e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="appraiserFirstName">First Name:</Label>
+                      <Input
+                        id="appraiserFirstName"
+                        value={formData.appraiserFirstName}
+                        onChange={(e) => handleInputChange("appraiserFirstName", e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Other Names */}
+                  <div className="space-y-2">
+                    <Label htmlFor="appraiserOtherNames">Other Name(s):</Label>
+                    <Input
+                      id="appraiserOtherNames"
+                      value={formData.appraiserOtherNames}
+                      onChange={(e) => handleInputChange("appraiserOtherNames", e.target.value)}
+                    />
+                  </div>
+
+                  {/* Position of Appraiser */}
+                  <div className="space-y-2">
+                    <Label htmlFor="appraiserPosition">Position of Appraiser:</Label>
+                    <Input
+                      id="appraiserPosition"
+                      value={formData.appraiserPosition}
+                      onChange={(e) => handleInputChange("appraiserPosition", e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            </Card>
+          )}
 
           {/* Action Buttons */}
           <div className="flex justify-between items-center pt-6 border-t">

@@ -11,7 +11,9 @@ export interface MidYearReviewData {
     targets: ReviewItem[]
     competencies: ReviewItem[]
     appraiseeSignatureUrl?: string
+    appraiserSignatureUrl?: string
     appraiseeDate?: string
+    appraiserDate?: string
 }
 
 export interface MidYearReview extends MidYearReviewData {
@@ -64,4 +66,12 @@ export async function getMyMidYearReview(): Promise<MidYearReview[]> {
  */
 export async function deleteMidYearReview(id: string): Promise<void> {
     await apiClient.delete(`/mid-year-review/${id}`)
+}
+
+/**
+ * Get mid-year review by User ID
+ */
+export async function getMidYearReviewByUserId(userId: string): Promise<MidYearReview[]> {
+    const response = await apiClient.get<{ success: boolean; data: MidYearReview[] }>(`/mid-year-review/user/${userId}`)
+    return response.data.data
 }

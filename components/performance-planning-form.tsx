@@ -25,6 +25,7 @@ import {
   createPerformancePlanning, 
   updatePerformancePlanning, 
   getMyPerformancePlanning, 
+  getPerformancePlanningByUserId,
   deletePerformancePlanning,
   PerformancePlanningData
 } from "@/lib/api/performancePlanning"
@@ -42,24 +43,28 @@ export function PerformancePlanningForm({
   onNext,
   onBack,
   isReviewMode = false,
-  initialData
+  initialData,
+  reviewUserId
 }: {
   onNext: (data: any) => void
   onBack: () => void
   isReviewMode?: boolean
   initialData?: any
+  reviewUserId?: string
 }) {
   const [isLoading, setIsLoading] = useState(false)
   const [isClearingForm, setIsClearingForm] = useState(false)
   const [isUploadingSignature, setIsUploadingSignature] = useState(false)
   const [existingPerformancePlanningId, setExistingPerformancePlanningId] = useState<string | null>(null)
-  const [userSignatureUrl, setUserSignatureUrl] = useState<string | null>(null)
+  const [appraiseeSignatureUrl, setAppraiseeSignatureUrl] = useState<string | null>(null)
+  const [appraiserSignatureUrl, setAppraiserSignatureUrl] = useState<string | null>(null)
   
   const [formData, setFormData] = useState({
     keyResultAreas: initialData?.keyResultAreas || [
       { id: "1", keyResultArea: "", targets: "", resourcesRequired: "" }
     ] as KeyResultArea[],
-    appraiseeSignatureUrl: initialData?.appraiseeSignatureUrl || null as string | null
+    appraiseeSignatureUrl: initialData?.appraiseeSignatureUrl || null as string | null,
+    appraiserSignatureUrl: initialData?.appraiserSignatureUrl || null as string | null
   })
 
   // Load draft and user profile on mount
@@ -68,12 +73,23 @@ export function PerformancePlanningForm({
       try {
         // Load user profile for signature
         const profile = await authApi.getProfile()
-        if (profile?.data?.signatureUrl) {
-          setUserSignatureUrl(profile.data.signatureUrl)
+        if (profile?.data?.signatureUrl && !isReviewMode) {
+          setAppraiseeSignatureUrl(profile.data.signatureUrl)
+        } else if (profile?.data?.signatureUrl && isReviewMode) {
+          setAppraiserSignatureUrl(profile.data.signatureUrl)
         }
 
         // Load existing draft
-        const plans = await getMyPerformancePlanning()
+        let plans
+        if (isReviewMode && reviewUserId) {
+          plans = await getPerformancePlanningByUserId(reviewUserId)
+          console.log(plans, 'plans')
+          setAppraiseeSignatureUrl(plans[0].appraisee_signature_url || null)
+        } else {
+          plans = await getMyPerformancePlanning()
+          console.log(plans, 'plans normal')
+          setAppraiseeSignatureUrl(plans[0].appraisee_signature_url || null)
+        }
         if (plans && plans.length > 0) {
           const latestPlan = plans[0]
           setFormData({
@@ -81,7 +97,8 @@ export function PerformancePlanningForm({
                 ...kra,
                 id: kra.id || (index + 1).toString()
             })),
-            appraiseeSignatureUrl: latestPlan.appraisee_signature_url || null
+            appraiseeSignatureUrl: latestPlan.appraisee_signature_url || null,
+            appraiserSignatureUrl: latestPlan.appraiser_signature_url || null
           })
           setExistingPerformancePlanningId(latestPlan.id)
           toast.info("Loaded your draft performance planning")
@@ -110,7 +127,7 @@ export function PerformancePlanningForm({
     if (formData.keyResultAreas.length > 1) {
       setFormData(prev => ({
         ...prev,
-        keyResultAreas: prev.keyResultAreas.filter(area => area.id !== id)
+        keyResultAreas: prev.keyResultAreas.filter((area: KeyResultArea) => area.id !== id)
       }))
     }
   }
@@ -118,7 +135,7 @@ export function PerformancePlanningForm({
   const updateKeyResultArea = (id: string, field: keyof KeyResultArea, value: string) => {
     setFormData(prev => ({
       ...prev,
-      keyResultAreas: prev.keyResultAreas.map(area =>
+      keyResultAreas: prev.keyResultAreas.map((area: KeyResultArea) =>
         area.id === id ? { ...area, [field]: value } : area
       )
     }))
@@ -126,11 +143,16 @@ export function PerformancePlanningForm({
 
   const handleSignatureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
+    const isAppraisee = !isReviewMode
     if (file && file.type === "image/png") {
         setIsUploadingSignature(true)
         try {
             const result = await usersApi.uploadSignature(file)
-            setUserSignatureUrl(result.signatureUrl)
+            if (isAppraisee) {
+                setAppraiseeSignatureUrl(result.signatureUrl)
+            } else {
+                setAppraiserSignatureUrl(result.signatureUrl)
+            }
             toast.success("Signature uploaded successfully")
         } catch (error) {
             toast.error("Failed to upload signature")
@@ -143,13 +165,38 @@ export function PerformancePlanningForm({
   }
 
   const handleSign = () => {
-      if (userSignatureUrl) {
+      if (appraiseeSignatureUrl && !isReviewMode) {
           setFormData(prev => ({
               ...prev,
-              appraiseeSignatureUrl: userSignatureUrl
+              appraiseeSignatureUrl: appraiseeSignatureUrl
           }))
           toast.success("Form signed successfully")
       }
+      if (appraiserSignatureUrl && isReviewMode) {
+          setFormData(prev => ({
+              ...prev,
+              appraiserSignatureUrl: appraiserSignatureUrl
+          }))
+          toast.success("Form signed successfully")
+      }
+  }
+
+  const handleClearSignatures = () => {
+    if (appraiseeSignatureUrl && !isReviewMode) {
+        setAppraiseeSignatureUrl(null)
+        setFormData(prev => ({
+            ...prev,
+            appraiseeSignatureUrl: null
+        }))
+    }
+    if (appraiserSignatureUrl && isReviewMode) {
+        setAppraiserSignatureUrl(null)
+        setFormData(prev => ({
+            ...prev,
+            appraiserSignatureUrl: null
+        }))
+    }
+    toast.success("Signatures cleared successfully")
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -158,7 +205,8 @@ export function PerformancePlanningForm({
     try {
       const payload: PerformancePlanningData = {
           keyResultAreas: formData.keyResultAreas,
-          appraiseeSignatureUrl: formData.appraiseeSignatureUrl || undefined
+          appraiseeSignatureUrl: formData.appraiseeSignatureUrl || undefined,
+          appraiserSignatureUrl: formData.appraiserSignatureUrl || undefined
       }
 
       let savedPlan
@@ -192,7 +240,8 @@ export function PerformancePlanningForm({
             keyResultAreas: [
                 { id: "1", keyResultArea: "", targets: "", resourcesRequired: "" }
             ],
-            appraiseeSignatureUrl: null
+            appraiseeSignatureUrl: null,
+            appraiserSignatureUrl: null
           })
           setExistingPerformancePlanningId(null)
       } catch (error) {
@@ -257,7 +306,7 @@ export function PerformancePlanningForm({
             </Card>
 
             {/* Table Rows */}
-            {formData.keyResultAreas.map((area, index) => (
+            {formData.keyResultAreas.map((area: KeyResultArea, index: number) => (
               <Card key={area.id} className="p-4">
                 <div className="grid grid-cols-12 gap-4">
                   <div className="col-span-4 space-y-2">
@@ -323,7 +372,7 @@ export function PerformancePlanningForm({
                 </CardHeader>
                 <CardContent className="p-0 space-y-3">
                   <div className="mb-0">
-                    {userSignatureUrl ? (
+                    {appraiseeSignatureUrl ? (
                         <div className="space-y-2">
                             {!formData.appraiseeSignatureUrl ? (
                                 <>
@@ -334,12 +383,14 @@ export function PerformancePlanningForm({
                                 </>
                             ) : (
                                 <>
+                                  {!isReviewMode && (
                                     <div className="flex items-center gap-2 text-sm">
                                         <span className="text-green-600 font-bold">✓ Signed</span>
-                                        <Button type="button" onClick={() => setFormData(prev => ({ ...prev, appraiseeSignatureUrl: null }))} variant="ghost" size="sm" className="h-6 text-xs text-red-500">
+                                        <Button type="button" onClick={handleClearSignatures} variant="ghost" size="sm" className="h-6 text-xs text-red-500">
                                             Remove
                                         </Button>
                                     </div>
+                                  )}
                                     <div className="space-y-1">
                                       <Label className="text-sm">Signature:</Label>
                                       <Card className="p-2 border-none shadow-none">
@@ -379,34 +430,72 @@ export function PerformancePlanningForm({
                 </CardContent>
               </Card>
 
-                 {/* Appraiser Signature */}
-                 <Card className={`p-4 ${!isReviewMode ? 'opacity-50' : ''}`}>
-                   <CardHeader className="p-0 pb-4">
-                     <CardTitle className={`${isReviewMode ? 'bg-amber-800' : 'bg-gray-600'} text-white p-2 rounded text-sm font-medium text-center`}>
-                       APPRAISER'S SIGNATURE
-                     </CardTitle>
-                   </CardHeader>
-                   <CardContent className="p-0 space-y-3">
-                     <div className="space-y-1">
-                       <Label className="text-sm">Upload Signature (PNG)</Label>
-                       <Input
-                         type="file"
-                         accept=".png"
-                         disabled={!isReviewMode}
-                         className="h-8 text-xs"
-                       />
-                       {!isReviewMode && (
-                         <p className="text-xs text-muted-foreground">
-                           Completed by appraiser
-                         </p>
-                       )}
-                     </div>
-
-                     <div className="border-t pt-1">
-                       {/* <p className="text-xs text-muted-foreground">Signature line</p> */}
-                     </div>
-                   </CardContent>
-                 </Card>
+              {/* Appraiser Signature */}
+              <Card className={`p-4 ${!isReviewMode ? 'opacity-50' : ''}`}>
+                <CardHeader className="p-0 pb-4">
+                  <CardTitle className={`${isReviewMode ? 'bg-amber-800' : 'bg-gray-600'} text-white p-2 rounded text-sm font-medium text-center`}>
+                    APPRAISER'S SIGNATURE
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0 space-y-3">
+                <div className="mb-0">
+                  {appraiserSignatureUrl ? (
+                      <div className="space-y-2">
+                          {!formData.appraiserSignatureUrl ? (
+                              <>
+                                  <p className="text-sm text-muted-foreground">You have a signature on file</p>
+                                  <Button type="button" onClick={handleSign} variant="default" size="sm">
+                                      Sign
+                                  </Button>
+                              </>
+                          ) : (
+                              <>
+                                {isReviewMode && (
+                                  <div className="flex items-center gap-2 text-sm">
+                                      <span className="text-green-600 font-bold">✓ Signed</span>
+                                      <Button type="button" onClick={handleClearSignatures} variant="ghost" size="sm" className="h-6 text-xs text-red-500">
+                                          Remove
+                                      </Button>
+                                  </div>
+                                )}
+                                  <div className="space-y-1">
+                                    <Label className="text-sm">Signature:</Label>
+                                    <Card className="p-2 border-none shadow-none">
+                                      <Image
+                                        src={formData.appraiserSignatureUrl}
+                                        alt="Appraiser Signature"
+                                        width={100}
+                                        height={50}
+                                        className="max-h-12 max-w-full object-contain"
+                                      />
+                                    </Card>
+                                  </div>
+                              </>
+                          )}
+                      </div>
+                  ) : (
+                      <div className="space-y-2">
+                          <Label htmlFor="appraiser-signature" className="text-sm">Upload Signature to Profile (PNG)</Label>
+                          <div className="flex gap-2">
+                              <Input
+                                  id="appraiser-signature"
+                                  type="file"
+                                  accept=".png"
+                                  onChange={handleSignatureUpload}
+                                  disabled={isUploadingSignature}
+                                  className="h-8 text-xs"
+                              />
+                              {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}
+                          </div>
+                      </div>
+                  )}
+                </div>
+                
+                <div className="border-t pt-1">
+                  {/* <p className="text-xs text-muted-foreground">Signature line</p> */}
+                </div>
+              </CardContent>
+              </Card>
             </div>
           </div>
 

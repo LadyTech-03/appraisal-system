@@ -18,6 +18,13 @@ export interface PersonalInfoData {
         date: string
         programme: string
     }>
+    // Appraiser fields (nullable)
+    appraiserTitle?: string
+    appraiserOtherTitle?: string
+    appraiserSurname?: string
+    appraiserFirstName?: string
+    appraiserOtherNames?: string
+    appraiserPosition?: string
 }
 
 export interface PersonalInfo {
@@ -40,8 +47,19 @@ export interface PersonalInfo {
         date: string
         programme: string
     }>
+    // Appraiser fields (nullable)
+    appraiser_title?: string
+    appraiser_other_title?: string
+    appraiser_surname?: string
+    appraiser_first_name?: string
+    appraiser_other_names?: string
+    appraiser_position?: string
     created_at: string
     updated_at: string
+
+    user_name: string
+    user_email: string
+    employee_id: string
 }
 
 /**
@@ -73,6 +91,14 @@ export async function getPersonalInfoById(id: string): Promise<PersonalInfo> {
  */
 export async function getMyPersonalInfo(): Promise<PersonalInfo[]> {
     const response = await apiClient.get<{ success: boolean; data: PersonalInfo[] }>("/personal-info/me")
+    return response.data.data
+}
+
+/**
+ * Get team appraisals (for managers)
+ */
+export async function getTeamAppraisals(): Promise<PersonalInfo[]> {
+    const response = await apiClient.get<{ success: boolean; data: PersonalInfo[] }>("/personal-info/team")
     return response.data.data
 }
 

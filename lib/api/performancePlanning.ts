@@ -10,6 +10,7 @@ export interface KeyResultArea {
 export interface PerformancePlanningData {
     keyResultAreas: KeyResultArea[]
     appraiseeSignatureUrl?: string
+    appraiserSignatureUrl?: string
 }
 
 export interface PerformancePlanning extends PerformancePlanningData {
@@ -17,6 +18,7 @@ export interface PerformancePlanning extends PerformancePlanningData {
     user_id: string
     key_result_areas: KeyResultArea[]
     appraisee_signature_url?: string
+    appraiser_signature_url?: string
     created_at: string
     updated_at: string
 }
@@ -58,4 +60,12 @@ export async function getMyPerformancePlanning(): Promise<PerformancePlanning[]>
  */
 export async function deletePerformancePlanning(id: string): Promise<void> {
     await apiClient.delete(`/performance-planning/${id}`)
+}
+
+/**
+ * Get performance planning by User ID
+ */
+export async function getPerformancePlanningByUserId(userId: string): Promise<PerformancePlanning[]> {
+    const response = await apiClient.get<{ success: boolean; data: PerformancePlanning[] }>(`/performance-planning/user/${userId}`)
+    return response.data.data
 }

@@ -25,6 +25,7 @@ import {
   createMidYearReview, 
   updateMidYearReview, 
   getMyMidYearReview, 
+  getMidYearReviewByUserId,
   deleteMidYearReview,
   MidYearReviewData
 } from "@/lib/api/midYearReview"
@@ -42,18 +43,21 @@ export function MidYearReviewForm({
   onNext,
   onBack,
   isReviewMode = false,
-  initialData
+  initialData,
+  reviewUserId
 }: {
   onNext: (data: any) => void
   onBack: () => void
   isReviewMode?: boolean
   initialData?: any
+  reviewUserId?: string
 }) {
   const [isLoading, setIsLoading] = useState(false)
   const [isClearingForm, setIsClearingForm] = useState(false)
   const [isUploadingSignature, setIsUploadingSignature] = useState(false)
   const [existingMidYearReviewId, setExistingMidYearReviewId] = useState<string | null>(null)
-  const [userSignatureUrl, setUserSignatureUrl] = useState<string | null>(null)
+  const [appraiseeSignatureUrl, setAppraiseeSignatureUrl] = useState<string | null>(null)
+  const [appraiserSignatureUrl, setAppraiserSignatureUrl] = useState<string | null>(null)
   
   const [formData, setFormData] = useState({
     targets: initialData?.targets || [
@@ -63,7 +67,9 @@ export function MidYearReviewForm({
       { id: "1", description: "", progressReview: "", remarks: "" }
     ] as ReviewItem[],
     appraiseeSignatureUrl: initialData?.appraiseeSignatureUrl || null as string | null,
-    appraiseeDate: initialData?.appraiseeDate || ""
+    appraiserSignatureUrl: initialData?.appraiserSignatureUrl || null as string | null,
+    appraiseeDate: initialData?.appraiseeDate || "",
+    appraiserDate: initialData?.appraiserDate || ""
   })
 
   // Load draft and user profile on mount
@@ -72,12 +78,24 @@ export function MidYearReviewForm({
       try {
         // Load user profile for signature
         const profile = await authApi.getProfile()
-        if (profile?.data?.signatureUrl) {
-          setUserSignatureUrl(profile.data.signatureUrl)
+        if (profile?.data?.signatureUrl && !isReviewMode) {
+          console.log(profile,'not review mode')
+          setAppraiseeSignatureUrl(profile.data.signatureUrl)
+        } else if (profile?.data?.signatureUrl && isReviewMode) {
+          console.log(profile,'review mode')
+          setAppraiserSignatureUrl(profile.data.signatureUrl)
         }
 
         // Load existing draft
-        const reviews = await getMyMidYearReview()
+        let reviews
+        if (isReviewMode && reviewUserId) {
+          reviews = await getMidYearReviewByUserId(reviewUserId)
+          console.log(reviews, 'reviews')
+          setAppraiseeSignatureUrl(reviews[0].appraisee_signature_url || null)
+        } else {
+          reviews = await getMyMidYearReview()
+          setAppraiseeSignatureUrl(reviews[0].appraisee_signature_url || null)
+        }
         if (reviews && reviews.length > 0) {
           const latestReview = reviews[0]
           setFormData({
@@ -90,7 +108,9 @@ export function MidYearReviewForm({
                 id: item.id || (index + 1).toString()
             })),
             appraiseeSignatureUrl: latestReview.appraisee_signature_url || null,
-            appraiseeDate: latestReview.appraisee_date ? latestReview.appraisee_date.slice(0, 10) : ""
+            appraiserSignatureUrl: latestReview.appraiser_signature_url || null,
+            appraiseeDate: latestReview.appraisee_date ? latestReview.appraisee_date.slice(0, 10) : "",
+            appraiserDate: latestReview.appraiser_date ? latestReview.appraiser_date.slice(0, 10) : ""
           })
           setExistingMidYearReviewId(latestReview.id)
           toast.info("Loaded your draft mid-year review")
@@ -121,7 +141,7 @@ export function MidYearReviewForm({
     if (currentItems.length > 1) {
       setFormData(prev => ({
         ...prev,
-        [type]: currentItems.filter(item => item.id !== id)
+        [type]: currentItems.filter((item: ReviewItem) => item.id !== id)
       }))
     }
   }
@@ -129,7 +149,7 @@ export function MidYearReviewForm({
   const updateReviewItem = (type: 'targets' | 'competencies', id: string, field: keyof ReviewItem, value: string) => {
     setFormData(prev => ({
       ...prev,
-      [type]: prev[type].map(item =>
+      [type]: prev[type].map((item: ReviewItem) =>
         item.id === id ? { ...item, [field]: value } : item
       )
     }))
@@ -137,11 +157,16 @@ export function MidYearReviewForm({
 
   const handleSignatureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
+    const isAppraisee = !isReviewMode
     if (file && file.type === "image/png") {
         setIsUploadingSignature(true)
         try {
             const result = await usersApi.uploadSignature(file)
-            setUserSignatureUrl(result.signatureUrl)
+            if (isAppraisee) {
+                setAppraiseeSignatureUrl(result.signatureUrl)
+            } else {
+                setAppraiserSignatureUrl(result.signatureUrl)
+            }
             toast.success("Signature uploaded successfully")
         } catch (error) {
             toast.error("Failed to upload signature")
@@ -154,13 +179,38 @@ export function MidYearReviewForm({
   }
 
   const handleSign = () => {
-      if (userSignatureUrl) {
+      if (appraiseeSignatureUrl && !isReviewMode) {
           setFormData(prev => ({
               ...prev,
-              appraiseeSignatureUrl: userSignatureUrl
+              appraiseeSignatureUrl: appraiseeSignatureUrl
           }))
           toast.success("Form signed successfully")
       }
+      if (appraiserSignatureUrl && isReviewMode) {
+          setFormData(prev => ({
+              ...prev,
+              appraiserSignatureUrl: appraiserSignatureUrl
+          }))
+          toast.success("Form signed successfully")
+      }
+  }
+
+    const handleClearSignatures = () => {
+    if (appraiseeSignatureUrl && !isReviewMode) {
+        setAppraiseeSignatureUrl(null)
+        setFormData(prev => ({
+            ...prev,
+            appraiseeSignatureUrl: null
+        }))
+    }
+    if (appraiserSignatureUrl && isReviewMode) {
+        setAppraiserSignatureUrl(null)
+        setFormData(prev => ({
+            ...prev,
+            appraiserSignatureUrl: null
+        }))
+    }
+    toast.success("Signatures cleared successfully")
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -171,7 +221,9 @@ export function MidYearReviewForm({
           targets: formData.targets,
           competencies: formData.competencies,
           appraiseeSignatureUrl: formData.appraiseeSignatureUrl || undefined,
-          appraiseeDate: formData.appraiseeDate || undefined
+          appraiseeDate: formData.appraiseeDate || undefined,
+          appraiserSignatureUrl: formData.appraiserSignatureUrl || undefined,
+          appraiserDate: formData.appraiserDate || undefined
       }
 
       let savedReview
@@ -209,7 +261,9 @@ export function MidYearReviewForm({
                 { id: "1", description: "", progressReview: "", remarks: "" }
             ],
             appraiseeSignatureUrl: null,
-            appraiseeDate: ""
+            appraiserSignatureUrl: null,
+            appraiseeDate: "",
+            appraiserDate: ""
           })
           setExistingMidYearReviewId(null)
       } catch (error) {
@@ -261,7 +315,7 @@ export function MidYearReviewForm({
           </div>
 
           {/* Table Rows */}
-          {items.map((item, index) => (
+          {items.map((item: ReviewItem, index: number) => (
             <div key={item.id} className="grid grid-cols-12 gap-2 items-start">
               <div className="col-span-1 flex items-center justify-center pt-2">
                 <span className="text-sm font-medium">{index + 1}</span>
@@ -363,7 +417,7 @@ export function MidYearReviewForm({
                 </CardHeader>
                 <CardContent className="p-0 space-y-3">
                   <div className="mb-0">
-                    {userSignatureUrl ? (
+                    {appraiseeSignatureUrl ? (
                         <div className="space-y-2">
                             {!formData.appraiseeSignatureUrl ? (
                                 <>
@@ -374,12 +428,14 @@ export function MidYearReviewForm({
                                 </>
                             ) : (
                                 <>
+                                  {!isReviewMode && (
                                     <div className="flex items-center gap-2 text-sm">
                                         <span className="text-green-600 font-bold">✓ Signed</span>
-                                        <Button type="button" onClick={() => setFormData(prev => ({ ...prev, appraiseeSignatureUrl: null }))} variant="ghost" size="sm" className="h-6 text-xs text-red-500">
+                                        <Button type="button" onClick={handleClearSignatures} variant="ghost" size="sm" className="h-6 text-xs text-red-500">
                                             Remove
                                         </Button>
                                     </div>
+                                  )}
                                     <div className="space-y-1">
                                       <Label className="text-sm">Signature:</Label>
                                       <Card className="p-2 border-none shadow-none">
@@ -422,6 +478,7 @@ export function MidYearReviewForm({
                       onChange={(e) => setFormData(prev => ({ ...prev, appraiseeDate: e.target.value }))}
                       className="h-8 text-xs"
                       required
+                      disabled={isReviewMode || isUploadingSignature}
                     />
                   </div>
                 </CardContent>
@@ -435,33 +492,70 @@ export function MidYearReviewForm({
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0 space-y-3">
-                  <div className="space-y-1">
-                    <Label className="text-sm">Upload Signature (PNG)</Label>
-                    <Input
-                      type="file"
-                      accept=".png"
-                      disabled={!isReviewMode}
-                      className="h-8 text-xs"
-                    />
-                    {!isReviewMode && (
-                      <p className="text-xs text-muted-foreground">
-                        Completed by appraiser
-                      </p>
+                  <div className="mb-0">
+                    {appraiserSignatureUrl ? (
+                        <div className="space-y-2">
+                            {!formData.appraiserSignatureUrl ? (
+                                <>
+                                    <p className="text-sm text-muted-foreground">You have a signature on file</p>
+                                    <Button type="button" onClick={handleSign} variant="default" size="sm">
+                                        Sign
+                                    </Button>
+                                </>
+                            ) : (
+                                <>
+                                  {isReviewMode && (
+                                    <div className="flex items-center gap-2 text-sm">
+                                        <span className="text-green-600 font-bold">✓ Signed</span>
+                                        <Button type="button" onClick={handleClearSignatures} variant="ghost" size="sm" className="h-6 text-xs text-red-500">
+                                            Remove
+                                        </Button>
+                                    </div>
+                                  )}
+                                    <div className="space-y-1">
+                                      <Label className="text-sm">Signature:</Label>
+                                      <Card className="p-2 border-none shadow-none">
+                                        <Image
+                                          src={formData.appraiserSignatureUrl}
+                                          alt="Appraisee Signature"
+                                          width={100}
+                                          height={50}
+                                          className="max-h-12 max-w-full object-contain"
+                                        />
+                                      </Card>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="space-y-2">
+                            <Label htmlFor="appraisee-signature" className="text-sm">Upload Signature to Profile (PNG)</Label>
+                            <div className="flex gap-2">
+                                <Input
+                                    id="appraisee-signature"
+                                    type="file"
+                                    accept=".png"
+                                    onChange={handleSignatureUpload}
+                                    disabled={isUploadingSignature}
+                                    className="h-8 text-xs"
+                                />
+                                {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}
+                            </div>
+                        </div>
                     )}
                   </div>
                   
                   <div className="space-y-1">
-                    <Label className="text-sm">Date (dd/mm/yyyy)</Label>
+                    <Label htmlFor="appraiser-date" className="text-sm">Date (dd/mm/yyyy)</Label>
                     <Input
+                      id="appraiser-date"
                       type="date"
-                      disabled={!isReviewMode}
+                      value={formData.appraiserDate}
+                      onChange={(e) => setFormData(prev => ({ ...prev, appraiserDate: e.target.value }))}
                       className="h-8 text-xs"
+                      required
+                      disabled={!isReviewMode || isUploadingSignature}
                     />
-                    {!isReviewMode && (
-                      <p className="text-xs text-muted-foreground">
-                        Completed by appraiser
-                      </p>
-                    )}
                   </div>
                 </CardContent>
               </Card>

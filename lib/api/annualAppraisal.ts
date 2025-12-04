@@ -85,3 +85,11 @@ export async function getMyAnnualAppraisal(): Promise<AnnualAppraisal[]> {
 export async function deleteAnnualAppraisal(id: string): Promise<void> {
     await apiClient.delete(`/annual-appraisal/${id}`)
 }
+
+/**
+ * Get annual appraisal by User ID
+ */
+export async function getAnnualAppraisalByUserId(userId: string): Promise<AnnualAppraisal[]> {
+    const response = await apiClient.get<{ success: boolean; data: AnnualAppraisal[] }>(`/annual-appraisal/user/${userId}`)
+    return response.data.data
+}

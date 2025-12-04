@@ -25,6 +25,7 @@ import {
   createAnnualAppraisal,
   updateAnnualAppraisal,
   getMyAnnualAppraisal,
+  getAnnualAppraisalByUserId,
   deleteAnnualAppraisal,
   AnnualAppraisalData,
   CompetencyCategory,
@@ -204,12 +205,14 @@ export function AnnualAppraisalForm({
   onNext,
   onBack,
   isReviewMode = false,
-  initialData
+  initialData,
+  reviewUserId
 }: {
   onNext: (data: any) => void
   onBack: () => void
   isReviewMode?: boolean
   initialData?: any
+  reviewUserId?: string
 }) {
   const [isLoading, setIsLoading] = useState(false)
   const [isClearingForm, setIsClearingForm] = useState(false)
@@ -227,8 +230,8 @@ export function AnnualAppraisalForm({
   // Calculate totals and averages using useMemo to avoid infinite loops
   const calculatedData = useMemo(() => {
     // Calculate Core Competencies
-    const updatedCoreCompetencies = formData.coreCompetencies.map(category => {
-      const items = category.items.map(item => ({
+    const updatedCoreCompetencies = formData.coreCompetencies.map((category: CompetencyCategory) => {
+      const items = category.items.map((item: CompetencyItem) => ({
         ...item,
         weightedScore: item.score * item.weight
       }))
@@ -238,8 +241,8 @@ export function AnnualAppraisalForm({
     })
 
     // Calculate Non-Core Competencies
-    const updatedNonCoreCompetencies = formData.nonCoreCompetencies.map(category => {
-      const items = category.items.map(item => ({
+    const updatedNonCoreCompetencies = formData.nonCoreCompetencies.map((category: CompetencyCategory) => {
+      const items = category.items.map((item: CompetencyItem) => ({
         ...item,
         weightedScore: item.score * item.weight
       }))
@@ -249,14 +252,14 @@ export function AnnualAppraisalForm({
     })
 
     // Calculate overall averages
-    const coreAverages = updatedCoreCompetencies.map(c => c.average)
+    const coreAverages = updatedCoreCompetencies.map((c: CompetencyCategory) => c.average)
     const coreCompetenciesAverage = coreAverages.length > 0 
-      ? coreAverages.reduce((sum, avg) => sum + avg, 0) / coreAverages.length 
+      ? coreAverages.reduce((sum: number, avg: number) => sum + avg, 0) / coreAverages.length 
       : 0
 
-    const nonCoreAverages = updatedNonCoreCompetencies.map(c => c.average)
+    const nonCoreAverages = updatedNonCoreCompetencies.map((c: CompetencyCategory) => c.average)
     const nonCoreCompetenciesAverage = nonCoreAverages.length > 0 
-      ? nonCoreAverages.reduce((sum, avg) => sum + avg, 0) / nonCoreAverages.length 
+      ? nonCoreAverages.reduce((sum: number, avg: number) => sum + avg, 0) / nonCoreAverages.length 
       : 0
 
     // Get performance assessment score from previous step (placeholder for now)
@@ -289,7 +292,12 @@ export function AnnualAppraisalForm({
         }
 
         // Load existing draft
-        const appraisals = await getMyAnnualAppraisal()
+        let appraisals
+        if (isReviewMode && reviewUserId) {
+          appraisals = await getAnnualAppraisalByUserId(reviewUserId)
+        } else {
+          appraisals = await getMyAnnualAppraisal()
+        }
         if (appraisals && appraisals.length > 0) {
           const latestAppraisal = appraisals[0]
           setFormData({
@@ -317,11 +325,11 @@ export function AnnualAppraisalForm({
     const key = type === 'core' ? 'coreCompetencies' : 'nonCoreCompetencies'
     setFormData(prev => ({
       ...prev,
-      [key]: prev[key].map(category =>
+      [key]: prev[key].map((category: CompetencyCategory) =>
         category.id === categoryId
           ? {
               ...category,
-              items: category.items.map(item =>
+              items: category.items.map((item: CompetencyItem) =>
                 item.id === itemId ? { ...item, score } : item
               )
             }
@@ -339,11 +347,11 @@ export function AnnualAppraisalForm({
     const key = type === 'core' ? 'coreCompetencies' : 'nonCoreCompetencies'
     setFormData(prev => ({
       ...prev,
-      [key]: prev[key].map(category =>
+      [key]: prev[key].map((category: CompetencyCategory) =>
         category.id === categoryId
           ? {
               ...category,
-              items: category.items.map(item =>
+              items: category.items.map((item: CompetencyItem) =>
                 item.id === itemId ? { ...item, comments } : item
               )
             }
@@ -521,7 +529,7 @@ export function AnnualAppraisalForm({
               </div>
 
               {/* Core Competencies Categories */}
-              {calculatedData.coreCompetencies.map(category => renderCompetencyCategory(category, 'core'))}
+              {calculatedData.coreCompetencies.map((category: CompetencyCategory) => renderCompetencyCategory(category, 'core'))}
 
               {/* Core Competencies Average */}
               <div className="grid grid-cols-12 gap-2 items-center text-base font-bold bg-blue-100 p-3 rounded">
@@ -548,7 +556,7 @@ export function AnnualAppraisalForm({
               </div>
 
               {/* Non-Core Competencies Categories */}
-              {calculatedData.nonCoreCompetencies.map(category => renderCompetencyCategory(category, 'nonCore'))}
+              {calculatedData.nonCoreCompetencies.map((category: CompetencyCategory) => renderCompetencyCategory(category, 'nonCore'))}
 
               {/* Non-Core Competencies Average */}
               <div className="grid grid-cols-12 gap-2 items-center text-sm font-bold bg-blue-100 p-3 rounded">
@@ -590,11 +598,11 @@ export function AnnualAppraisalForm({
 
           {/* Signatures Section */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Signatures</h3>
+            {/* <h3 className="text-lg font-semibold">Signatures</h3> */}
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="gap-6">
               {/* Appraisee Signature */}
-              <Card className="p-4">
+              {/* <Card className="p-4">
                 <CardHeader className="p-0 pb-4">
                   <CardTitle className="bg-amber-800 text-white p-2 rounded text-sm font-medium text-center">
                     APPRAISEE'S SIGNATURE
@@ -672,19 +680,19 @@ export function AnnualAppraisalForm({
                     />
                   </div>
                 </CardContent>
-              </Card>
+              </Card> */}
 
               {/* Appraiser Signature - Disabled for now */}
-              <Card className="p-4 opacity-50">
+              <Card className="p-4">
                 <CardHeader className="p-0 pb-4">
-                  <CardTitle className="bg-gray-600 text-white p-2 rounded text-sm font-medium text-center">
+                  <CardTitle className="bg-amber-800 text-white p-2 rounded text-sm font-medium text-center">
                     APPRAISER'S SIGNATURE
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0 space-y-3">
                   <div className="space-y-1">
                     <Label className="text-sm">Upload Signature (PNG)</Label>
-                    <Input type="file" accept=".png" disabled className="h-8 text-xs" />
+                    <Input type="file" accept=".png" disabled={!isReviewMode} className="h-8 text-xs" />
                     <p className="text-xs text-muted-foreground">
                       Completed by appraiser during review
                     </p>
@@ -692,7 +700,7 @@ export function AnnualAppraisalForm({
                   
                   <div className="space-y-1">
                     <Label className="text-sm">Date (dd/mm/yyyy)</Label>
-                    <Input type="date" disabled className="h-8 text-xs" />
+                    <Input type="date" disabled={!isReviewMode} className="h-8 text-xs" />
                     <p className="text-xs text-muted-foreground">
                       Completed by appraiser during review
                     </p>
@@ -755,7 +763,7 @@ export function AnnualAppraisalForm({
                 type="submit"
                 size="lg"
                 className="px-8"
-                disabled={isLoading || isClearingForm || !formData.appraiseeSignatureUrl || !formData.appraiseeDate}
+                disabled={isLoading || isClearingForm}
               >
                 {isLoading ? (
                   <>

@@ -74,3 +74,11 @@ export async function getMyEndYearReview(): Promise<EndYearReview[]> {
 export async function deleteEndYearReview(id: string): Promise<void> {
     await apiClient.delete(`/end-year-review/${id}`)
 }
+
+/**
+ * Get end-year review by User ID
+ */
+export async function getEndYearReviewByUserId(userId: string): Promise<EndYearReview[]> {
+    const response = await apiClient.get<{ success: boolean; data: EndYearReview[] }>(`/end-year-review/user/${userId}`)
+    return response.data.data
+}

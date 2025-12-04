@@ -26,7 +26,8 @@ import {
   updateFinalSections,
   getMyFinalSections,
   deleteFinalSections,
-  FinalSectionsData
+  FinalSectionsData,
+  getFinalSectionsByUserId
 } from "@/lib/api/finalSections"
 import { usersApi } from "@/lib/api/users"
 import { authApi } from "@/lib/api/auth"
@@ -35,11 +36,13 @@ export function FinalSectionsForm({
   onNext,
   onBack,
   isReviewMode = false,
+  reviewUserId,
   initialData
 }: {
   onNext: (data: any) => void
   onBack: () => void
   isReviewMode?: boolean
+  reviewUserId?: string
   initialData?: any
 }) {
   const [isLoading, setIsLoading] = useState(false)
@@ -70,9 +73,14 @@ export function FinalSectionsForm({
         }
 
         // Load existing draft
-        const sections = await getMyFinalSections()
-        if (sections && sections.length > 0) {
-          const latestSection = sections[0]
+        let finalSections
+        if (isReviewMode && reviewUserId) {
+          finalSections = await getFinalSectionsByUserId(reviewUserId)
+        } else {
+          finalSections = await getMyFinalSections()
+        }
+        if (finalSections && finalSections.length > 0) {
+          const latestSection = finalSections[0]
           setFormData({
             appraiserComments: latestSection.appraiser_comments || "",
             appraiserSignatureUrl: latestSection.appraiser_signature_url || null,
@@ -343,6 +351,7 @@ export function FinalSectionsForm({
                   placeholder="Enter your comments..."
                   className="min-h-24 resize-none"
                   rows={6}
+                  disabled={isReviewMode}
                 />
               </div>
 
@@ -360,18 +369,20 @@ export function FinalSectionsForm({
                         </>
                       ) : (
                         <>
-                          <div className="flex items-center gap-2 text-sm">
-                            <span className="text-green-600 font-bold">✓ Signed</span>
-                            <Button
-                              type="button"
-                              onClick={() => setFormData(prev => ({ ...prev, appraiseeSignatureUrl: null }))}
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 text-xs text-red-500"
-                            >
-                              Remove
-                            </Button>
-                          </div>
+                          {isReviewMode &&  (
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="text-green-600 font-bold">✓ Signed</span>
+                              <Button
+                                type="button"
+                                onClick={() => setFormData(prev => ({ ...prev, appraiseeSignatureUrl: null }))}
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 text-xs text-red-500"
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                          )}
                           <div className="">
                             <Image
                               src={formData.appraiseeSignatureUrl}
@@ -411,6 +422,7 @@ export function FinalSectionsForm({
                     onChange={(e) => setFormData(prev => ({ ...prev, appraiseeDate: e.target.value }))}
                     className="h-12"
                     required
+                    disabled={isReviewMode}
                   />
                 </div>
               </div>

@@ -25,6 +25,7 @@ import {
   createEndYearReview,
   updateEndYearReview,
   getMyEndYearReview,
+  getEndYearReviewByUserId,
   deleteEndYearReview,
   EndYearReviewData
 } from "@/lib/api/endYearReview"
@@ -44,12 +45,14 @@ export function EndYearReviewForm({
   onNext, 
   onBack,
   isReviewMode = false,
-  initialData
+  initialData,
+  reviewUserId
 }: { 
   onNext: (data: any) => void
   onBack: () => void
   isReviewMode?: boolean
   initialData?: any
+  reviewUserId?: string
 }) {
   const [isLoading, setIsLoading] = useState(false)
   const [isClearingForm, setIsClearingForm] = useState(false)
@@ -74,8 +77,8 @@ export function EndYearReviewForm({
   })
 
   useEffect(() => {
-    const totalWeight = formData.targets.reduce((sum, target) => sum + target.weightOfTarget, 0)
-    const totalScore = formData.targets.reduce((sum, target) => sum + (target.score * target.weightOfTarget), 0)
+    const totalWeight = formData.targets.reduce((sum: number, target: TargetEvaluation) => sum + target.weightOfTarget, 0)
+    const totalScore = formData.targets.reduce((sum: number, target: TargetEvaluation) => sum + (target.score * target.weightOfTarget), 0)
     const average = totalWeight > 0 ? totalScore / totalWeight : 0
     const finalScore = average * 0.6
 
@@ -99,7 +102,12 @@ export function EndYearReviewForm({
         }
 
         // Load existing draft
-        const reviews = await getMyEndYearReview()
+        let reviews
+        if (isReviewMode && reviewUserId) {
+          reviews = await getEndYearReviewByUserId(reviewUserId)
+        } else {
+          reviews = await getMyEndYearReview()
+        }
         if (reviews && reviews.length > 0) {
           const latestReview = reviews[0]
           setFormData({
@@ -137,7 +145,7 @@ export function EndYearReviewForm({
     if (formData.targets.length > 1) {
       setFormData(prev => ({
         ...prev,
-        targets: prev.targets.filter(target => target.id !== id)
+        targets: prev.targets.filter((target: TargetEvaluation) => target.id !== id)
       }))
     }
   }
@@ -145,7 +153,7 @@ export function EndYearReviewForm({
   const updateTarget = (id: string, field: keyof TargetEvaluation, value: string | number) => {
     setFormData(prev => ({
       ...prev,
-      targets: prev.targets.map(target =>
+      targets: prev.targets.map((target: TargetEvaluation) =>
         target.id === id ? { ...target, [field]: value } : target
       )
     }))
@@ -287,7 +295,7 @@ export function EndYearReviewForm({
               </div>
 
               {/* Target Rows */}
-              {formData.targets.map((target, index) => (
+              {formData.targets.map((target: TargetEvaluation, index: number) => (
                 <div key={target.id} className="grid grid-cols-12 gap-2 items-start">
                   <div className="col-span-1 flex items-center justify-center pt-2">
                     <span className="text-sm font-medium">{index + 1}</span>
@@ -426,12 +434,14 @@ export function EndYearReviewForm({
                                 </>
                             ) : (
                                 <>
+                                  {!isReviewMode && (
                                     <div className="flex items-center gap-2 text-sm">
                                         <span className="text-green-600 font-bold">✓ Signed</span>
                                         <Button type="button" onClick={() => setFormData(prev => ({ ...prev, appraiseeSignatureUrl: null }))} variant="ghost" size="sm" className="h-6 text-xs text-red-500">
                                             Remove
                                         </Button>
                                     </div>
+                                  )}
                                     <div className="space-y-1">
                                       <Label className="text-sm">Signature:</Label>
                                       <Card className="p-2 border-none shadow-none">
@@ -458,6 +468,7 @@ export function EndYearReviewForm({
                                     onChange={handleSignatureUpload}
                                     disabled={isUploadingSignature}
                                     className="h-8 text-xs"
+
                                 />
                                 {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}
                             </div>
@@ -474,6 +485,7 @@ export function EndYearReviewForm({
                       onChange={(e) => setFormData(prev => ({ ...prev, appraiseeDate: e.target.value }))}
                       className="h-8 text-xs"
                       required
+                      disabled={isReviewMode}
                     />
                   </div>
                 </CardContent>

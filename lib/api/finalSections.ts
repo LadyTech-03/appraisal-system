@@ -64,3 +64,9 @@ export async function getMyFinalSections(): Promise<FinalSections[]> {
 export async function deleteFinalSections(id: string): Promise<void> {
     await apiClient.delete(`/final-sections/${id}`)
 }
+
+export async function getFinalSectionsByUserId(userId: string): Promise<FinalSections[]> {
+    const response = await apiClient.get<{ success: boolean; data: FinalSections[] }>(`/final-sections/user/${userId}`)
+    return response.data.data
+}
+
