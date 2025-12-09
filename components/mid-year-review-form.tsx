@@ -94,7 +94,8 @@ export function MidYearReviewForm({
           setAppraiseeSignatureUrl(reviews[0].appraisee_signature_url || null)
         } else {
           reviews = await getMyMidYearReview()
-          setAppraiseeSignatureUrl(reviews[0].appraisee_signature_url || null)
+          // setAppraiseeSignatureUrl(reviews[0].appraisee_signature_url || null)
+          setAppraiserSignatureUrl(reviews[0].appraiser_signature_url || null)
         }
         if (reviews && reviews.length > 0) {
           const latestReview = reviews[0]
@@ -342,7 +343,7 @@ export function MidYearReviewForm({
                 <Textarea
                   value={item.remarks}
                   onChange={(e) => updateReviewItem(type, item.id, "remarks", e.target.value)}
-                  placeholder={isReviewMode ? "Enter appraiser's remarks" : "Appraiser's remarks (disabled)"}
+                  placeholder={isReviewMode ? "" : "By appraiser"}
                   className="min-h-10 resize-none text-sm"
                   disabled={!isReviewMode}
                 />
@@ -409,9 +410,9 @@ export function MidYearReviewForm({
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Appraisee Signature */}
-              <Card className="p-4">
+              <Card className={`p-4 ${isReviewMode ? 'opacity-50' : ''}`}>
                 <CardHeader className="p-0 pb-4">
-                  <CardTitle className="bg-amber-800 text-white p-2 rounded text-sm font-medium text-center">
+                  <CardTitle className={`${!isReviewMode ? 'bg-amber-800' : 'bg-gray-600'} text-white p-2 rounded text-sm font-medium text-center`}>
                     APPRAISEE'S SIGNATURE
                   </CardTitle>
                 </CardHeader>

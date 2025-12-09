@@ -25,8 +25,8 @@ export interface AnnualAppraisalData {
     nonCoreCompetenciesAverage?: number
     overallTotal?: number
     overallScorePercentage?: number
-    appraiseeSignatureUrl?: string
-    appraiseeDate?: string
+    appraiserSignatureUrl?: string
+    appraiserDate?: string
 }
 
 export interface AnnualAppraisal extends AnnualAppraisalData {
@@ -45,6 +45,22 @@ export interface AnnualAppraisal extends AnnualAppraisalData {
     appraiser_date?: string
     created_at: string
     updated_at: string
+}
+
+export interface PerformanceAssessment {
+    calculations: {
+        finalScore: number
+        coreCompetencies: {
+            total: number
+            average: number
+        }
+        nonCoreCompetencies: {
+            total: number
+            average: number
+        }
+        overallTotal: number
+        overallScorePercentage: number
+    }
 }
 
 /**
@@ -93,3 +109,12 @@ export async function getAnnualAppraisalByUserId(userId: string): Promise<Annual
     const response = await apiClient.get<{ success: boolean; data: AnnualAppraisal[] }>(`/annual-appraisal/user/${userId}`)
     return response.data.data
 }
+
+/**
+ * Get performance assessment by User ID
+ */
+export async function getPerformanceAssessment(userId: string): Promise<PerformanceAssessment[]> {
+    const response = await apiClient.get<{ success: boolean; data: PerformanceAssessment[] }>(`/annual-appraisal/performance-assessment/${userId}`)
+    return response.data.data
+}
+

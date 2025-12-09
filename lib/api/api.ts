@@ -41,12 +41,27 @@ apiClient.interceptors.request.use((config) => {
   return config
 })
 
+let isHandlingUnauthorized = false
+
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    if (error.response?.status === 401 && unauthorizedHandler) {
-      unauthorizedHandler()
+    // Handle 401 Unauthorized errors
+    if (error.response?.status === 401) {
+      // Prevent multiple simultaneous logout triggers
+      if (!isHandlingUnauthorized && unauthorizedHandler) {
+        isHandlingUnauthorized = true
+
+        // Call the handler (which triggers logout)
+        unauthorizedHandler()
+
+        // Reset flag after a short delay to allow for legitimate re-authentication
+        setTimeout(() => {
+          isHandlingUnauthorized = false
+        }, 1000)
+      }
     }
+
     return Promise.reject(error)
   },
 )
@@ -60,9 +75,9 @@ export const parseApiError = (error: unknown): ApiErrorShape => {
       const message = typeof data.message === "string" ? data.message : "Something went wrong"
       const errors = Array.isArray(data.errors)
         ? (data.errors as ApiValidationError[]).map((item) => ({
-            field: item.field,
-            message: item.message,
-          }))
+          field: item.field,
+          message: item.message,
+        }))
         : undefined
 
       return {

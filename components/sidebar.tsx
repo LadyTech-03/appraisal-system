@@ -42,11 +42,11 @@ const menuItems: MenuItem[] = [
     label: "Dashboard",
     href: "/dashboard",
   },
-  // {
-  //   icon: FileText,
-  //   label: "My Appraisals",
-  //   href: "/appraisals",
-  // },
+  {
+    icon: FileText,
+    label: "My Appraisals",
+    href: "/appraisals",
+  },
   {
     icon: Target,
     label: "Create Appraisal",

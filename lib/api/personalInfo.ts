@@ -56,6 +56,9 @@ export interface PersonalInfo {
     appraiser_position?: string
     created_at: string
     updated_at: string
+    appraisal_id?: string
+    status?: string
+    manager_status?: string
 
     user_name: string
     user_email: string

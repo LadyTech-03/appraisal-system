@@ -58,14 +58,18 @@ export function EndYearReviewForm({
   const [isClearingForm, setIsClearingForm] = useState(false)
   const [isUploadingSignature, setIsUploadingSignature] = useState(false)
   const [existingEndYearReviewId, setExistingEndYearReviewId] = useState<string | null>(null)
-  const [userSignatureUrl, setUserSignatureUrl] = useState<string | null>(null)
+  const [appraiseeSignatureUrl, setAppraiseeSignatureUrl] = useState<string | null>(null)
+  const [appraiserSignatureUrl, setAppraiserSignatureUrl] = useState<string | null>(null)
+
 
   const [formData, setFormData] = useState({
     targets: initialData?.targets || [
       { id: "1", target: "", performanceAssessment: "", weightOfTarget: 5, score: 0, comments: "" }
     ] as TargetEvaluation[],
     appraiseeSignatureUrl: initialData?.appraiseeSignatureUrl || null as string | null,
-    appraiseeDate: initialData?.appraiseeDate || ""
+    appraiserSignatureUrl: initialData?.appraiserSignatureUrl || null as string | null,
+    appraiseeDate: initialData?.appraiseeDate || "",
+    appraiserDate: initialData?.appraiserDate || ""
   })
 
   // Calculate totals and averages
@@ -96,17 +100,21 @@ export function EndYearReviewForm({
       try {
         // Load user profile for signature
         const profile = await authApi.getProfile()
-        console.log(profile, 'This')
-        if (profile?.data?.signatureUrl) {
-          setUserSignatureUrl(profile.data.signatureUrl)
+        if (profile?.data?.signatureUrl && !isReviewMode) {
+          setAppraiseeSignatureUrl(profile.data.signatureUrl)
+        } else if (profile?.data?.signatureUrl && isReviewMode) {
+          setAppraiserSignatureUrl(profile.data.signatureUrl)
         }
 
         // Load existing draft
         let reviews
         if (isReviewMode && reviewUserId) {
           reviews = await getEndYearReviewByUserId(reviewUserId)
+          setAppraiseeSignatureUrl(reviews[0].appraisee_signature_url || null)
         } else {
           reviews = await getMyEndYearReview()
+          // setAppraiseeSignatureUrl(reviews[0].appraisee_signature_url || null)
+          setAppraiserSignatureUrl(reviews[0].appraiser_signature_url || null)
         }
         if (reviews && reviews.length > 0) {
           const latestReview = reviews[0]
@@ -116,7 +124,9 @@ export function EndYearReviewForm({
                 id: item.id || (index + 1).toString()
             })),
             appraiseeSignatureUrl: latestReview.appraisee_signature_url || null,
-            appraiseeDate: latestReview.appraisee_date ? latestReview.appraisee_date.slice(0, 10) : ""
+            appraiseeDate: latestReview.appraisee_date ? latestReview.appraisee_date.slice(0, 10) : "",
+            appraiserSignatureUrl: latestReview.appraiser_signature_url || null,
+            appraiserDate: latestReview.appraiser_date ? latestReview.appraiser_date.slice(0, 10) : ""
           })
           setExistingEndYearReviewId(latestReview.id)
           toast.info("Loaded your draft end-year review")
@@ -165,7 +175,7 @@ export function EndYearReviewForm({
         setIsUploadingSignature(true)
         try {
             const result = await usersApi.uploadSignature(file)
-            setUserSignatureUrl(result.signatureUrl)
+            setAppraiseeSignatureUrl(result.signatureUrl)
             toast.success("Signature uploaded successfully")
         } catch (error) {
             toast.error("Failed to upload signature")
@@ -178,13 +188,37 @@ export function EndYearReviewForm({
   }
 
   const handleSign = () => {
-      if (userSignatureUrl) {
+      if (appraiseeSignatureUrl && !isReviewMode) {
           setFormData(prev => ({
               ...prev,
-              appraiseeSignatureUrl: userSignatureUrl
+              appraiseeSignatureUrl: appraiseeSignatureUrl
+          }))
+          toast.success("Form signed successfully")
+      } else if(appraiserSignatureUrl && isReviewMode) {
+          setFormData(prev => ({
+              ...prev,
+              appraiserSignatureUrl: appraiserSignatureUrl
           }))
           toast.success("Form signed successfully")
       }
+  }
+
+      const handleClearSignatures = () => {
+    if (appraiseeSignatureUrl && !isReviewMode) {
+        setAppraiseeSignatureUrl(null)
+        setFormData(prev => ({
+            ...prev,
+            appraiseeSignatureUrl: null
+        }))
+    }
+    if (appraiserSignatureUrl && isReviewMode) {
+        setAppraiserSignatureUrl(null)
+        setFormData(prev => ({
+            ...prev,
+            appraiserSignatureUrl: null
+        }))
+    }
+    toast.success("Signatures cleared successfully")
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -195,7 +229,9 @@ export function EndYearReviewForm({
           targets: formData.targets,
           calculations: calculations,
           appraiseeSignatureUrl: formData.appraiseeSignatureUrl || undefined,
-          appraiseeDate: formData.appraiseeDate || undefined
+          appraiserSignatureUrl: formData.appraiserSignatureUrl || undefined,
+          appraiseeDate: formData.appraiseeDate || undefined,
+          appraiserDate: formData.appraiserDate || undefined
       }
 
       let savedReview
@@ -230,7 +266,9 @@ export function EndYearReviewForm({
                 { id: "1", target: "", performanceAssessment: "", weightOfTarget: 5, score: 0, comments: "" }
             ],
             appraiseeSignatureUrl: null,
-            appraiseeDate: ""
+            appraiserSignatureUrl: null,
+            appraiseeDate: "",
+            appraiserDate: ""
           })
           setExistingEndYearReviewId(null)
       } catch (error) {
@@ -335,7 +373,7 @@ export function EndYearReviewForm({
                       value={target.score}
                       onChange={(e) => updateTarget(target.id, "score", parseInt(e.target.value) || 0)}
                       className="h-10 text-sm text-center"
-                      disabled
+                      disabled={!isReviewMode}
                       min="0"
                       max="10"
                     />
@@ -344,7 +382,7 @@ export function EndYearReviewForm({
                      <Textarea
                        value={target.comments}
                        onChange={(e) => updateTarget(target.id, "comments", e.target.value)}
-                       placeholder={isReviewMode ? "Enter appraiser's comments" : "Appraiser's comments (disabled)"}
+                       placeholder={isReviewMode ? "Enter comments" : "Enter comments"}
                        className="min-h-10 resize-none text-sm"
                        disabled={!isReviewMode}
                      />
@@ -415,15 +453,15 @@ export function EndYearReviewForm({
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Appraisee Signature */}
-              <Card className="p-4">
+              <Card className={`p-4 ${isReviewMode ? 'opacity-50' : ''}`}>
                 <CardHeader className="p-0 pb-4">
-                  <CardTitle className="bg-amber-800 text-white p-2 rounded text-sm font-medium text-center">
+                  <CardTitle className={`${!isReviewMode ? 'bg-amber-800' : 'bg-gray-600'} text-white p-2 rounded text-sm font-medium text-center`}>
                     APPRAISEE'S SIGNATURE
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0 space-y-3">
                   <div className="mb-0">
-                    {userSignatureUrl ? (
+                    {appraiseeSignatureUrl ? (
                         <div className="space-y-2">
                             {!formData.appraiseeSignatureUrl ? (
                                 <>
@@ -437,7 +475,7 @@ export function EndYearReviewForm({
                                   {!isReviewMode && (
                                     <div className="flex items-center gap-2 text-sm">
                                         <span className="text-green-600 font-bold">✓ Signed</span>
-                                        <Button type="button" onClick={() => setFormData(prev => ({ ...prev, appraiseeSignatureUrl: null }))} variant="ghost" size="sm" className="h-6 text-xs text-red-500">
+                                        <Button type="button" onClick={handleClearSignatures} variant="ghost" size="sm" className="h-6 text-xs text-red-500">
                                             Remove
                                         </Button>
                                     </div>
@@ -499,35 +537,73 @@ export function EndYearReviewForm({
                    </CardTitle>
                  </CardHeader>
                  <CardContent className="p-0 space-y-3">
-                   <div className="space-y-1">
-                     <Label className="text-sm">Upload Signature (PNG)</Label>
-                     <Input
-                       type="file"
-                       accept=".png"
-                       disabled={!isReviewMode}
-                       className="h-8 text-xs"
-                     />
-                     {!isReviewMode && (
-                       <p className="text-xs text-muted-foreground">
-                         Completed by appraiser during review
-                       </p>
-                     )}
-                   </div>
-                   
-                   <div className="space-y-1">
-                     <Label className="text-sm">Date (dd/mm/yyyy)</Label>
-                     <Input
-                       type="date"
-                       disabled={!isReviewMode}
-                       className="h-8 text-xs"
-                     />
-                     {!isReviewMode && (
-                       <p className="text-xs text-muted-foreground">
-                         Completed by appraiser during review
-                       </p>
-                     )}
-                   </div>
-                 </CardContent>
+                  <div className="mb-0">
+                    {appraiserSignatureUrl ? (
+                        <div className="space-y-2">
+                            {!formData.appraiserSignatureUrl ? (
+                                <>
+                                    <p className="text-sm text-muted-foreground">You have a signature on file</p>
+                                    <Button type="button" onClick={handleSign} variant="default" size="sm">
+                                        Sign
+                                    </Button>
+                                </>
+                            ) : (
+                                <>
+                                  {isReviewMode && (
+                                    <div className="flex items-center gap-2 text-sm">
+                                        <span className="text-green-600 font-bold">✓ Signed</span>
+                                        <Button type="button" onClick={handleClearSignatures} variant="ghost" size="sm" className="h-6 text-xs text-red-500">
+                                            Remove
+                                        </Button>
+                                    </div>
+                                  )}
+                                    <div className="space-y-1">
+                                      <Label className="text-sm">Signature:</Label>
+                                      <Card className="p-2 border-none shadow-none">
+                                        <Image
+                                          src={formData.appraiserSignatureUrl}
+                                          alt="Appraisee Signature"
+                                          width={100}
+                                          height={50}
+                                          className="max-h-12 max-w-full object-contain"
+                                        />
+                                      </Card>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="space-y-2">
+                            <Label htmlFor="appraisee-signature" className="text-sm">Upload Signature to Profile (PNG)</Label>
+                            <div className="flex gap-2">
+                                <Input
+                                    id="appraisee-signature"
+                                    type="file"
+                                    accept=".png"
+                                    onChange={handleSignatureUpload}
+                                    disabled={isUploadingSignature}
+                                    className="h-8 text-xs"
+
+                                />
+                                {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}
+                            </div>
+                        </div>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <Label htmlFor="appraiser-date" className="text-sm">Date (dd/mm/yyyy)</Label>
+                    <Input
+                      id="appraiser-date"
+                      type="date"
+                      value={formData.appraiserDate}
+                      onChange={(e) => setFormData(prev => ({ ...prev, appraiserDate: e.target.value }))}
+                      className="h-8 text-xs"
+                      required
+                      disabled={!isReviewMode}
+                    />
+                  </div>
+                </CardContent>
                </Card>
             </div>
           </div>

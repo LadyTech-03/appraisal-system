@@ -29,7 +29,9 @@ import {
   deleteAnnualAppraisal,
   AnnualAppraisalData,
   CompetencyCategory,
-  CompetencyItem
+  CompetencyItem,
+  AnnualAppraisal,
+  getPerformanceAssessment
 } from "@/lib/api/annualAppraisal"
 import { usersApi } from "@/lib/api/users"
 import { authApi } from "@/lib/api/auth"
@@ -218,13 +220,14 @@ export function AnnualAppraisalForm({
   const [isClearingForm, setIsClearingForm] = useState(false)
   const [isUploadingSignature, setIsUploadingSignature] = useState(false)
   const [existingAppraisalId, setExistingAppraisalId] = useState<string | null>(null)
-  const [userSignatureUrl, setUserSignatureUrl] = useState<string | null>(null)
+  const [appraiserSignatureUrl, setAppraiserSignatureUrl] = useState<string | null>(null)
+  const [performanceAssessmentScore, setPeformanceAssessmentScore] = useState(0)
 
   const [formData, setFormData] = useState({
     coreCompetencies: initialData?.coreCompetencies || initialCoreCompetencies,
     nonCoreCompetencies: initialData?.nonCoreCompetencies || initialNonCoreCompetencies,
-    appraiseeSignatureUrl: initialData?.appraiseeSignatureUrl || null as string | null,
-    appraiseeDate: initialData?.appraiseeDate || ""
+    appraiserSignatureUrl: initialData?.appraiserSignatureUrl || null as string | null,
+    appraiserDate: initialData?.appraiserDate || ""
   })
 
   // Calculate totals and averages using useMemo to avoid infinite loops
@@ -262,10 +265,7 @@ export function AnnualAppraisalForm({
       ? nonCoreAverages.reduce((sum: number, avg: number) => sum + avg, 0) / nonCoreAverages.length 
       : 0
 
-    // Get performance assessment score from previous step (placeholder for now)
-    const performanceAssessmentScore = initialData?.performanceAssessmentScore || 0
-
-    const overallTotal = performanceAssessmentScore + coreCompetenciesAverage + nonCoreCompetenciesAverage
+    const overallTotal = (performanceAssessmentScore ?? 0) + coreCompetenciesAverage + nonCoreCompetenciesAverage
     const overallScorePercentage = (overallTotal / 5) * 100
 
     return {
@@ -279,32 +279,39 @@ export function AnnualAppraisalForm({
         overallScorePercentage: Math.round(overallScorePercentage * 100) / 100
       }
     }
-  }, [formData.coreCompetencies, formData.nonCoreCompetencies, initialData?.performanceAssessmentScore])
+  }, [formData.coreCompetencies, formData.nonCoreCompetencies, performanceAssessmentScore])
 
   // Load draft and user profile on mount
   useEffect(() => {
     const loadData = async () => {
       try {
         // Load user profile for signature
-        const profile = await authApi.getProfile()
-        if (profile?.data?.signatureUrl) {
-          setUserSignatureUrl(profile.data.signatureUrl)
+        const [ profile, performanceAssessment ] = await Promise.all([
+          authApi.getProfile(),
+          getPerformanceAssessment(reviewUserId || '')
+        ])
+
+        // console.log(performanceAssessment, 'performanceAssessment')
+        setPeformanceAssessmentScore(performanceAssessment?.[0].calculations?.finalScore || 0)
+        console.log(performanceAssessment?.[0].calculations?.finalScore, 'performanceAssessment')
+        if (profile?.data?.signatureUrl && isReviewMode) {
+          setAppraiserSignatureUrl(profile.data.signatureUrl)
         }
 
         // Load existing draft
-        let appraisals
-        if (isReviewMode && reviewUserId) {
-          appraisals = await getAnnualAppraisalByUserId(reviewUserId)
-        } else {
-          appraisals = await getMyAnnualAppraisal()
+        let appraisals: AnnualAppraisal[] = []
+        if (isReviewMode && profile) {
+          appraisals = await getAnnualAppraisalByUserId(reviewUserId || '')
+          console.log(appraisals, 'this is the annual appraisal')
         }
+
         if (appraisals && appraisals.length > 0) {
           const latestAppraisal = appraisals[0]
           setFormData({
             coreCompetencies: latestAppraisal.core_competencies || initialCoreCompetencies,
             nonCoreCompetencies: latestAppraisal.non_core_competencies || initialNonCoreCompetencies,
-            appraiseeSignatureUrl: latestAppraisal.appraisee_signature_url || null,
-            appraiseeDate: latestAppraisal.appraisee_date ? latestAppraisal.appraisee_date.slice(0, 10) : ""
+            appraiserSignatureUrl: latestAppraisal.appraiser_signature_url || null,
+            appraiserDate: latestAppraisal.appraiser_date ? latestAppraisal.appraiser_date.slice(0, 10) : ""
           })
           setExistingAppraisalId(latestAppraisal.id)
           toast.info("Loaded your draft annual appraisal")
@@ -314,7 +321,7 @@ export function AnnualAppraisalForm({
       }
     }
     loadData()
-  }, [])
+  }, [reviewUserId])
 
   const updateCompetencyScore = (
     type: 'core' | 'nonCore',
@@ -366,7 +373,7 @@ export function AnnualAppraisalForm({
       setIsUploadingSignature(true)
       try {
         const result = await usersApi.uploadSignature(file)
-        setUserSignatureUrl(result.signatureUrl)
+        setAppraiserSignatureUrl(result.signatureUrl)
         toast.success("Signature uploaded successfully")
       } catch (error) {
         toast.error("Failed to upload signature")
@@ -379,13 +386,24 @@ export function AnnualAppraisalForm({
   }
 
   const handleSign = () => {
-    if (userSignatureUrl) {
+    if (appraiserSignatureUrl && isReviewMode) {
       setFormData(prev => ({
         ...prev,
-        appraiseeSignatureUrl: userSignatureUrl
+        appraiserSignatureUrl: appraiserSignatureUrl
       }))
       toast.success("Form signed successfully")
     }
+  }
+
+  const handleClearSignatures = () => {
+    if (appraiserSignatureUrl && isReviewMode) {
+        setAppraiserSignatureUrl(null)
+        setFormData(prev => ({
+            ...prev,
+            appraiserSignatureUrl: null
+        }))
+    }
+    toast.success("Signatures cleared successfully")
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -395,13 +413,14 @@ export function AnnualAppraisalForm({
       const payload: AnnualAppraisalData = {
         coreCompetencies: calculatedData.coreCompetencies,
         nonCoreCompetencies: calculatedData.nonCoreCompetencies,
-        performanceAssessmentScore: calculatedData.calculations.performanceAssessmentScore,
+        performanceAssessmentScore: performanceAssessmentScore,
         coreCompetenciesAverage: calculatedData.calculations.coreCompetenciesAverage,
         nonCoreCompetenciesAverage: calculatedData.calculations.nonCoreCompetenciesAverage,
         overallTotal: calculatedData.calculations.overallTotal,
         overallScorePercentage: calculatedData.calculations.overallScorePercentage,
-        appraiseeSignatureUrl: formData.appraiseeSignatureUrl || undefined,
-        appraiseeDate: formData.appraiseeDate || undefined
+        appraiserSignatureUrl: formData.appraiserSignatureUrl || undefined,
+        appraiserDate: formData.appraiserDate || undefined,
+        ...(isReviewMode && reviewUserId ? { targetUserId: reviewUserId } : {})
       }
 
       let savedAppraisal
@@ -434,8 +453,8 @@ export function AnnualAppraisalForm({
       setFormData({
         coreCompetencies: initialCoreCompetencies,
         nonCoreCompetencies: initialNonCoreCompetencies,
-        appraiseeSignatureUrl: null,
-        appraiseeDate: ""
+        appraiserSignatureUrl: null,
+        appraiserDate: ""
       })
       setExistingAppraisalId(null)
     } catch (error) {
@@ -690,20 +709,75 @@ export function AnnualAppraisalForm({
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0 space-y-3">
-                  <div className="space-y-1">
-                    <Label className="text-sm">Upload Signature (PNG)</Label>
-                    <Input type="file" accept=".png" disabled={!isReviewMode} className="h-8 text-xs" />
-                    <p className="text-xs text-muted-foreground">
-                      Completed by appraiser during review
-                    </p>
+                  <div className="mb-0">
+                    {appraiserSignatureUrl ? (
+                      <div className="space-y-2">
+                        {!formData.appraiserSignatureUrl ? (
+                          <>
+                            <p className="text-sm text-muted-foreground">You have a signature on file</p>
+                            <Button type="button" onClick={handleSign} variant="default" size="sm">
+                              Sign
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="text-green-600 font-bold">✓ Signed</span>
+                              <Button
+                                type="button"
+                                onClick={handleClearSignatures}
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 text-xs text-red-500"
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                            <div className="space-y-1">
+                              <Label className="text-sm">Signature:</Label>
+                              <Card className="p-2 border-none shadow-none">
+                                <Image
+                                  src={formData.appraiserSignatureUrl}
+                                  alt="Appraiser Signature"
+                                  width={100}
+                                  height={50}
+                                  className="max-h-12 max-w-full object-contain"
+                                />
+                              </Card>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <Label htmlFor="appraiser-signature" className="text-sm">
+                          Upload Signature to Profile (PNG)
+                        </Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="appraiser-signature"
+                            type="file"
+                            accept=".png"
+                            onChange={handleSignatureUpload}
+                            disabled={isUploadingSignature}
+                            className="h-8 text-xs"
+                          />
+                          {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="space-y-1">
-                    <Label className="text-sm">Date (dd/mm/yyyy)</Label>
-                    <Input type="date" disabled={!isReviewMode} className="h-8 text-xs" />
-                    <p className="text-xs text-muted-foreground">
-                      Completed by appraiser during review
-                    </p>
+                    <Label htmlFor="appraiser-date" className="text-sm">Date (dd/mm/yyyy)</Label>
+                    <Input
+                      id="appraiser-date"
+                      type="date"
+                      value={formData.appraiserDate}
+                      onChange={(e) => setFormData(prev => ({ ...prev, appraiserDate: e.target.value }))}
+                      className="h-8 text-xs"
+                      required
+                    />
                   </div>
                 </CardContent>
               </Card>

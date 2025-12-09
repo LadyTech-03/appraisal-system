@@ -11,6 +11,8 @@ export interface User {
   passwordHash?: string // for local auth simulation
   createdAt: string
   updatedAt: string
+  first_name: string
+  surname: string
 }
 
 export interface Appraisal {
@@ -21,6 +23,7 @@ export interface Appraisal {
   periodEnd: string
   status: "draft" | "submitted" | "reviewed" | "closed"
   employeeName?: string
+  employeeInfo?: User
   employeeEmployeeId?: string
   appraiserName?: string
   appraiserEmployeeId?: string

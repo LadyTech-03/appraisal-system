@@ -20,7 +20,9 @@ export interface EndYearReviewData {
     targets: TargetEvaluation[]
     calculations?: Calculations
     appraiseeSignatureUrl?: string
+    appraiserSignatureUrl?: string
     appraiseeDate?: string
+    appraiserDate?: string
 }
 
 export interface EndYearReview extends EndYearReviewData {

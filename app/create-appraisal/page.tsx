@@ -198,7 +198,7 @@ export default function CreateAppraisalPage() {
               ) : (
                 <FinalSectionsForm 
                   onNext={handleFinalSectionsNext}
-                  onBack={handleBackToAnnualAppraisal}
+                  onBack={handleBackToEndYearReview}
                 />
               )}
 

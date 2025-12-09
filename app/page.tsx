@@ -1,37 +1,25 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/lib/store"
 
 export default function HomePage() {
   const router = useRouter()
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
-  const bootstrap = useAuthStore((state) => state.bootstrap)
   const token = useAuthStore((state) => state.token)
-  const [isBootstrapping, setIsBootstrapping] = useState(true)
+  const hasHydrated = useAuthStore((state) => state.hasHydrated)
 
   useEffect(() => {
-    const run = async () => {
-      try {
-        await bootstrap()
-      } finally {
-        setIsBootstrapping(false)
-      }
-    }
+    // Only redirect after Zustand persist has rehydrated the state
+    if (!hasHydrated) return
 
-    run()
-  }, [bootstrap])
-
-  useEffect(() => {
-    if (isBootstrapping) return
-
-    if (isAuthenticated) {
+    if (isAuthenticated && token) {
       router.replace("/dashboard")
     } else {
       router.replace("/login")
     }
-  }, [isAuthenticated, isBootstrapping, router])
+  }, [isAuthenticated, token, hasHydrated, router])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">

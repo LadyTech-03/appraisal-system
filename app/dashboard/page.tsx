@@ -116,9 +116,9 @@ export default function DashboardPage() {
           {/* Stats Cards */}
           <DashboardStats />
 
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            {/* Recent Activity - Takes 2 columns on xl screens */}
-            <div className="xl:col-span-2">
+          <div className="grid grid-cols-1 gap-6" >
+            {/* Recent Activity */}
+            <div>
               <RecentActivity />
             </div>
 

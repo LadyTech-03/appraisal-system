@@ -2,26 +2,72 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { useAuthStore, useAppStore } from "@/lib/store"
+import { useAuthStore } from "@/lib/store"
 import { Sidebar } from "@/components/sidebar"
 import { Topbar } from "@/components/topbar"
-import { AppraisalExport } from "@/components/appraisal-export"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { formatDistanceToNow } from "date-fns"
-import { FileText, Eye, Edit, Clock, CheckCircle, AlertCircle, Send, Download, ArrowLeft } from "lucide-react"
+import { FileText, Eye, Loader2 } from "lucide-react"
+import { appraisalsApi } from "@/lib/api/appraisals"
+import { toast } from "sonner"
+
+interface Appraisal {
+  id: string
+  periodStart: string
+  periodEnd: string
+  status: string
+  manager_status: string
+  overall_assessment?: {
+    overall_score_percentage: number
+  }
+  overallAssessment?: {
+    overall_score_percentage: number
+    overall_score: number
+    overall_comment: string
+  }
+  created_at: string
+  updated_at: string
+  updatedAt: string
+  employee_name?: string
+  appraiser_name?: string
+}
 
 export default function AppraisalsPage() {
   const router = useRouter()
   const { user, isAuthenticated } = useAuthStore()
-  const { appraisals, users } = useAppStore()
-  const [exportingAppraisal, setExportingAppraisal] = useState<string | null>(null)
+  const [appraisals, setAppraisals] = useState<Appraisal[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     if (!isAuthenticated) {
       router.push("/login")
+      return
     }
+
+    const fetchAppraisals = async () => {
+      try {
+        const data = await appraisalsApi.getSubmittedAppraisals()
+        console.log(data,'kkkdkdk')
+        setAppraisals(data?.appraisals || [])
+      } catch (error) {
+        console.error("Error fetching appraisals:", error)
+        toast.error("Failed to load appraisals")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchAppraisals()
   }, [isAuthenticated, router])
 
   if (!isAuthenticated || !user) {
@@ -32,65 +78,33 @@ export default function AppraisalsPage() {
     )
   }
 
-  const myAppraisals = appraisals.filter((a) => a.employeeId === user.id)
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "draft":
-        return <Clock className="h-4 w-4 text-orange-500" />
-      case "submitted":
-        return <Send className="h-4 w-4 text-blue-500" />
-      case "reviewed":
-        return <AlertCircle className="h-4 w-4 text-purple-500" />
-      case "closed":
-        return <CheckCircle className="h-4 w-4 text-green-500" />
-      default:
-        return <FileText className="h-4 w-4 text-gray-500" />
+  const getStatusBadge = (status: string) => {
+    const statusConfig: Record<string, { label: string; className: string }> = {
+      "in-progress": { label: "In Progress", className: "bg-gray-100 text-gray-800" },
+      submitted: { label: "Submitted", className: "bg-blue-100 text-blue-800" },
+      reviewed: { label: "Reviewed", className: "bg-purple-100 text-purple-800" },
+      closed: { label: "Closed", className: "bg-green-100 text-green-800" },
     }
+    const config = statusConfig[status] || statusConfig["in-progress"]
+    return <Badge className={config.className}>{config.label}</Badge>
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "draft":
-        return "bg-orange-100 text-orange-800"
-      case "submitted":
-        return "bg-blue-100 text-blue-800"
-      case "reviewed":
-        return "bg-purple-100 text-purple-800"
-      case "closed":
-        return "bg-green-100 text-green-800"
-      default:
-        return "bg-gray-100 text-gray-800"
+  const getManagerStatusBadge = (status: string) => {
+    const statusConfig: Record<string, { label: string; className: string }> = {
+      pending: { label: "Pending Review", className: "bg-yellow-100 text-yellow-800" },
+      approved: { label: "Approved", className: "bg-green-100 text-green-800" },
+      rejected: { label: "Rejected", className: "bg-red-100 text-red-800" },
     }
+    const config = statusConfig[status] || statusConfig.pending
+    return <Badge className={config.className}>{config.label}</Badge>
   }
 
-  if (exportingAppraisal) {
-    const appraisal = myAppraisals.find((a) => a.id === exportingAppraisal)
-    const employee = users.find((u) => u.id === appraisal?.employeeId)
-    const appraiser = users.find((u) => u.id === appraisal?.appraiserId)
-
-    if (!appraisal || !employee || !appraiser) {
-      setExportingAppraisal(null)
-      return null
+  const handleViewAppraisal = (appraisal: Appraisal) => {
+    if(appraisal.status === "reviewed") {
+      // We'll populate the appraisal-view with the data so we can print it. 
+    } else {
+      router.push(`/appraisals/${appraisal.id}`)
     }
-
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 flex">
-        <Sidebar />
-        <div className="flex-1 flex flex-col">
-          <Topbar />
-          <main className="flex-1 p-6">
-            <div className="mb-4">
-              <Button variant="outline" onClick={() => setExportingAppraisal(null)}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to My Appraisals
-              </Button>
-            </div>
-            <AppraisalExport appraisal={appraisal} employee={employee} appraiser={appraiser} />
-          </main>
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -104,107 +118,85 @@ export default function AppraisalsPage() {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-primary">My Appraisals</h1>
-              <p className="text-muted-foreground">View and manage your performance appraisals</p>
+              <h1 className="text-3xl font-bold text-primary">My Appraisals</h1>
+              <p className="text-muted-foreground">View and track your submitted performance appraisals</p>
             </div>
-            <Badge variant="secondary">{myAppraisals.length} Total Appraisals</Badge>
+            <Badge variant="secondary" className="text-lg px-4 py-2">
+              {appraisals.length} Total
+            </Badge>
           </div>
 
-          {/* Appraisals List */}
-          {myAppraisals.length === 0 ? (
-            <Card className="glass-card">
-              <CardContent className="p-12 text-center">
-                <FileText className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Appraisals Yet</h3>
-                <p className="text-muted-foreground mb-6">
-                  You don't have any performance appraisals at this time. Your manager will create appraisals for you
-                  during review periods.
-                </p>
-                <Button onClick={() => router.push("/dashboard")}>Back to Dashboard</Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-6">
-              {myAppraisals.map((appraisal) => {
-                const appraiser = users.find((u) => u.id === appraisal.appraiserId)
-                const completedObjectives = appraisal.objectives?.filter((obj) => obj.achievement > 0).length || 0
-                const avgCompetencyRating =
-                  appraisal.competencies?.reduce((sum, comp) => sum + comp.rating, 0) /
-                    (appraisal.competencies?.length || 1) || 0
-
-                return (
-                  <Card key={appraisal.id} className="glass-card hover:shadow-lg transition-shadow">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          {getStatusIcon(appraisal.status)}
-                          <div>
-                            <CardTitle className="text-lg">
-                              Performance Appraisal - {new Date(appraisal.periodStart).getFullYear()}
-                            </CardTitle>
-                            <p className="text-sm text-muted-foreground">
-                              Appraised by {appraiser?.name} • {appraiser?.role}
-                            </p>
-                          </div>
-                        </div>
-                        <Badge className={`${getStatusColor(appraisal.status)}`}>
-                          {appraisal.status.toUpperCase()}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                        <div className="text-center">
-                          <p className="text-2xl font-bold text-primary">{appraisal.overallRating || "N/A"}</p>
-                          <p className="text-sm text-muted-foreground">Overall Rating</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-2xl font-bold text-green-600">
-                            {completedObjectives}/{appraisal.objectives?.length || 0}
-                          </p>
-                          <p className="text-sm text-muted-foreground">Objectives Progress</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-2xl font-bold text-blue-600">{avgCompetencyRating.toFixed(1)}</p>
-                          <p className="text-sm text-muted-foreground">Avg Competency</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm text-muted-foreground">
-                          <p>
-                            Period: {new Date(appraisal.periodStart).toLocaleDateString()} -{" "}
-                            {new Date(appraisal.periodEnd).toLocaleDateString()}
-                          </p>
-                          <p>Last updated {formatDistanceToNow(new Date(appraisal.updatedAt), { addSuffix: true })}</p>
-                        </div>
-                        <div className="flex space-x-2">
-                          <Button variant="outline" size="sm" onClick={() => setExportingAppraisal(appraisal.id)}>
-                            <Download className="h-4 w-4 mr-2" />
-                            Export
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => router.push(`/appraisals/${appraisal.id}`)}
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            View Details
-                          </Button>
-                          {appraisal.status === "draft" && (
-                            <Button size="sm" onClick={() => router.push(`/appraisals/${appraisal.id}/edit`)}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Continue
+          {/* Appraisals Table */}
+          <Card className="glass-card">
+            <CardHeader>
+              <CardTitle>Submitted Appraisals</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : appraisals.length === 0 ? (
+                <div className="text-center py-12">
+                  <FileText className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No Submitted Appraisals</h3>
+                  <p className="text-muted-foreground mb-6">
+                    You haven't submitted any appraisals yet. Complete your appraisal forms to see them here.
+                  </p>
+                  <Button onClick={() => router.push("/create-appraisal")}>
+                    Create New Appraisal
+                  </Button>
+                </div>
+              ) : (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Period</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Overall Score</TableHead>
+                        <TableHead>Submitted</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {appraisals.map((appraisal) => (
+                        <TableRow key={appraisal.id}>
+                          <TableCell className="font-medium">
+                            {appraisal.periodStart && appraisal.periodEnd
+                              ? `${new Date(appraisal.periodStart).toLocaleDateString()} - ${new Date(appraisal.periodEnd).toLocaleDateString()}`
+                              : "N/A"}
+                          </TableCell>
+                          <TableCell>{getStatusBadge(appraisal.status)}</TableCell>
+                          {/* <TableCell>{getManagerStatusBadge(appraisal.manager_status)}</TableCell> */}
+                          <TableCell>
+                            {appraisal.overallAssessment?.overall_score_percentage && appraisal.status === "reviewed"
+                              ? `${appraisal.overallAssessment.overall_score_percentage}%`
+                              : "N/A"}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {appraisal.updatedAt 
+                              ? formatDistanceToNow(new Date(appraisal.updatedAt), { addSuffix: true })
+                              : "N/A"}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewAppraisal(appraisal)}
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              View
                             </Button>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </main>
       </div>
     </div>

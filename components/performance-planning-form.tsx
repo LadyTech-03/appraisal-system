@@ -88,7 +88,8 @@ export function PerformancePlanningForm({
         } else {
           plans = await getMyPerformancePlanning()
           console.log(plans, 'plans normal')
-          setAppraiseeSignatureUrl(plans[0].appraisee_signature_url || null)
+          // setAppraiseeSignatureUrl(plans[0].appraisee_signature_url || null)
+          setAppraiserSignatureUrl(plans[0].appraiser_signature_url || null)
         }
         if (plans && plans.length > 0) {
           const latestPlan = plans[0]
@@ -364,9 +365,9 @@ export function PerformancePlanningForm({
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Appraisee Signature */}
-              <Card className="p-4">
+              <Card className={`p-4 ${isReviewMode ? 'opacity-50' : ''}`}>
                 <CardHeader className="p-0 pb-4">
-                  <CardTitle className="bg-amber-800 text-white p-2 rounded text-sm font-medium text-center">
+                  <CardTitle className={`${!isReviewMode ? 'bg-amber-800' : 'bg-gray-600'} text-white p-2 rounded text-sm font-medium text-center`}>
                     APPRAISEE'S SIGNATURE
                   </CardTitle>
                 </CardHeader>

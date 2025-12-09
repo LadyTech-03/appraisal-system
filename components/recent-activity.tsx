@@ -66,10 +66,10 @@ export function RecentActivity() {
     <Card className="glass-card">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>Recent Activity</span>
-          <Button variant="outline" size="sm">
+          <span>Recent Activities</span>
+          {/* <Button variant="outline" size="sm">
             View All
-          </Button>
+          </Button> */}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -82,7 +82,9 @@ export function RecentActivity() {
         ) : (
           <div className="space-y-4">
             {recentAppraisals.map((appraisal) => {
-              const employee = users.find((u) => u.id === appraisal.employeeId)
+              console.log(appraisal)
+              console.log(user, 'this is the user')
+              const employee = appraisal.employeeInfo
               const appraiser = users.find((u) => u.id === appraisal.appraiserId)
               const isMyAppraisal = appraisal.employeeId === user?.id
 
@@ -94,10 +96,7 @@ export function RecentActivity() {
                   <div className="flex-shrink-0">{getStatusIcon(appraisal.status)}</div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground">
-                      {isMyAppraisal ? "My Appraisal" : `${employee?.name}'s Appraisal`}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {isMyAppraisal ? `Appraised by ${appraiser?.name}` : `You are appraising ${employee?.name}`}
+                      {isMyAppraisal ? "My Appraisal" : `${employee?.first_name} ${employee?.surname}'s Appraisal`}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       Updated {formatDistanceToNow(new Date(appraisal.updatedAt), { addSuffix: true })}
@@ -105,9 +104,6 @@ export function RecentActivity() {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Badge className={`text-xs ${getStatusColor(appraisal.status)}`}>{appraisal.status}</Badge>
-                    <Button variant="ghost" size="sm">
-                      <Eye className="h-4 w-4" />
-                    </Button>
                   </div>
                 </div>
               )

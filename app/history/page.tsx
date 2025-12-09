@@ -2,32 +2,84 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { useAuthStore, useAppStore } from "@/lib/store"
+import { useAuthStore } from "@/lib/store"
 import { Sidebar } from "@/components/sidebar"
 import { Topbar } from "@/components/topbar"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { formatDistanceToNow } from "date-fns"
-import { Calendar, Filter, Search, Eye, Download, Clock, CheckCircle, AlertCircle, Send } from "lucide-react"
+import { Search, Eye, Download, Loader2, FileText } from "lucide-react"
+import { appraisalsApi } from "@/lib/api/appraisals"
+import { toast } from "sonner"
+
+interface Appraisal {
+  id: string
+  period_start: string
+  period_end: string
+  status: string
+
+  periodStart: string
+  periodEnd: string
+  overallAssessment?: {
+    overall_score_percentage?: number
+  }
+  employeeInfo?:{
+    first_name: string
+    surname: string
+  }
+  employeeId: string
+  employee_info?: {
+    first_name: string
+    surname: string
+    employee_id: string
+  }
+  overall_assessment?: {
+    overall_score_percentage?: number
+  }
+  updated_at: string
+
+  updatedAt: string
+}
 
 export default function HistoryPage() {
   const router = useRouter()
   const { user, isAuthenticated } = useAuthStore()
-  const { appraisals, users } = useAppStore()
+  const [appraisals, setAppraisals] = useState<Appraisal[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
-  const [yearFilter, setYearFilter] = useState("all")
-  const [sortBy, setSortBy] = useState("updatedAt")
+  const [dateRangeFilter, setDateRangeFilter] = useState("all")
 
   useEffect(() => {
     if (!isAuthenticated) {
       router.push("/login")
     }
   }, [isAuthenticated, router])
+
+  useEffect(() => {
+    const fetchAppraisals = async () => {
+      try {
+        setIsLoading(true)
+        // Fetch appraisals where current user is the appraiser
+        const data = await appraisalsApi.getMyAppraisalHistory()
+        console.log(data, 'appraisal history data')
+        setAppraisals(data?.appraisals?.appraisals || [])
+      } catch (error) {
+        console.error("Error fetching appraisal history:", error)
+        toast.error("Failed to load appraisal history")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    if (isAuthenticated) {
+      fetchAppraisals()
+    }
+  }, [isAuthenticated])
 
   if (!isAuthenticated || !user) {
     return (
@@ -37,100 +89,81 @@ export default function HistoryPage() {
     )
   }
 
-  const safeAppraisals = appraisals || []
-  const safeUsers = users || []
-
-  // Get all appraisals related to the user (as employee or appraiser)
-  const allUserAppraisals = safeAppraisals.filter((a) => a.employeeId === user.id || a.appraiserId === user.id)
-
   // Apply filters
-  const filteredAppraisals = allUserAppraisals
-    .filter((appraisal) => {
-      const employee = safeUsers.find((u) => u.id === appraisal.employeeId)
-      const appraiser = safeUsers.find((u) => u.id === appraisal.appraiserId)
-
-      const matchesSearch =
-        searchTerm === "" ||
-        employee?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        appraiser?.name.toLowerCase().includes(searchTerm.toLowerCase())
-
-      const matchesStatus = statusFilter === "all" || appraisal.status === statusFilter
-
-      const appraisalYear = new Date(appraisal.periodStart).getFullYear().toString()
-      const matchesYear = yearFilter === "all" || appraisalYear === yearFilter
-
-      return matchesSearch && matchesStatus && matchesYear
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "updatedAt":
-          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-        case "periodStart":
-          return new Date(b.periodStart).getTime() - new Date(a.periodStart).getTime()
-        case "status":
-          return a.status.localeCompare(b.status)
-        default:
-          return 0
-      }
-    })
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "draft":
-        return <Clock className="h-4 w-4 text-orange-500" />
-      case "submitted":
-        return <Send className="h-4 w-4 text-blue-500" />
-      case "reviewed":
-        return <AlertCircle className="h-4 w-4 text-purple-500" />
-      case "closed":
-        return <CheckCircle className="h-4 w-4 text-green-500" />
+  const filteredAppraisals = (Array.isArray(appraisals) ? appraisals : []).filter((appraisal) => {
+    const employeeName = `${appraisal.employee_info?.first_name} ${appraisal.employee_info?.surname}`.toLowerCase()
+    const matchesSearch = searchTerm === "" || employeeName.includes(searchTerm.toLowerCase())
+    const matchesStatus = statusFilter === "all" || appraisal.status === statusFilter
+    
+    // Date range filtering
+    let matchesDateRange = true
+    const now = new Date()
+    const appraisalDate = new Date(appraisal.updated_at)
+    
+    switch (dateRangeFilter) {
+      case "last-30-days":
+        matchesDateRange = (now.getTime() - appraisalDate.getTime()) <= (30 * 24 * 60 * 60 * 1000)
+        break
+      case "last-3-months":
+        matchesDateRange = (now.getTime() - appraisalDate.getTime()) <= (90 * 24 * 60 * 60 * 1000)
+        break
+      case "last-6-months":
+        matchesDateRange = (now.getTime() - appraisalDate.getTime()) <= (180 * 24 * 60 * 60 * 1000)
+        break
+      case "last-year":
+        matchesDateRange = (now.getTime() - appraisalDate.getTime()) <= (365 * 24 * 60 * 60 * 1000)
+        break
+      case "all":
       default:
-        return <Clock className="h-4 w-4 text-gray-500" />
+        matchesDateRange = true
     }
-  }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "draft":
-        return "bg-orange-100 text-orange-800"
-      case "submitted":
-        return "bg-blue-100 text-blue-800"
-      case "reviewed":
-        return "bg-purple-100 text-purple-800"
-      case "closed":
-        return "bg-green-100 text-green-800"
-      default:
-        return "bg-gray-100 text-gray-800"
+    return matchesSearch && matchesStatus && matchesDateRange
+  })
+
+  const getStatusBadge = (status: string) => {
+    const statusConfig: Record<string, { label: string; className: string }> = {
+      "in-progress": { label: "In Progress", className: "bg-gray-100 text-gray-800 font-bold" },
+      submitted: { label: "Submitted", className: "bg-blue-100 text-blue-800 font-bold" },
+      reviewed: { label: "Reviewed", className: "bg-purple-100 text-purple-800 font-bold" },
+      closed: { label: "Closed", className: "bg-green-100 text-green-800 font-bold" },
     }
+    const config = statusConfig[status] || statusConfig["in-progress"]
+    return <Badge className={config.className}>{config.label}</Badge>
   }
 
   const exportHistory = () => {
-    const data = filteredAppraisals.map((appraisal) => {
-      const employee = safeUsers.find((u) => u.id === appraisal.employeeId)
-      const appraiser = safeUsers.find((u) => u.id === appraisal.appraiserId)
-      return {
-        employee: employee?.name,
-        appraiser: appraiser?.name,
-        period: `${appraisal.periodStart} to ${appraisal.periodEnd}`,
-        status: appraisal.status,
-        overallRating: appraisal.overallRating,
-        updatedAt: appraisal.updatedAt,
-      }
-    })
+    const csvContent = [
+      ["Employee", "Employee ID", "Period", "Status", "Score", "Updated"],
+      ...filteredAppraisals.map(appraisal => [
+        `${appraisal.employee_info?.first_name} ${appraisal.employee_info?.surname}`,
+        appraisal.employee_info?.employee_id || "",
+        `${new Date(appraisal.period_start).toLocaleDateString()} - ${new Date(appraisal.period_end).toLocaleDateString()}`,
+        appraisal.status,
+        appraisal.overall_assessment?.overall_score_percentage ? `${appraisal.overall_assessment.overall_score_percentage}%` : "N/A",
+        new Date(appraisal.updated_at).toLocaleString()
+      ])
+    ].map(row => row.join(",")).join("\n")
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
+    const blob = new Blob([csvContent], { type: "text/csv" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = "appraisal-history.json"
+    a.download = `appraisal-history-${new Date().toISOString().split('T')[0]}.csv`
     a.click()
     URL.revokeObjectURL(url)
+    toast.success("History exported successfully!")
   }
 
-  // Get unique years for filter
-  const availableYears = [...new Set(allUserAppraisals.map((a) => new Date(a.periodStart).getFullYear()))].sort(
-    (a, b) => b - a,
-  )
+  const handleViewAppraisal = (appraisal: Appraisal) => {
+    if(appraisal.status === "reviewed") {
+      // Navigate to printable view
+      router.push(`/appraisal-print/${appraisal.id}`)
+    } else {
+      // Navigate to editable appraisal form
+      router.push(`/appraisals/${appraisal.id}`)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 flex">
@@ -143,184 +176,154 @@ export default function HistoryPage() {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-primary">Appraisal History</h1>
-              <p className="text-muted-foreground">Browse and filter your performance appraisal history</p>
+              <h1 className="text-3xl font-bold text-primary">Appraisal History</h1>
+              <p className="text-muted-foreground">Team members you're appraising or have appraised</p>
             </div>
             <div className="flex items-center space-x-3">
-              <Badge variant="secondary">
-                {filteredAppraisals.length} of {allUserAppraisals.length} appraisals
+              <Badge variant="secondary" className="text-lg px-4 py-2">
+                {filteredAppraisals.length} Total
               </Badge>
-              <Button variant="outline" onClick={exportHistory}>
+              <Button variant="outline" onClick={exportHistory} disabled={filteredAppraisals.length === 0}>
                 <Download className="h-4 w-4 mr-2" />
-                Export
+                Export CSV
               </Button>
             </div>
           </div>
 
           {/* Filters */}
           <Card className="glass-card">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Filter className="h-5 w-5 text-primary" />
-                <span>Filters</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="p-4">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="space-y-2">
-                  <Label>Search</Label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search by name..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search employee name..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
                 </div>
-                <div className="space-y-2">
-                  <Label>Status</Label>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Statuses</SelectItem>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="submitted">Submitted</SelectItem>
-                      <SelectItem value="reviewed">Reviewed</SelectItem>
-                      <SelectItem value="closed">Closed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Year</Label>
-                  <Select value={yearFilter} onValueChange={setYearFilter}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Years</SelectItem>
-                      {availableYears.map((year) => (
-                        <SelectItem key={year} value={year.toString()}>
-                          {year}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Sort By</Label>
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="updatedAt">Last Updated</SelectItem>
-                      <SelectItem value="periodStart">Period Start</SelectItem>
-                      <SelectItem value="status">Status</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* History List */}
-          {filteredAppraisals.length === 0 ? (
-            <Card className="glass-card">
-              <CardContent className="p-12 text-center">
-                <Calendar className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Appraisals Found</h3>
-                <p className="text-muted-foreground mb-6">
-                  {searchTerm || statusFilter !== "all" || yearFilter !== "all"
-                    ? "No appraisals match your current filters. Try adjusting your search criteria."
-                    : "You haven't Completed any Appraisals yet."}
-                </p>
-                {(searchTerm || statusFilter !== "all" || yearFilter !== "all") && (
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Statuses" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="in-progress">In Progress</SelectItem>
+                    <SelectItem value="submitted">Submitted</SelectItem>
+                    <SelectItem value="reviewed">Reviewed</SelectItem>
+                    <SelectItem value="closed">Closed</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={dateRangeFilter} onValueChange={setDateRangeFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="last-30-days">Last 30 Days</SelectItem>
+                    <SelectItem value="last-3-months">Last 3 Months</SelectItem>
+                    <SelectItem value="last-6-months">Last 6 Months</SelectItem>
+                    <SelectItem value="last-year">Last Year</SelectItem>
+                  </SelectContent>
+                </Select>
+                {(searchTerm || statusFilter !== "all" || dateRangeFilter !== "all") && (
                   <Button
                     variant="outline"
                     onClick={() => {
                       setSearchTerm("")
                       setStatusFilter("all")
-                      setYearFilter("all")
+                      setDateRangeFilter("all")
                     }}
                   >
                     Clear Filters
                   </Button>
                 )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Loading State */}
+          {isLoading && (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="ml-2 text-muted-foreground">Loading history...</span>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!isLoading && filteredAppraisals.length === 0 && (
+            <Card className="glass-card">
+              <CardContent className="p-12 text-center">
+                <FileText className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No Appraisals Found</h3>
+                <p className="text-muted-foreground">
+                  {searchTerm || statusFilter !== "all" || dateRangeFilter !== "all"
+                    ? "No appraisals match your filters."
+                    : "You haven't appraised any team members yet."}
+                </p>
               </CardContent>
             </Card>
-          ) : (
-            <div className="grid gap-4">
-              {filteredAppraisals.map((appraisal) => {
-                const employee = safeUsers.find((u) => u.id === appraisal.employeeId)
-                const appraiser = safeUsers.find((u) => u.id === appraisal.appraiserId)
-                const isMyAppraisal = appraisal.employeeId === user.id
-                const completedObjectives = (appraisal.objectives || []).filter((obj) => obj.achievement > 0).length
+          )}
 
-                return (
-                  <Card key={appraisal.id} className="glass-card hover:shadow-lg transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center space-x-3">
-                          {getStatusIcon(appraisal.status)}
-                          <div>
-                            <h3 className="font-semibold">
-                              {isMyAppraisal ? "My Appraisal" : `${employee?.name}'s Appraisal`}
-                            </h3>
-                            <p className="text-sm text-muted-foreground">
-                              {isMyAppraisal ? `Appraised by ${appraiser?.name}` : `You appraised ${employee?.name}`}
-                            </p>
-                          </div>
-                        </div>
-                        <Badge className={`${getStatusColor(appraisal.status)}`}>
-                          {appraisal.status.toUpperCase()}
-                        </Badge>
-                      </div>
-
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                        <div className="text-center">
-                          <p className="text-lg font-bold text-primary">{appraisal.overallRating || "N/A"}</p>
-                          <p className="text-xs text-muted-foreground">Overall Rating</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-lg font-bold text-green-600">
-                            {completedObjectives}/{(appraisal.objectives || []).length}
+          {/* History Table */}
+          {!isLoading && filteredAppraisals.length > 0 && (
+            <div className="bg-white rounded-lg shadow">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Appraisee</TableHead>
+                    <TableHead>Period</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Score</TableHead>
+                    <TableHead>Last Updated</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredAppraisals.map((appraisal) => (
+                    <TableRow key={appraisal.id}>
+                      <TableCell>
+                        <div>
+                          <p className="font-bold">
+                            {appraisal.employeeInfo?.first_name} {appraisal.employeeInfo?.surname}
                           </p>
-                          <p className="text-xs text-muted-foreground">Objectives</p>
+                          {/* <p className="text-sm text-muted-foreground font-bold">{appraisal.employeeId}</p> */}
                         </div>
-                        <div className="text-center">
-                          <p className="text-lg font-bold text-blue-600">
-                            {new Date(appraisal.periodStart).getFullYear()}
-                          </p>
-                          <p className="text-xs text-muted-foreground">Year</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-lg font-bold text-purple-600">
-                            {formatDistanceToNow(new Date(appraisal.updatedAt), { addSuffix: true })}
-                          </p>
-                          <p className="text-xs text-muted-foreground">Last Updated</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm text-muted-foreground">
-                          <p>
-                            Period: {new Date(appraisal.periodStart).toLocaleDateString()} -{" "}
-                            {new Date(appraisal.periodEnd).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <Button variant="outline" size="sm" onClick={() => router.push(`/appraisals/${appraisal.id}`)}>
-                          <Eye className="h-4 w-4 mr-2" />
-                          View Details
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm font-bold">
+                          {new Date(appraisal.periodStart).toLocaleDateString()} -{" "}
+                          {new Date(appraisal.periodEnd).toLocaleDateString()}
+                        </span>
+                      </TableCell>
+                      <TableCell>{getStatusBadge(appraisal.status)}</TableCell>
+                      <TableCell>
+                        <span className="font-semibold text-primary">
+                          {appraisal.overallAssessment?.overall_score_percentage && appraisal.status === "reviewed"
+                            ? `${appraisal.overallAssessment.overall_score_percentage}%`
+                            : "N/A"}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm font-bold">
+                        {appraisal.updatedAt 
+                          ? formatDistanceToNow(new Date(appraisal.updatedAt), { addSuffix: true })
+                          : "N/A"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewAppraisal(appraisal)}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
                         </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           )}
         </main>

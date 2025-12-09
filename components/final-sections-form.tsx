@@ -49,7 +49,8 @@ export function FinalSectionsForm({
   const [isClearingForm, setIsClearingForm] = useState(false)
   const [isUploadingSignature, setIsUploadingSignature] = useState(false)
   const [existingFinalSectionsId, setExistingFinalSectionsId] = useState<string | null>(null)
-  const [userSignatureUrl, setUserSignatureUrl] = useState<string | null>(null)
+  const [appraiserSignatureUrl, setAppraiserSignatureUrl] = useState<string | null>(null)
+  const [appraiseeSignatureUrl, setAppraiseeSignatureUrl] = useState<string | null>(null)
 
   const [formData, setFormData] = useState({
     appraiserComments: initialData?.appraiserComments || "",
@@ -68,16 +69,23 @@ export function FinalSectionsForm({
       try {
         // Load user profile for signature
         const profile = await authApi.getProfile()
-        if (profile?.data?.signatureUrl) {
-          setUserSignatureUrl(profile.data.signatureUrl)
+        console.log(profile, 'user profile')
+        if (profile?.data?.signatureUrl && !isReviewMode) {
+          setAppraiseeSignatureUrl(profile.data.signatureUrl)
+        } else if (profile?.data?.signatureUrl && isReviewMode) {
+          setAppraiserSignatureUrl(profile.data.signatureUrl)
         }
 
         // Load existing draft
         let finalSections
         if (isReviewMode && reviewUserId) {
           finalSections = await getFinalSectionsByUserId(reviewUserId)
+          console.log(finalSections, 'first log')
+          setAppraiseeSignatureUrl(finalSections[0].appraisee_signature_url || null)
         } else {
           finalSections = await getMyFinalSections()
+          console.log(finalSections, 'second log')
+          setAppraiserSignatureUrl(finalSections[0].appraiser_signature_url || null)
         }
         if (finalSections && finalSections.length > 0) {
           const latestSection = finalSections[0]
@@ -107,7 +115,7 @@ export function FinalSectionsForm({
       setIsUploadingSignature(true)
       try {
         const result = await usersApi.uploadSignature(file)
-        setUserSignatureUrl(result.signatureUrl)
+        setAppraiserSignatureUrl(result.signatureUrl)
         toast.success("Signature uploaded successfully")
       } catch (error) {
         toast.error("Failed to upload signature")
@@ -120,14 +128,38 @@ export function FinalSectionsForm({
   }
 
   const handleSign = () => {
-    if (userSignatureUrl) {
+    if (appraiseeSignatureUrl && !isReviewMode) {
       setFormData(prev => ({
         ...prev,
-        appraiseeSignatureUrl: userSignatureUrl
+        appraiseeSignatureUrl: appraiseeSignatureUrl
+      }))
+      toast.success("Form signed successfully")
+    } else if (appraiserSignatureUrl && isReviewMode) {
+      setFormData(prev => ({
+        ...prev,
+        appraiserSignatureUrl: appraiserSignatureUrl
       }))
       toast.success("Form signed successfully")
     }
   }
+
+    const handleClearSignatures = () => {
+      if (appraiseeSignatureUrl && !isReviewMode) {
+          setAppraiseeSignatureUrl(null)
+          setFormData(prev => ({
+              ...prev,
+              appraiseeSignatureUrl: null
+          }))
+      }
+      if (appraiserSignatureUrl && isReviewMode) {
+          setAppraiserSignatureUrl(null)
+          setFormData(prev => ({
+              ...prev,
+              appraiserSignatureUrl: null
+          }))
+      }
+      toast.success("Signatures cleared successfully")
+    }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -150,13 +182,21 @@ export function FinalSectionsForm({
         toast.success("Final sections updated successfully!")
       } else {
         savedSections = await createFinalSections(payload)
+        console.log(savedSections, 'saved sections')
         setExistingFinalSectionsId(savedSections.id)
         toast.success("Final sections saved successfully!")
       }
 
-      onNext({ ...formData, finalSectionsId: savedSections.id })
+      // Appraisal is automatically submitted via the service
+      toast.success("Appraisal submitted successfully! Redirecting...")
+      
+      // Redirect to appraisals page after 1 second
+      setTimeout(() => {
+        window.location.href = "/appraisals"
+      }, 1000)
     } catch (error) {
-      toast.error("Failed to save final sections")
+      console.error("Error saving final sections:", error)
+      toast.error("Failed to save final sections. Please try again.")
     } finally {
       setIsLoading(false)
     }
@@ -224,21 +264,61 @@ export function FinalSectionsForm({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
                 <div className="space-y-2">
                   <Label className="font-semibold">APPRAISER'S SIGNATURE</Label>
-                  <div className="">
-                    {formData.appraiserSignatureUrl ? (
-                      <Image
-                        src={formData.appraiserSignatureUrl}
-                        alt="Appraiser Signature"
-                        width={100}
-                        height={50}
-                        className="max-h-20 max-w-full object-contain"
-                      />
-                    ) : (
-                      <span className="text-gray-400 text-sm">
-                        {isReviewMode ? "Upload signature" : ""}
-                      </span>
-                    )}
-                  </div>
+                  {appraiserSignatureUrl ? (
+                    <div className="space-y-2">
+                      {!formData.appraiserSignatureUrl ? (
+                        <>
+                          <p className="text-sm text-muted-foreground">You have a signature on file</p>
+                          <Button type="button" onClick={handleSign} variant="default" size="sm">
+                            Sign
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          {isReviewMode &&  (
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="text-green-600 font-bold">✓ Signed</span>
+                              <Button
+                                type="button"
+                                onClick={handleClearSignatures}
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 text-xs text-red-500"
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                          )}
+                          <div className="">
+                            <Image
+                              src={formData.appraiserSignatureUrl}
+                              alt="Appraiser Signature"
+                              width={100}
+                              height={50}
+                              className="max-h-20 max-w-full object-contain"
+                            />
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label htmlFor="appraiser-signature" className="text-sm">
+                        Upload Signature to Profile (PNG)
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="appraiser-signature"
+                          type="file"
+                          accept=".png"
+                          onChange={handleSignatureUpload}
+                          disabled={isUploadingSignature}
+                          className="h-8 text-xs"
+                        />
+                        {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label className="font-semibold">DATE (dd/mm/yyyy)</Label>
@@ -338,7 +418,7 @@ export function FinalSectionsForm({
           </Card>
 
           {/* Section 9: Appraisee's Comments */}
-          <Card className="p-4">
+          <Card className={`p-4 ${isReviewMode ? 'opacity-50' : ''}`}>
             <div className="space-y-4">
               <div className="bg-amber-800 text-white p-2 rounded">
                 <h3 className="font-bold">SECTION 9: Appraisee's Comments</h3>
@@ -358,7 +438,7 @@ export function FinalSectionsForm({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
                 <div className="space-y-2">
                   <Label className="font-semibold">APPRAISEE'S SIGNATURE</Label>
-                  {userSignatureUrl ? (
+                  {appraiseeSignatureUrl ? (
                     <div className="space-y-2">
                       {!formData.appraiseeSignatureUrl ? (
                         <>
@@ -369,12 +449,12 @@ export function FinalSectionsForm({
                         </>
                       ) : (
                         <>
-                          {isReviewMode &&  (
+                          {!isReviewMode &&  (
                             <div className="flex items-center gap-2 text-sm">
                               <span className="text-green-600 font-bold">✓ Signed</span>
                               <Button
                                 type="button"
-                                onClick={() => setFormData(prev => ({ ...prev, appraiseeSignatureUrl: null }))}
+                                onClick={handleClearSignatures}
                                 variant="ghost"
                                 size="sm"
                                 className="h-6 text-xs text-red-500"
@@ -482,7 +562,7 @@ export function FinalSectionsForm({
                 type="submit"
                 size="lg"
                 className="px-8"
-                disabled={isLoading || isClearingForm || !formData.appraiseeSignatureUrl || !formData.appraiseeDate}
+                disabled={isLoading || isClearingForm || !formData.appraiseeDate}
               >
                 {isLoading ? (
                   <>

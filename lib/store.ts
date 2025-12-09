@@ -18,6 +18,7 @@ export const useAuthStore = create<AuthState & AuthPersistState & {
   register: (data: { employeeId: string; email: string; password: string; name: string; role: string; division?: string; unit?: string; managerId?: string; phone?: string }) => Promise<void>
   bootstrap: () => Promise<void>
   error: string | null
+  hasHydrated: boolean
   clearError: () => void
 }>()(
   persist(
@@ -26,6 +27,7 @@ export const useAuthStore = create<AuthState & AuthPersistState & {
       isAuthenticated: false,
       token: null,
       error: null,
+      hasHydrated: false,
       clearError: () => set({ error: null }),
       login: async (emailOrEmployeeId: string, password: string) => {
         try {
@@ -90,6 +92,22 @@ export const useAuthStore = create<AuthState & AuthPersistState & {
     {
       name: 'auth-storage',
       partialize: (state) => ({ token: state.token }),
+      onRehydrateStorage: () => (state) => {
+        // Mark that rehydration is complete
+        if (state) {
+          state.hasHydrated = true
+        }
+
+        // After rehydration, call bootstrap to restore user session
+        if (state?.token) {
+          setAuthToken(state.token)
+          // Call bootstrap asynchronously to restore user profile
+          state.bootstrap().catch(() => {
+            // If bootstrap fails, clear the invalid token
+            console.error('Session restoration failed')
+          })
+        }
+      },
     },
   ),
 )

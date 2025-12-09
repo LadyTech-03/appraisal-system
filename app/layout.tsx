@@ -7,16 +7,7 @@ import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import "./globals.css"
-import { useAuthStore } from "@/lib/store"
-import { useEffect } from "react"
-
-function BootstrapSession() {
-  useEffect(() => {
-    useAuthStore.getState().bootstrap()
-  }, [])
-
-  return null
-}
+import { Toaster } from "sonner"
 
 // export const metadata: Metadata = {
 //   title: "Appraisal Platform - Performance Management System",
@@ -33,9 +24,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <Suspense fallback={null}>
-          <BootstrapSession />
           {children}
           <Analytics />
+          <Toaster position="top-center" richColors />
         </Suspense>
       </body>
     </html>
