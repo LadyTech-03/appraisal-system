@@ -123,7 +123,7 @@ export default function HistoryPage() {
 
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; className: string }> = {
-      "in-progress": { label: "In Progress", className: "bg-gray-100 text-gray-800 font-bold" },
+      "in-progress": { label: "In Progress", className: "bg-green-100 text-green-800 font-bold" },
       submitted: { label: "Submitted", className: "bg-blue-100 text-blue-800 font-bold" },
       reviewed: { label: "Reviewed", className: "bg-purple-100 text-purple-800 font-bold" },
       closed: { label: "Closed", className: "bg-green-100 text-green-800 font-bold" },
@@ -293,8 +293,8 @@ export default function HistoryPage() {
                       </TableCell>
                       <TableCell>
                         <span className="text-sm font-bold">
-                          {new Date(appraisal.periodStart).toLocaleDateString()} -{" "}
-                          {new Date(appraisal.periodEnd).toLocaleDateString()}
+                          {new Date(appraisal.periodStart).toLocaleDateString("en-GB")} -{" "}
+                          {new Date(appraisal.periodEnd).toLocaleDateString("en-GB")}
                         </span>
                       </TableCell>
                       <TableCell>{getStatusBadge(appraisal.status)}</TableCell>

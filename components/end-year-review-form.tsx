@@ -82,7 +82,7 @@ export function EndYearReviewForm({
 
   useEffect(() => {
     const totalWeight = formData.targets.reduce((sum: number, target: TargetEvaluation) => sum + target.weightOfTarget, 0)
-    const totalScore = formData.targets.reduce((sum: number, target: TargetEvaluation) => sum + (target.score * target.weightOfTarget), 0)
+    const totalScore = formData.targets.reduce((sum: number, target: TargetEvaluation) => sum + target.score, 0)
     const average = totalWeight > 0 ? totalScore / totalWeight : 0
     const finalScore = average * 0.6
 
@@ -294,33 +294,15 @@ export function EndYearReviewForm({
         </div>
       </CardHeader>
       <CardContent className="px-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-2">
           {/* End-of-Year Review Title */}
           <div className="text-center">
-            <h2 className="text-lg font-semibold">END-OF-YEAR REVIEW FORM</h2>
+            <h2 className="text-lg font-bold">END-OF-YEAR REVIEW FORM</h2>
           </div>
 
           {/* Targets Evaluation Table */}
-          <Card className="p-4">
+          <Card className="p-4 bg-transparent shadow-none border-none">
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Badge variant="secondary" className="text-sm font-semibold">
-                  TARGETS EVALUATION
-                </Badge>
-                {formData.targets.length < 9 && (
-                  <Button
-                    type="button"
-                    onClick={addTarget}
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-2"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Add Target
-                  </Button>
-                )}
-              </div>
-
               {/* Table Header */}
               <div className="grid grid-cols-12 gap-2 text-xs font-semibold border-b pb-2">
                 <div className="col-span-1">NO.</div>
@@ -342,7 +324,7 @@ export function EndYearReviewForm({
                     <Textarea
                       value={target.target}
                       onChange={(e) => updateTarget(target.id, "target", e.target.value)}
-                      placeholder="Enter target"
+                      placeholder=""
                       className="min-h-10 resize-none text-sm"
                       required
                     />
@@ -351,7 +333,7 @@ export function EndYearReviewForm({
                     <Textarea
                       value={target.performanceAssessment}
                       onChange={(e) => updateTarget(target.id, "performanceAssessment", e.target.value)}
-                      placeholder="Enter performance assessment..."
+                      placeholder=""
                       className="min-h-10 resize-none text-sm"
                       required
                     />
@@ -387,21 +369,33 @@ export function EndYearReviewForm({
                        disabled={!isReviewMode}
                      />
                    </div>
-                  <div className="col-span-1 flex items-center justify-center pt-2">
+                  <div className="col-span-1 flex items-center justify-center">
                     {formData.targets.length > 1 && (
                       <Button
                         type="button"
-                        variant="outline"
-                        size="sm"
+                        variant="destructive"
                         onClick={() => removeTarget(target.id)}
-                        className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
+                        className="text-xs p-1"
                       >
-                        <Trash2 className="h-3 w-3" />
+                        Remove
                       </Button>
                     )}
                   </div>
                 </div>
               ))}
+
+               <div className="flex items-center justify-between">
+                {formData.targets.length < 9 && (
+                  <Button
+                    type="button"
+                    onClick={addTarget}
+                    className="flex items-center gap-2 w-full"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Target
+                  </Button>
+                )}
+              </div>
 
               {/* Calculation Rows */}
               <div className="space-y-2 pt-4 border-t">
@@ -411,7 +405,7 @@ export function EndYearReviewForm({
                   <div className="col-span-3"></div>
                   <div className="col-span-3"></div>
                   <div className="col-span-1 text-xs font-semibold">TOTAL (Q)</div>
-                  <div className="col-span-1 text-xs font-semibold text-center bg-gray-100 p-2 rounded">
+                  <div className="col-span-1 text-xs font-semibold text-center bg-blue-100 p-2 rounded">
                     {calculations.totalScore}
                   </div>
                   <div className="col-span-2"></div>
@@ -424,7 +418,7 @@ export function EndYearReviewForm({
                   <div className="col-span-3"></div>
                   <div className="col-span-3"></div>
                   <div className="col-span-1 text-xs font-semibold">(A) AVERAGE (Q/n)</div>
-                  <div className="col-span-1 text-xs font-semibold text-center bg-gray-100 p-2 rounded">
+                  <div className="col-span-1 text-xs font-semibold text-center bg-blue-100 p-2 rounded">
                     {calculations.average}
                   </div>
                   <div className="col-span-2"></div>
@@ -453,7 +447,7 @@ export function EndYearReviewForm({
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Appraisee Signature */}
-              <Card className={`p-4 ${isReviewMode ? 'opacity-50' : ''}`}>
+              <Card className={`p-4 ${isReviewMode ? 'opacity-70' : ''}`}>
                 <CardHeader className="p-0 pb-4">
                   <CardTitle className={`${!isReviewMode ? 'bg-amber-800' : 'bg-gray-600'} text-white p-2 rounded text-sm font-medium text-center`}>
                     APPRAISEE'S SIGNATURE
@@ -465,7 +459,7 @@ export function EndYearReviewForm({
                         <div className="space-y-2">
                             {!formData.appraiseeSignatureUrl ? (
                                 <>
-                                    <p className="text-sm text-muted-foreground">You have a signature on file</p>
+                                    {/* <p className="text-sm text-muted-foreground">You have a signature on file</p> */}
                                     <Button type="button" onClick={handleSign} variant="default" size="sm">
                                         Sign
                                     </Button>
@@ -504,7 +498,7 @@ export function EndYearReviewForm({
                                     type="file"
                                     accept=".png"
                                     onChange={handleSignatureUpload}
-                                    disabled={isUploadingSignature}
+                                    disabled={isUploadingSignature || isReviewMode}
                                     className="h-8 text-xs"
 
                                 />
@@ -515,7 +509,7 @@ export function EndYearReviewForm({
                   </div>
                   
                   <div className="space-y-1">
-                    <Label htmlFor="appraisee-date" className="text-sm">Date (dd/mm/yyyy)</Label>
+                    <Label htmlFor="appraisee-date" className="text-sm">Date</Label>
                     <Input
                       id="appraisee-date"
                       type="date"
@@ -542,7 +536,7 @@ export function EndYearReviewForm({
                         <div className="space-y-2">
                             {!formData.appraiserSignatureUrl ? (
                                 <>
-                                    <p className="text-sm text-muted-foreground">You have a signature on file</p>
+                                    {/* <p className="text-sm text-muted-foreground">You have a signature on file</p> */}
                                     <Button type="button" onClick={handleSign} variant="default" size="sm">
                                         Sign
                                     </Button>
@@ -581,7 +575,7 @@ export function EndYearReviewForm({
                                     type="file"
                                     accept=".png"
                                     onChange={handleSignatureUpload}
-                                    disabled={isUploadingSignature}
+                                    disabled={isUploadingSignature || !isReviewMode}
                                     className="h-8 text-xs"
 
                                 />
@@ -592,7 +586,7 @@ export function EndYearReviewForm({
                   </div>
                   
                   <div className="space-y-1">
-                    <Label htmlFor="appraiser-date" className="text-sm">Date (dd/mm/yyyy)</Label>
+                    <Label htmlFor="appraiser-date" className="text-sm">Date</Label>
                     <Input
                       id="appraiser-date"
                       type="date"
@@ -600,7 +594,7 @@ export function EndYearReviewForm({
                       onChange={(e) => setFormData(prev => ({ ...prev, appraiserDate: e.target.value }))}
                       className="h-8 text-xs"
                       required
-                      disabled={!isReviewMode}
+                      disabled={!isReviewMode || isUploadingSignature}
                     />
                   </div>
                 </CardContent>

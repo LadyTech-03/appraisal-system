@@ -282,14 +282,14 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
         <CardTitle className="text-xl font-bold bg-amber-800 text-white rounded-lg p-2">SECTION 1 - A: Appraisee Personal Information</CardTitle>
       </CardHeader>
       <CardContent className="px-6">
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="">
           {/* Period of Report */}
-          <Card className="p-4">
-            <div className="space-y-4">
-              <Badge variant="secondary" className="text-sm font-semibold">PERIOD OF REPORT</Badge>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="periodFrom">From (dd/mm/yyyy)</Label>
+          <Card className="p-2 rounded-lg">
+            <div className="space-y-4 flex items-center justify-between gap-2">
+              <h3 className="text-base font-bold m-0">PERIOD OF REPORT</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="space-y-2 flex gap-2 items-center">
+                  <Label className="m-0" htmlFor="periodFrom">From</Label>
                   <Input
                     id="periodFrom"
                     type="date"
@@ -298,8 +298,8 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="periodTo">To (dd/mm/yyyy)</Label>
+                <div className="space-y-2 flex gap-2 items-center">
+                  <Label className="m-0" htmlFor="periodTo">To</Label>
                   <Input
                     id="periodTo"
                     type="date"
@@ -313,14 +313,13 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
           </Card>
 
           {/* Personal Details */}
-          <Card className="p-4">
+          <Card className="p-4 bg-transparent border-none shadow-none">
             <div className="space-y-4">
-              <Badge variant="secondary" className="text-sm font-semibold">Personal Details</Badge>
-              
+              {/* <h3 className="text-base font-bold">Personal Details</h3> */}
               {/* Title */}
               <div className="space-y-2">
-                <Label>Title</Label>
                 <div className="flex items-center space-x-4">
+                  <Label>Title</Label>
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="mr"
@@ -365,7 +364,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
               </div>
 
               {/* Name Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                 <div className="space-y-2">
                   <Label htmlFor="surname">Surname</Label>
                   <Input
@@ -396,8 +395,8 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
 
               {/* Gender */}
               <div className="space-y-2">
-                <Label>Gender</Label>
                 <div className="flex items-center space-x-4">
+                  <Label>Gender</Label>
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="male"
@@ -420,10 +419,10 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
           </Card>
 
           {/* Job Information */}
-          <Card className="p-4">
+          <Card className="p-4 bg-transparent border-none shadow-none">
             <div className="space-y-4">
-              <Badge variant="secondary" className="text-sm font-semibold">Job Information</Badge>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* <Badge variant="secondary" className="text-sm font-semibold">Job Information</Badge> */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <div className="space-y-2">
                   <Label htmlFor="presentJobTitle">Present Job Title/Position</Label>
                   <Input
@@ -452,7 +451,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="dateOfAppointment">Date of Appointment to Present Grade (dd/mm/yyyy)</Label>
+                  <Label htmlFor="dateOfAppointment">Date of Appointment to Present Grade</Label>
                   <Input
                     id="dateOfAppointment"
                     type="date"
@@ -466,14 +465,13 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
           </Card>
 
           {/* Training Received */}
-          <Card className="p-4">
+          <Card className="p-4 border-none bg-transparent shadow-none">
             <div className="space-y-4">
-              <Badge variant="secondary" className="text-sm font-semibold underline">TRAINING RECEIVED DURING THE PREVIOUS YEAR</Badge>
-              
+              <h3 className="text-base font-bold">TRAINING RECEIVED DURING THE PREVIOUS YEAR</h3>
               {/* Add New Training Record */}
-              <Card className="p-4">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="space-y-2">
+              <div className="">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+                  <div className="space-y-2 flex flex-col items-center">
                     <Label>Institution</Label>
                     <Input
                       value={newTrainingRecord.institution}
@@ -481,15 +479,15 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                       placeholder="Enter institution"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label>Date (dd-mm-yyyy)</Label>
+                  <div className="space-y-2 flex flex-col items-center">
+                    <Label>Date</Label>
                     <Input
                       type="date"
                       value={newTrainingRecord.date}
                       onChange={(e) => setNewTrainingRecord(prev => ({ ...prev, date: e.target.value }))}
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 flex flex-col items-center">
                     <Label>Programme</Label>
                     <Input
                       value={newTrainingRecord.programme}
@@ -503,31 +501,30 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                     </Button>
                   </div>
                 </div>
-              </Card>
+              </div>
 
               {/* Training Records List */}
               {formData.trainingRecords.length > 0 && (
                 <div className="space-y-2">
-                  <h4 className="font-medium">Training Records:</h4>
                   {formData.trainingRecords.map((record, index) => (
-                    <Card key={index} className="p-3">
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div key={index} className="">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-2 border-b border-blue-300 py-1">
                         <div>
-                          <span className="text-sm font-medium">Institution:</span>
-                          <p className="text-sm">{record.institution}</p>
+                          {/* <span className="text-sm flex items-center justify-center font-semibold">Institution</span> */}
+                          <p className="text-sm text-center">{record.institution}</p>
                         </div>
                         <div>
-                          <span className="text-sm font-medium">Date:</span>
-                          <p className="text-sm">{record.date}</p>
+                          {/* <span className="text-sm flex items-center justify-center font-semibold">Date</span> */}
+                          <p className="text-sm text-center">{record.date}</p>
                         </div>
                         <div>
-                          <span className="text-sm font-medium">Programme:</span>
-                          <p className="text-sm">{record.programme}</p>
+                          {/* <span className="text-sm flex items-center justify-center font-semibold">Programme</span> */}
+                          <p className="text-sm text-center">{record.programme}</p>
                         </div>
-                        <div className="flex items-center">
+                        <div className="flex items-center justify-center">
                           <Button
                             type="button"
-                            variant="outline"
+                            variant="destructive"
                             size="sm"
                             onClick={() => removeTrainingRecord(index)}
                           >
@@ -535,7 +532,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                           </Button>
                         </div>
                       </div>
-                    </Card>
+                    </div>
                   ))}
                 </div>
               )}
@@ -554,7 +551,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                   {/* Title with Checkboxes */}
                   <div className="space-y-2">
                     <Label>Title:</Label>
-                    <div className="flex flex-wrap gap-4">
+                    <div className="flex flex-wrap gap-2">
                       <div className="flex items-center space-x-2">
                         <Checkbox
                           id="appraiser-mr"
@@ -599,7 +596,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                   </div>
 
                   {/* Name Fields */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div className="space-y-2">
                       <Label htmlFor="appraiserSurname">Surname:</Label>
                       <Input

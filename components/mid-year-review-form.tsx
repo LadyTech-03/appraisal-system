@@ -276,8 +276,8 @@ export function MidYearReviewForm({
 
   const renderReviewTable = (
     type: 'targets' | 'competencies',
-    title: string,
-    description: string
+    title?: string,
+    description?: string
   ) => {
     const items = formData[type]
     const isTargets = type === 'targets'
@@ -287,23 +287,9 @@ export function MidYearReviewForm({
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <Badge variant="secondary" className="text-sm font-semibold mb-2">
-                {title}
-              </Badge>
-              <p className="text-xs text-muted-foreground">{description}</p>
+              {title && <Badge variant="secondary" className="text-sm font-semibold mb-2">{title}</Badge>}
+              {description && <p className="text-xs text-muted-foreground">{description}</p>}
             </div>
-            {items.length < 7 && (
-              <Button
-                type="button"
-                onClick={() => addReviewItem(type)}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                Add {isTargets ? 'Target' : 'Competency'}
-              </Button>
-            )}
           </div>
 
           {/* Table Header */}
@@ -336,10 +322,10 @@ export function MidYearReviewForm({
                   onChange={(e) => updateReviewItem(type, item.id, "progressReview", e.target.value)}
                   placeholder="Enter progress review"
                   className="min-h-10 resize-none text-sm"
-                  required
+                  // required
                 />
               </div>
-              <div className={`col-span-3 ${!isReviewMode ? 'opacity-50' : ''}`}>
+              <div className={`col-span-3 ${!isReviewMode ? 'opacity-80' : ''}`}>
                 <Textarea
                   value={item.remarks}
                   onChange={(e) => updateReviewItem(type, item.id, "remarks", e.target.value)}
@@ -348,22 +334,33 @@ export function MidYearReviewForm({
                   disabled={!isReviewMode}
                 />
               </div>
-              <div className="col-span-1 flex items-center justify-center pt-2">
+              <div className="col-span-1 flex items-center justify-center">
                 {items.length > 1 && (
                   <Button
                     type="button"
-                    variant="outline"
-                    size="sm"
+                    variant="destructive"
                     onClick={() => removeReviewItem(type, item.id)}
-                    className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
+                    className="text-xs p-1"
                   >
-                    <Trash2 className="h-3 w-3" />
+                    Remove
                   </Button>
                 )}
               </div>
             </div>
           ))}
+
         </div>
+        {items.length < 7 && (
+          <Button
+            type="button"
+            onClick={() => addReviewItem(type)}
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Add {isTargets ? 'Target' : 'Competency'}
+          </Button>
+          )}
       </Card>
     )
   }
@@ -378,30 +375,26 @@ export function MidYearReviewForm({
           <p className="text-sm text-muted-foreground">
             This is to be completed in July by the Appraiser and Appraisee
           </p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-center text-muted-foreground">
             Progress has been discussed and Agreements have been reached as detailed below.
           </p>
         </div>
       </CardHeader>
       <CardContent className="px-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Mid-Year Review Title */}
           <div className="text-center">
-            <h2 className="text-lg font-semibold underline">MID-YEAR REVIEW</h2>
+            <h2 className="text-lg font-bold">MID-YEAR REVIEW</h2>
           </div>
 
           {/* Targets Review Table */}
           {renderReviewTable(
             'targets',
-            'TARGETS REVIEW',
-            'Review progress on established targets and goals'
           )}
 
           {/* Competencies Review Table */}
           {renderReviewTable(
             'competencies',
-            'COMPETENCIES REVIEW',
-            'Review progress on key competencies and skills'
           )}
 
           {/* Signatures Section */}
@@ -422,7 +415,7 @@ export function MidYearReviewForm({
                         <div className="space-y-2">
                             {!formData.appraiseeSignatureUrl ? (
                                 <>
-                                    <p className="text-sm text-muted-foreground">You have a signature on file</p>
+                                    {/* <p className="text-sm text-muted-foreground">You have a signature on file</p> */}
                                     <Button type="button" onClick={handleSign} variant="default" size="sm">
                                         Sign
                                     </Button>
@@ -486,7 +479,7 @@ export function MidYearReviewForm({
               </Card>
 
               {/* Appraiser Signature */}
-              <Card className={`p-4 ${!isReviewMode ? 'opacity-50' : ''}`}>
+              <Card className={`p-4 ${!isReviewMode ? 'opacity-70' : ''}`}>
                 <CardHeader className="p-0 pb-4">
                   <CardTitle className={`${isReviewMode ? 'bg-amber-800' : 'bg-gray-600'} text-white p-2 rounded text-sm font-medium text-center`}>
                     APPRAISER'S SIGNATURE
@@ -498,7 +491,7 @@ export function MidYearReviewForm({
                         <div className="space-y-2">
                             {!formData.appraiserSignatureUrl ? (
                                 <>
-                                    <p className="text-sm text-muted-foreground">You have a signature on file</p>
+                                    {/* <p className="text-sm text-muted-foreground">You have a signature on file</p> */}
                                     <Button type="button" onClick={handleSign} variant="default" size="sm">
                                         Sign
                                     </Button>
@@ -537,7 +530,7 @@ export function MidYearReviewForm({
                                     type="file"
                                     accept=".png"
                                     onChange={handleSignatureUpload}
-                                    disabled={isUploadingSignature}
+                                    disabled={isUploadingSignature || !isReviewMode}
                                     className="h-8 text-xs"
                                 />
                                 {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}

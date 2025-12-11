@@ -17,7 +17,7 @@ export default function HomePage() {
     if (isAuthenticated && token) {
       router.replace("/dashboard")
     } else {
-      router.replace("/login")
+      router.replace("/appraisals")
     }
   }, [isAuthenticated, token, hasHydrated, router])
 

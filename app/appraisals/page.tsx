@@ -164,7 +164,7 @@ export default function AppraisalsPage() {
                         <TableRow key={appraisal.id}>
                           <TableCell className="font-medium">
                             {appraisal.periodStart && appraisal.periodEnd
-                              ? `${new Date(appraisal.periodStart).toLocaleDateString()} - ${new Date(appraisal.periodEnd).toLocaleDateString()}`
+                              ? `${new Date(appraisal.periodStart).toLocaleDateString("en-GB")} - ${new Date(appraisal.periodEnd).toLocaleDateString("en-GB")}`
                               : "N/A"}
                           </TableCell>
                           <TableCell>{getStatusBadge(appraisal.status)}</TableCell>

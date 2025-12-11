@@ -7,8 +7,14 @@ export interface KeyResultArea {
     resourcesRequired: string
 }
 
+export interface KeyCompetency {
+    id: string
+    competency: string
+}
+
 export interface PerformancePlanningData {
     keyResultAreas: KeyResultArea[]
+    keyCompetencies?: KeyCompetency[]
     appraiseeSignatureUrl?: string
     appraiserSignatureUrl?: string
 }
@@ -17,6 +23,7 @@ export interface PerformancePlanning extends PerformancePlanningData {
     id: string
     user_id: string
     key_result_areas: KeyResultArea[]
+    key_competencies?: KeyCompetency[]
     appraisee_signature_url?: string
     appraiser_signature_url?: string
     created_at: string

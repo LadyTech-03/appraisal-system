@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Trash2, Upload, Loader2 } from "lucide-react"
+import { Plus, Trash2, Upload, Loader2, PlusCircle } from "lucide-react"
 import { toast } from "sonner"
 import {
   AlertDialog,
@@ -39,6 +39,11 @@ interface KeyResultArea {
   resourcesRequired: string
 }
 
+interface KeyCompetency {
+  id: string
+  competency: string
+}
+
 export function PerformancePlanningForm({
   onNext,
   onBack,
@@ -63,6 +68,9 @@ export function PerformancePlanningForm({
     keyResultAreas: initialData?.keyResultAreas || [
       { id: "1", keyResultArea: "", targets: "", resourcesRequired: "" }
     ] as KeyResultArea[],
+    keyCompetencies: initialData?.keyCompetencies || [
+      { id: "1", competency: "" }
+    ] as KeyCompetency[],
     appraiseeSignatureUrl: initialData?.appraiseeSignatureUrl || null as string | null,
     appraiserSignatureUrl: initialData?.appraiserSignatureUrl || null as string | null
   })
@@ -98,6 +106,10 @@ export function PerformancePlanningForm({
                 ...kra,
                 id: kra.id || (index + 1).toString()
             })),
+            keyCompetencies: latestPlan.key_competencies?.map((kc: any, index: number) => ({
+                ...kc,
+                id: kc.id || (index + 1).toString()
+            })) || [{ id: "1", competency: "" }],
             appraiseeSignatureUrl: latestPlan.appraisee_signature_url || null,
             appraiserSignatureUrl: latestPlan.appraiser_signature_url || null
           })
@@ -121,6 +133,8 @@ export function PerformancePlanningForm({
           { id: newId, keyResultArea: "", targets: "", resourcesRequired: "" }
         ]
       }))
+    } else {
+      toast.warning("Cannot add more than 5 targets")
     }
   }
 
@@ -134,10 +148,43 @@ export function PerformancePlanningForm({
   }
 
   const updateKeyResultArea = (id: string, field: keyof KeyResultArea, value: string) => {
-    setFormData(prev => ({
+   setFormData(prev => ({
       ...prev,
       keyResultAreas: prev.keyResultAreas.map((area: KeyResultArea) =>
         area.id === id ? { ...area, [field]: value } : area
+      )
+    }))
+  }
+
+  const addKeyCompetency = () => {
+    if (formData.keyCompetencies.length < 10) {
+      const newId = (formData.keyCompetencies.length + 1).toString()
+      setFormData(prev => ({
+        ...prev,
+        keyCompetencies: [
+          ...prev.keyCompetencies,
+          { id: newId, competency: "" }
+        ]
+      }))
+    } else {
+      toast.warning("Cannot add more than 10 competencies")
+    }
+  } 
+
+  const removeKeyCompetency = (id: string) => {
+    if (formData.keyCompetencies.length > 1) {
+      setFormData(prev => ({
+        ...prev,
+        keyCompetencies: prev.keyCompetencies.filter((comp: KeyCompetency) => comp.id !== id)
+      }))
+    }
+  }
+
+  const updateKeyCompetency = (id: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      keyCompetencies: prev.keyCompetencies.map((comp: KeyCompetency) =>
+        comp.id === id ? { ...comp, competency: value } : comp
       )
     }))
   }
@@ -206,6 +253,7 @@ export function PerformancePlanningForm({
     try {
       const payload: PerformancePlanningData = {
           keyResultAreas: formData.keyResultAreas,
+          keyCompetencies: formData.keyCompetencies,
           appraiseeSignatureUrl: formData.appraiseeSignatureUrl || undefined,
           appraiserSignatureUrl: formData.appraiserSignatureUrl || undefined
       }
@@ -241,6 +289,9 @@ export function PerformancePlanningForm({
             keyResultAreas: [
                 { id: "1", keyResultArea: "", targets: "", resourcesRequired: "" }
             ],
+            keyCompetencies: [
+                { id: "1", competency: "" }
+            ],
             appraiseeSignatureUrl: null,
             appraiserSignatureUrl: null
           })
@@ -251,6 +302,29 @@ export function PerformancePlanningForm({
           setIsClearingForm(false)
       }
   }
+
+  const tableHeader = [
+  {
+    title: "KEY RESULT AREAS",
+    subtitle: "(Not more than 5 - To be drawn from employees Job Description)",
+    class:"col-span-4 border rounded-md p-2"
+  },
+  {
+    title: "TARGETS",
+    subtitle: "(Results to be achieved, should be specific, measurable, realistic and time-framed)",
+    class:"col-span-4 border rounded-md p-2"
+  },
+  {
+    title: "RESOURCES REQUIRED",
+    subtitle: "",
+    class:"col-span-3 border rounded-md p-2"
+  },
+  {
+    title: "",
+    subtitle: "",
+    class:"col-span-1"
+  },
+]
 
   return (
     <Card className="max-w-6xl mx-auto">
@@ -265,56 +339,31 @@ export function PerformancePlanningForm({
       <CardContent className="px-6">
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Key Result Areas Table */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Performance Planning</h3>
-              {formData.keyResultAreas.length < 5 && (
-                <Button
-                  type="button"
-                  onClick={addKeyResultArea}
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  Add Key Result Area
-                </Button>
-              )}
-            </div>
-
+          <div className="">
             {/* Table Header */}
-            <Card className="p-4">
-              <div className="grid grid-cols-12 gap-4 font-semibold text-sm">
-                <div className="col-span-4">
-                  <Badge variant="secondary" className="mb-2">KEY RESULT AREAS</Badge>
-                  <p className="text-xs font-normal text-muted-foreground">
-                    (Not more than 5 - To be drawn from employees Job Description)
-                  </p>
-                </div>
-                <div className="col-span-4">
-                  <Badge variant="secondary" className="mb-2">TARGETS</Badge>
-                  <p className="text-xs font-normal text-muted-foreground">
-                    (Results to be achieved, should be specific, measurable, realistic and time-framed)
-                  </p>
-                </div>
-                <div className="col-span-3">
-                  <Badge variant="secondary" className="mb-2">RESOURCES REQUIRED</Badge>
-                </div>
-                <div className="col-span-1">
-                  <Badge variant="outline" className="mb-2">Actions</Badge>
-                </div>
+            <Card className="py-2 bg-transparent shadow-none border-none">
+              <div className="grid grid-cols-12 gap-2 font-semibold text-sm">
+                {tableHeader.map((header, index) => (
+                  <div key={index} className={`${header.class} flex flex-col items-center justify-center`}>
+                    {/* <Badge variant="secondary" className="mb-2">{header.title}</Badge> */}
+                    <h3 className="text-base font-bold">{header.title}</h3>
+                    <p className="text-xs text-center font-normal text-muted-foreground">
+                      {header.subtitle}
+                    </p>
+                  </div>
+                ))}
               </div>
             </Card>
 
             {/* Table Rows */}
             {formData.keyResultAreas.map((area: KeyResultArea, index: number) => (
-              <Card key={area.id} className="p-4">
-                <div className="grid grid-cols-12 gap-4">
+              <Card key={area.id} className="py-2 bg-transparent border-none shadow-none">
+                <div className="grid grid-cols-12 gap-2 items-center">
                   <div className="col-span-4 space-y-2">
                     <Textarea
                       value={area.keyResultArea}
                       onChange={(e) => updateKeyResultArea(area.id, "keyResultArea", e.target.value)}
-                      placeholder="Enter key result area"
+                      placeholder=""
                       className="min-h-10 resize-none"
                       required
                     />
@@ -323,7 +372,7 @@ export function PerformancePlanningForm({
                     <Textarea
                       value={area.targets}
                       onChange={(e) => updateKeyResultArea(area.id, "targets", e.target.value)}
-                      placeholder="Enter specific, measurable targets"
+                      placeholder=""
                       className="min-h-10 resize-none"
                       required
                     />
@@ -332,7 +381,7 @@ export function PerformancePlanningForm({
                     <Textarea
                       value={area.resourcesRequired}
                       onChange={(e) => updateKeyResultArea(area.id, "resourcesRequired", e.target.value)}
-                      placeholder="Enter required resources"
+                      placeholder=""
                       className="min-h-10 resize-none"
                     />
                   </div>
@@ -340,23 +389,74 @@ export function PerformancePlanningForm({
                     {formData.keyResultAreas.length > 1 && (
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="destructive"
                         size="sm"
                         onClick={() => removeKeyResultArea(area.id)}
-                        className="text-red-600 hover:text-red-700"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        Remove
                       </Button>
                     )}
                   </div>
                 </div>
               </Card>
             ))}
+
+            <Button
+              type="button"
+              onClick={addKeyResultArea}
+              className="col-span-2 flex items-center gap-2 mt-4 w-full"
+              disabled={formData.keyResultAreas.length >= 10}
+            >
+              <Plus className="h-4 w-4" />
+              Add Targets
+            </Button>
           </div>
 
           {/* Key Competencies Required */}
-          <div className="space-y-1">
-            <span className="text-xs font-semibold italic text-muted-foreground">Key Competencies Required: (see Section 5)</span>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <Label className="text-base font-semibold">Key Competencies Required</Label>
+                <p className="text-xs text-muted-foreground italic">(Refer to Section 5)</p>
+              </div>
+
+            </div>
+            <div className="grid grid-cols-12 gap-0">
+              {formData.keyCompetencies.map((comp: KeyCompetency) => (
+                <Card key={comp.id} className="col-span-12 bg-transparent shadow-none border-none py-2">
+                  <div className="flex gap-2 items-start">
+                    <div className="flex-1">
+                      <Textarea
+                        value={comp.competency}
+                        onChange={(e) => updateKeyCompetency(comp.id, e.target.value)}
+                        placeholder="Enter key competency"
+                        className="min-h-10 resize-none"
+                        required
+                      />
+                    </div>
+                    {formData.keyCompetencies.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => removeKeyCompetency(comp.id)}
+                      >
+                        Remove
+                      </Button>
+                    )}
+                  </div>
+                </Card>
+              ))}
+
+              <Button
+                type="button"
+                onClick={addKeyCompetency}
+                className="col-span-12 flex items-center gap-2 mt-4"
+              >
+                <Plus className="h-4 w-4" />
+                Add Competency
+              </Button>
+            </div>
           </div>
 
           {/* Signatures Section */}
@@ -377,7 +477,7 @@ export function PerformancePlanningForm({
                         <div className="space-y-2">
                             {!formData.appraiseeSignatureUrl ? (
                                 <>
-                                    <p className="text-sm text-muted-foreground">You have a signature on file</p>
+                                    {/* <p className="text-sm text-muted-foreground">You have a signature on file</p> */}
                                     <Button type="button" onClick={handleSign} variant="default" size="sm">
                                         Sign
                                     </Button>
@@ -432,7 +532,7 @@ export function PerformancePlanningForm({
               </Card>
 
               {/* Appraiser Signature */}
-              <Card className={`p-4 ${!isReviewMode ? 'opacity-50' : ''}`}>
+              <Card className={`p-4 ${!isReviewMode ? 'opacity-70' : ''}`}>
                 <CardHeader className="p-0 pb-4">
                   <CardTitle className={`${isReviewMode ? 'bg-amber-800' : 'bg-gray-600'} text-white p-2 rounded text-sm font-medium text-center`}>
                     APPRAISER'S SIGNATURE
@@ -444,7 +544,7 @@ export function PerformancePlanningForm({
                       <div className="space-y-2">
                           {!formData.appraiserSignatureUrl ? (
                               <>
-                                  <p className="text-sm text-muted-foreground">You have a signature on file</p>
+                                  {/* <p className="text-sm text-muted-foreground">You have a signature on file</p> */}
                                   <Button type="button" onClick={handleSign} variant="default" size="sm">
                                       Sign
                                   </Button>
@@ -483,7 +583,7 @@ export function PerformancePlanningForm({
                                   type="file"
                                   accept=".png"
                                   onChange={handleSignatureUpload}
-                                  disabled={isUploadingSignature}
+                                  disabled={isUploadingSignature || !isReviewMode}
                                   className="h-8 text-xs"
                               />
                               {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}
