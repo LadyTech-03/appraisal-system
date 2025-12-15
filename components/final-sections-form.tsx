@@ -204,7 +204,11 @@ export function FinalSectionsForm({
       if (existingFinalSectionsId) {
         savedSections = await updateFinalSections(existingFinalSectionsId, payload)
         toast.success("Final sections updated successfully!")
-        appraisalsApi.updateAppraisalStatus(formData.appraisalId, "reviewed")
+        if(isReviewMode){
+          appraisalsApi.updateAppraisalStatus(formData.appraisalId, "reviewed")
+        }else{
+          appraisalsApi.updateAppraisalStatus(formData.appraisalId, "submitted")
+        }
       } else {
         savedSections = await createFinalSections(payload)
         setExistingFinalSectionsId(savedSections.id)

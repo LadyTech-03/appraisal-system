@@ -111,11 +111,11 @@ export default function SettingsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Full Name</Label>
-                  <Input value={user.name} disabled />
+                  <Input value={user?.first_name + " " + user?.surname} disabled />
                 </div>
                 <div className="space-y-2">
                   <Label>Staff ID</Label>
-                  <Input value={user.employee_id} disabled />
+                  <Input value={user?.employee_id} disabled />
                 </div>
                 <div className="space-y-2">
                   <Label>Email</Label>
