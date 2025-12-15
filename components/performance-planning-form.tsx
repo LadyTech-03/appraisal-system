@@ -81,22 +81,19 @@ export function PerformancePlanningForm({
       try {
         // Load user profile for signature
         const profile = await authApi.getProfile()
-        if (profile?.data?.signatureUrl && !isReviewMode) {
-          setAppraiseeSignatureUrl(profile.data.signatureUrl)
-        } else if (profile?.data?.signatureUrl && isReviewMode) {
-          setAppraiserSignatureUrl(profile.data.signatureUrl)
+        if (profile?.data?.signature_url && !isReviewMode) {
+          setAppraiseeSignatureUrl(profile.data.signature_url)
+        } else if (profile?.data?.signature_url && isReviewMode) {
+          setAppraiserSignatureUrl(profile.data.signature_url)
         }
 
         // Load existing draft
         let plans
         if (isReviewMode && reviewUserId) {
           plans = await getPerformancePlanningByUserId(reviewUserId)
-          console.log(plans, 'plans')
           setAppraiseeSignatureUrl(plans[0].appraisee_signature_url || null)
         } else {
           plans = await getMyPerformancePlanning()
-          console.log(plans, 'plans normal')
-          // setAppraiseeSignatureUrl(plans[0].appraisee_signature_url || null)
           setAppraiserSignatureUrl(plans[0].appraiser_signature_url || null)
         }
         if (plans && plans.length > 0) {

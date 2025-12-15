@@ -31,6 +31,8 @@ import {
 } from "@/lib/api/finalSections"
 import { usersApi } from "@/lib/api/users"
 import { authApi } from "@/lib/api/auth"
+import { useRouter } from "next/navigation"
+import { appraisalsApi } from "@/lib/api/appraisals"
 
 export function FinalSectionsForm({
   onNext,
@@ -45,14 +47,18 @@ export function FinalSectionsForm({
   reviewUserId?: string
   initialData?: any
 }) {
+  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [isClearingForm, setIsClearingForm] = useState(false)
   const [isUploadingSignature, setIsUploadingSignature] = useState(false)
   const [existingFinalSectionsId, setExistingFinalSectionsId] = useState<string | null>(null)
   const [appraiserSignatureUrl, setAppraiserSignatureUrl] = useState<string | null>(null)
   const [appraiseeSignatureUrl, setAppraiseeSignatureUrl] = useState<string | null>(null)
+  const [hodSignatureUrl, setHodSignatureUrl] = useState<string | null>(null)
+
 
   const [formData, setFormData] = useState({
+    appraisalId: "",
     appraiserComments: initialData?.appraiserComments || "",
     appraiserSignatureUrl: initialData?.appraiserSignatureUrl || null as string | null,
     appraiserDate: initialData?.appraiserDate || "",
@@ -60,7 +66,11 @@ export function FinalSectionsForm({
     assessmentDecision: initialData?.assessmentDecision || "",
     appraiseeComments: initialData?.appraiseeComments || "",
     appraiseeSignatureUrl: initialData?.appraiseeSignatureUrl || null as string | null,
-    appraiseeDate: initialData?.appraiseeDate || ""
+    appraiseeDate: initialData?.appraiseeDate || "",
+    hodComments: initialData?.hodComments || "",
+    hodName: initialData?.hodName || "",
+    hodSignatureUrl: initialData?.hodSignatureUrl || null as string | null,
+    hodDate: initialData?.hodDate || ""
   })
 
   // Load draft and user profile on mount
@@ -70,10 +80,11 @@ export function FinalSectionsForm({
         // Load user profile for signature
         const profile = await authApi.getProfile()
         console.log(profile, 'user profile')
-        if (profile?.data?.signatureUrl && !isReviewMode) {
-          setAppraiseeSignatureUrl(profile.data.signatureUrl)
-        } else if (profile?.data?.signatureUrl && isReviewMode) {
-          setAppraiserSignatureUrl(profile.data.signatureUrl)
+        if (profile?.data?.signature_url && !isReviewMode) {
+          setAppraiseeSignatureUrl(profile.data.signature_url)
+        } else if (profile?.data?.signature_url && isReviewMode) {
+          setAppraiserSignatureUrl(profile.data.signature_url)
+          setHodSignatureUrl(profile.data.signature_url)
         }
 
         // Load existing draft
@@ -86,10 +97,12 @@ export function FinalSectionsForm({
           finalSections = await getMyFinalSections()
           console.log(finalSections, 'second log')
           setAppraiserSignatureUrl(finalSections[0].appraiser_signature_url || null)
+          setHodSignatureUrl(finalSections[0].hod_signature_url || null)
         }
         if (finalSections && finalSections.length > 0) {
           const latestSection = finalSections[0]
           setFormData({
+            appraisalId: latestSection.appraisal_id || "",
             appraiserComments: latestSection.appraiser_comments || "",
             appraiserSignatureUrl: latestSection.appraiser_signature_url || null,
             appraiserDate: latestSection.appraiser_date ? latestSection.appraiser_date.slice(0, 10) : "",
@@ -97,7 +110,11 @@ export function FinalSectionsForm({
             assessmentDecision: latestSection.assessment_decision || "",
             appraiseeComments: latestSection.appraisee_comments || "",
             appraiseeSignatureUrl: latestSection.appraisee_signature_url || null,
-            appraiseeDate: latestSection.appraisee_date ? latestSection.appraisee_date.slice(0, 10) : ""
+            appraiseeDate: latestSection.appraisee_date ? latestSection.appraisee_date.slice(0, 10) : "",
+            hodComments: latestSection.hod_comments || "",
+            hodName: latestSection.hod_name || "",
+            hodSignatureUrl: latestSection.hod_signature_url || null,
+            hodDate: latestSection.hod_date ? latestSection.hod_date.slice(0, 10) : ""
           })
           setExistingFinalSectionsId(latestSection.id)
           toast.info("Loaded your draft final sections")
@@ -116,6 +133,7 @@ export function FinalSectionsForm({
       try {
         const result = await usersApi.uploadSignature(file)
         setAppraiserSignatureUrl(result.signatureUrl)
+        setHodSignatureUrl(result.signatureUrl)
         toast.success("Signature uploaded successfully")
       } catch (error) {
         toast.error("Failed to upload signature")
@@ -137,7 +155,8 @@ export function FinalSectionsForm({
     } else if (appraiserSignatureUrl && isReviewMode) {
       setFormData(prev => ({
         ...prev,
-        appraiserSignatureUrl: appraiserSignatureUrl
+        appraiserSignatureUrl: appraiserSignatureUrl,
+        hodSignatureUrl: appraiserSignatureUrl
       }))
       toast.success("Form signed successfully")
     }
@@ -153,6 +172,7 @@ export function FinalSectionsForm({
       }
       if (appraiserSignatureUrl && isReviewMode) {
           setAppraiserSignatureUrl(null)
+          setHodSignatureUrl(null)
           setFormData(prev => ({
               ...prev,
               appraiserSignatureUrl: null
@@ -173,27 +193,34 @@ export function FinalSectionsForm({
         assessmentDecision: formData.assessmentDecision || undefined,
         appraiseeComments: formData.appraiseeComments || undefined,
         appraiseeSignatureUrl: formData.appraiseeSignatureUrl || undefined,
-        appraiseeDate: formData.appraiseeDate || undefined
+        appraiseeDate: formData.appraiseeDate || undefined,
+        hodComments: formData.hodComments || undefined,
+        hodName: formData.hodName || undefined,
+        hodSignatureUrl: formData.hodSignatureUrl || undefined,
+        hodDate: formData.hodDate || undefined
       }
 
       let savedSections
       if (existingFinalSectionsId) {
         savedSections = await updateFinalSections(existingFinalSectionsId, payload)
         toast.success("Final sections updated successfully!")
+        appraisalsApi.updateAppraisalStatus(formData.appraisalId, "reviewed")
       } else {
         savedSections = await createFinalSections(payload)
-        console.log(savedSections, 'saved sections')
         setExistingFinalSectionsId(savedSections.id)
+        appraisalsApi.updateAppraisalStatus(formData.appraisalId, "submitted")
         toast.success("Final sections saved successfully!")
       }
 
       // Appraisal is automatically submitted via the service
-      toast.success("Appraisal submitted successfully! Redirecting...")
+      toast.success("Appraisal submitted successfully!")
       
-      // Redirect to appraisals page after 1 second
-      setTimeout(() => {
-        window.location.href = "/appraisals"
-      }, 1000)
+      // Redirect
+      if(isReviewMode){
+        router.push("/team-appraisals")
+      }else{
+        router.push("/appraisals")
+      }
     } catch (error) {
       console.error("Error saving final sections:", error)
       toast.error("Failed to save final sections. Please try again.")
@@ -212,6 +239,7 @@ export function FinalSectionsForm({
         toast.success("Form cleared")
       }
       setFormData({
+        appraisalId: "",
         appraiserComments: "",
         appraiserSignatureUrl: null,
         appraiserDate: "",
@@ -219,7 +247,11 @@ export function FinalSectionsForm({
         assessmentDecision: "",
         appraiseeComments: "",
         appraiseeSignatureUrl: null,
-        appraiseeDate: ""
+        appraiseeDate: "",
+        hodComments: "",
+        hodName: "",
+        hodSignatureUrl: null,
+        hodDate: ""
       })
       setExistingFinalSectionsId(null)
     } catch (error) {
@@ -238,7 +270,7 @@ export function FinalSectionsForm({
       <CardContent className="px-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Section 6: Appraiser's Comments */}
-          <Card className={`p-4 ${!isReviewMode ? 'opacity-50' : ''}`}>
+          <Card className={`p-4 ${!isReviewMode ? 'opacity-70' : ''}`}>
             <div className="space-y-4">
               <div className="bg-amber-800 text-white p-2 rounded">
                 <h3 className="font-bold">SECTION 6: Annual Appraisal</h3>
@@ -335,7 +367,7 @@ export function FinalSectionsForm({
           </Card>
 
           {/* Section 7: Career Development */}
-          <Card className={`p-4 ${!isReviewMode ? 'opacity-50' : ''}`}>
+          <Card className={`p-4 ${!isReviewMode ? 'opacity-70' : ''}`}>
             <div className="space-y-4">
               <div className="bg-amber-800 text-white p-2 rounded">
                 <h3 className="font-bold">SECTION 7: Career Development</h3>
@@ -361,7 +393,7 @@ export function FinalSectionsForm({
           </Card>
 
           {/* Section 8: Assessment Decision */}
-          <Card className={`p-4 ${!isReviewMode ? 'opacity-50' : ''}`}>
+          <Card className={`p-4 ${!isReviewMode ? 'opacity-70' : ''}`}>
             <div className="space-y-4">
               <div className="bg-amber-800 text-white p-2 rounded">
                 <h3 className="font-bold">SECTION 8: ASSESSMENT DECISION</h3>
@@ -506,6 +538,130 @@ export function FinalSectionsForm({
                   />
                 </div>
               </div>
+            </div>
+          </Card>
+
+          {/* Section 10: HOD Comments */}
+          <Card className={`p-4 ${!isReviewMode ? 'opacity-70' : ''}`}>
+            <div className="space-y-4">
+              <div className="bg-amber-800 text-white p-2 rounded">
+                <h3 className="font-bold">SECTION 10: Head of Department's / Division's (HOD) Comments</h3>
+              </div>
+              
+              <div className="space-y-2">
+                <Textarea
+                  value={formData.hodComments}
+                  onChange={(e) => setFormData(prev => ({ ...prev, hodComments: e.target.value }))}
+                  placeholder="Enter HOD comments..."
+                  className="min-h-32 resize-none"
+                  rows={7}
+                  disabled={!isReviewMode}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                <div className="space-y-2">
+                  <Label className="font-semibold">HOD'S NAME</Label>
+                  <Input
+                    type="text"
+                    value={formData.hodName}
+                    onChange={(e) => setFormData(prev => ({ ...prev, hodName: e.target.value }))}
+                    placeholder="Enter HOD name"
+                    className="h-12"
+                    disabled={!isReviewMode}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="font-semibold">HOD'S SIGNATURE</Label>
+                  {hodSignatureUrl ? (
+                    <div className="space-y-2">
+                      {!formData.hodSignatureUrl ? (
+                        <>
+                          {/* <p className="text-sm text-muted-foreground">You have a signature on file</p> */}
+                          <Button type="button" onClick={handleSign} variant="default" size="sm">
+                            Sign
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          {isReviewMode &&  (
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="text-green-600 font-bold">✓ Signed</span>
+                              <Button
+                                type="button"
+                                onClick={handleClearSignatures}
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 text-xs text-red-500"
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                          )}
+                          <div className="">
+                            <Image
+                              src={formData.hodSignatureUrl}
+                              alt="HOD Signature"
+                              width={100}
+                              height={50}
+                              className="max-h-20 max-w-full object-contain"
+                            />
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label htmlFor="appraiser-signature" className="text-sm">
+                        Upload Signature to Profile (PNG)
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="appraiser-signature"
+                          type="file"
+                          accept=".png"
+                          onChange={handleSignatureUpload}
+                          disabled={isUploadingSignature || !isReviewMode}
+                          className="h-8 text-xs"
+                        />
+                        {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label className="font-semibold">DATE (dd/mm/yyyy)</Label>
+                  <Input
+                    type="date"
+                    value={formData.hodDate}
+                    onChange={(e) => setFormData(prev => ({ ...prev, hodDate: e.target.value }))}
+                    className="h-12"
+                    disabled={!isReviewMode}
+                  />
+                </div>
+              </div>
+
+              {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                <div className="space-y-2">
+                  <Label className="font-semibold">NAME AND HOD'S SIGNATURE</Label>
+                  <Input
+                    type="text"
+                    value={formData.hodName}
+                    onChange={(e) => setFormData(prev => ({ ...prev, hodName: e.target.value }))}
+                    placeholder="Enter HOD name"
+                    className="h-12"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="font-semibold">DATE (dd/mm/yyyy)</Label>
+                  <Input
+                    type="date"
+                    value={formData.hodDate}
+                    onChange={(e) => setFormData(prev => ({ ...prev, hodDate: e.target.value }))}
+                    className="h-12"
+                  />
+                </div>
+              </div> */}
             </div>
           </Card>
 

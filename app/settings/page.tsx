@@ -115,7 +115,7 @@ export default function SettingsPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>Staff ID</Label>
-                  <Input value={user.employeeId} disabled />
+                  <Input value={user.employee_id} disabled />
                 </div>
                 <div className="space-y-2">
                   <Label>Email</Label>

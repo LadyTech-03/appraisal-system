@@ -86,7 +86,7 @@ export function RecentActivity() {
               console.log(user, 'this is the user')
               const employee = appraisal.employeeInfo
               const appraiser = users.find((u) => u.id === appraisal.appraiserId)
-              const isMyAppraisal = appraisal.employeeId === user?.id
+              const isMyAppraisal = appraisal.employee_id === user?.id
 
               return (
                 <div

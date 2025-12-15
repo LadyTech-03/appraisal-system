@@ -78,12 +78,12 @@ export function MidYearReviewForm({
       try {
         // Load user profile for signature
         const profile = await authApi.getProfile()
-        if (profile?.data?.signatureUrl && !isReviewMode) {
+        if (profile?.data?.signature_url && !isReviewMode) {
           console.log(profile,'not review mode')
-          setAppraiseeSignatureUrl(profile.data.signatureUrl)
-        } else if (profile?.data?.signatureUrl && isReviewMode) {
+          setAppraiseeSignatureUrl(profile.data.signature_url)
+        } else if (profile?.data?.signature_url && isReviewMode) {
           console.log(profile,'review mode')
-          setAppraiserSignatureUrl(profile.data.signatureUrl)
+          setAppraiserSignatureUrl(profile.data.signature_url)
         }
 
         // Load existing draft
@@ -320,8 +320,9 @@ export function MidYearReviewForm({
                 <Textarea
                   value={item.progressReview}
                   onChange={(e) => updateReviewItem(type, item.id, "progressReview", e.target.value)}
-                  placeholder="Enter progress review"
+                  placeholder={isReviewMode ? "" : "By appraiser"}
                   className="min-h-10 resize-none text-sm"
+                  disabled={!isReviewMode}
                   // required
                 />
               </div>

@@ -6,27 +6,25 @@ import { useAppStore, useAuthStore } from "@/lib/store"
 import { FileText, Clock, CheckCircle, Users, TrendingUp } from "lucide-react"
 import { toast } from "sonner"
 import { parseApiError } from "@/lib/api/api"
+import { Skeleton } from "./ui/skeleton"
 
-export function DashboardStats() {
+interface DashboardOverview {
+  myAppraisals: number
+  pendingAppraisals: number
+  completedAppraisals: number
+  averageRating: number
+  teamMembers: number
+  totalUsers: number
+
+  appraisalsInProgress: number
+  appraisalsSubmitted: number
+  appraisalsCompleted: number
+}
+
+export function DashboardStats({ dashboardOverview }: { dashboardOverview: DashboardOverview | { [key: string]: any } }) {
   const { user } = useAuthStore()
-  const { dashboardOverview, fetchDashboardOverview } = useAppStore()
   const isLoading = !dashboardOverview
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      if (!user) return
-
-      try {
-        await fetchDashboardOverview()
-        console.log("Dashboard overview:", dashboardOverview)
-      } catch (error) {
-        const apiError = parseApiError(error)
-        toast.error(apiError.message)
-      }
-    }
-
-    fetchStats()
-  }, [user, fetchDashboardOverview])
+  const pendingReviewAppraisals = dashboardOverview?.appraisalsInProgress + dashboardOverview?.appraisalsSubmitted + dashboardOverview?.appraisalsCompleted
 
   const isAdmin = user?.role === "Director-General" || user?.role === "System Administrator"
 
@@ -41,7 +39,7 @@ export function DashboardStats() {
     },
     {
       title: "Pending Reviews",
-      value: dashboardOverview?.pendingAppraisals ?? 0,
+      value: pendingReviewAppraisals ?? 0,
       description: "Awaiting action",
       icon: Clock,
       color: "text-orange-600",
@@ -101,7 +99,12 @@ export function DashboardStats() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {stats.map((stat, index) => {
+      {isLoading && (
+        <div className="col-span-4">
+          <Skeleton className="h-64" />
+        </div>
+      )}
+      {!isLoading && stats.map((stat, index) => {
         const Icon = stat.icon
         return (
           <Card key={index} className="glass-card hover:shadow-lg transition-shadow">

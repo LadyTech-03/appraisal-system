@@ -28,9 +28,9 @@ export const usersApi = {
     }
   },
 
-  async getTeam(managerId: string) {
+  async getTeam(manager_id: string) {
     try {
-      const response = await apiClient.get(`/users/${managerId}/team`)
+      const response = await apiClient.get(`/users/${manager_id}/team`)
       return response.data?.data
     } catch (error) {
       throw parseApiError(error)

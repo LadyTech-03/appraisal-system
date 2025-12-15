@@ -71,7 +71,7 @@ export async function deleteMidYearReview(id: string): Promise<void> {
 /**
  * Get mid-year review by User ID
  */
-export async function getMidYearReviewByUserId(userId: string): Promise<MidYearReview[]> {
-    const response = await apiClient.get<{ success: boolean; data: MidYearReview[] }>(`/mid-year-review/user/${userId}`)
+export async function getMidYearReviewByUserId(user_id: string): Promise<MidYearReview[]> {
+    const response = await apiClient.get<{ success: boolean; data: MidYearReview[] }>(`/mid-year-review/user/${user_id}`)
     return response.data.data
 }

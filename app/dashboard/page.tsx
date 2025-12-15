@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuthStore } from "@/lib/store"
@@ -9,15 +10,35 @@ import { DashboardStats } from "@/components/dashboard-stats"
 import { RecentActivity } from "@/components/recent-activity"
 import { QuickActions } from "@/components/quick-actions"
 import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
+import { appraisalsApi } from "@/lib/api/appraisals"
 
 export default function DashboardPage() {
   const router = useRouter()
   const { user, isAuthenticated } = useAuthStore()
 
+  const [dashboardOverview, setDashboardOverview] = useState(null)
+
+
   useEffect(() => {
     if (!isAuthenticated) {
       router.push("/login")
     }
+
+    const fetchDashboardStats = async () => {
+      if (!user) return
+
+      try {
+        const response = await appraisalsApi.getDashboardOverview()
+        setDashboardOverview(response)
+        console.log(response)
+      } catch (error) {
+        // console.error(error)
+      }
+    }
+
+    fetchDashboardStats()
+  
   }, [isAuthenticated, router])
 
   if (!isAuthenticated || !user) {
@@ -56,9 +77,9 @@ export default function DashboardPage() {
               {/* Header Section */}
               <div className="mb-8">
                 <h1 className="text-3xl md:text-4xl font-bold mb-3">
-                  {getGreeting()}, {user.name.split(" ")[0]}!
+                  {getGreeting()}, {user?.first_name}!
                 </h1>
-                <p className="text-blue-100 text-lg mb-6">Welcome to your performance management dashboard</p>
+                <p className="text-blue-100 text-lg mb-6">Welcome to your dashboard</p>
               </div>
 
               {/* User Info Cards */}
@@ -83,7 +104,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
                   <div className="text-blue-200 text-sm font-medium mb-1">Staff ID</div>
-                  <div className="text-white font-semibold">{user.employeeId}</div>
+                  <div className="text-white font-semibold">{user.employee_id}</div>
                 </div>
               </div>
 
@@ -114,7 +135,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Stats Cards */}
-          <DashboardStats />
+          <DashboardStats dashboardOverview={dashboardOverview || {}} />
 
           <div className="grid grid-cols-1 gap-6" >
             {/* Recent Activity */}

@@ -28,6 +28,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
+import { useAuthStore } from "@/lib/store"
+
 interface TrainingRecord {
   institution: string
   date: string
@@ -41,6 +43,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
   isReviewMode?: boolean
   reviewUserId?: string
 }) {
+  const { user } = useAuthStore()
   const [isLoading, setIsLoading] = useState(false)
   const [isClearingForm, setIsClearingForm] = useState(false)
   const [existingPersonalInfoId, setExistingPersonalInfoId] = useState<string | null>(null)
@@ -50,29 +53,29 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
     periodTo: "",
     
     // Personal Details
-    title: "",
-    otherTitle: "",
-    surname: "",
-    firstName: "",
-    otherNames: "",
-    gender: "",
+    title: user?.title || "",
+    otherTitle: user?.other_title || "",
+    surname: user?.surname || "",
+    firstName: user?.first_name || "",
+    otherNames: user?.other_names || "",
+    gender: user?.gender || "",
     
     // Job Information
-    presentJobTitle: "",
-    gradeSalary: "",
-    division: "",
-    dateOfAppointment: "",
+    presentJobTitle: user?.position || "",
+    gradeSalary: user?.grade || "",
+    division: user?.division || "",
+    dateOfAppointment: user?.appointment_date || "",
     
     // Training Records
     trainingRecords: [] as TrainingRecord[],
     
     // Appraiser Information (Section 1 B - only in review mode)
-    appraiserTitle: "",
-    appraiserOtherTitle: "",
-    appraiserSurname: "",
-    appraiserFirstName: "",
-    appraiserOtherNames: "",
-    appraiserPosition: ""
+    appraiserTitle: user?.title || "",
+    appraiserOtherTitle: user?.other_title || "",
+    appraiserSurname: user?.surname || "",
+    appraiserFirstName: user?.first_name || "",
+    appraiserOtherNames: user?.other_names || "",
+    appraiserPosition: user?.position || ""
   })
 
   const [newTrainingRecord, setNewTrainingRecord] = useState<TrainingRecord>({
@@ -83,6 +86,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
 
   // Load existing draft on mount
   useEffect(() => {
+    console.log(user, 'main user')
     const loadExistingDraft = async () => {
       try {
         let personalInfoRecords
@@ -115,12 +119,12 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
             dateOfAppointment: latestRecord.date_of_appointment.slice(0, 10) || "",
             trainingRecords: latestRecord.training_records || [],
             // Appraiser fields
-            appraiserTitle: latestRecord.appraiser_title || "",
-            appraiserOtherTitle: latestRecord.appraiser_other_title || "",
-            appraiserSurname: latestRecord.appraiser_surname || "",
-            appraiserFirstName: latestRecord.appraiser_first_name || "",
-            appraiserOtherNames: latestRecord.appraiser_other_names || "",
-            appraiserPosition: latestRecord.appraiser_position || ""
+            appraiserTitle: user?.title || "",
+            appraiserOtherTitle: user?.other_title || "",
+            appraiserSurname: user?.surname || "",
+            appraiserFirstName: user?.first_name || "",
+            appraiserOtherNames: user?.other_names || "",
+            appraiserPosition: user?.position || ""
           })
           
           // Store the ID for updates
@@ -325,6 +329,8 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                       id="mr"
                       checked={formData.title === "Mr"}
                       onCheckedChange={() => handleTitleChange("Mr")}
+                      required
+                      disabled
                     />
                     <Label htmlFor="mr">Mr.</Label>
                   </div>
@@ -333,6 +339,8 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                       id="mrs"
                       checked={formData.title === "Mrs"}
                       onCheckedChange={() => handleTitleChange("Mrs")}
+                      required
+                      disabled
                     />
                     <Label htmlFor="mrs">Mrs.</Label>
                   </div>
@@ -341,6 +349,8 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                       id="ms"
                       checked={formData.title === "Ms"}
                       onCheckedChange={() => handleTitleChange("Ms")}
+                      required
+                      disabled
                     />
                     <Label htmlFor="ms">Ms.</Label>
                   </div>
@@ -349,6 +359,8 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                       id="other"
                       checked={formData.title === "other"}
                       onCheckedChange={() => handleTitleChange("other")}
+                      required
+                      disabled
                     />
                     <Label htmlFor="other">Other (Pls. specify):</Label>
                   </div>
@@ -372,6 +384,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                     value={formData.surname}
                     onChange={(e) => handleInputChange("surname", e.target.value)}
                     required
+                    disabled={formData.surname !== ""}
                   />
                 </div>
                 <div className="space-y-2">
@@ -381,6 +394,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                     value={formData.firstName}
                     onChange={(e) => handleInputChange("firstName", e.target.value)}
                     required
+                    disabled={formData.firstName !== ""}
                   />
                 </div>
                 <div className="space-y-2">
@@ -389,6 +403,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                     id="otherNames"
                     value={formData.otherNames}
                     onChange={(e) => handleInputChange("otherNames", e.target.value)}
+                    disabled
                   />
                 </div>
               </div>
@@ -402,6 +417,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                       id="male"
                       checked={formData.gender === "Male"}
                       onCheckedChange={() => handleInputChange("gender", "Male")}
+                      disabled={formData.gender !== ""}
                     />
                     <Label htmlFor="male">Male</Label>
                   </div>
@@ -410,6 +426,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                       id="female"
                       checked={formData.gender === "Female"}
                       onCheckedChange={() => handleInputChange("gender", "Female")}
+                      disabled={formData.gender !== ""}
                     />
                     <Label htmlFor="female">Female</Label>
                   </div>
@@ -430,6 +447,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                     value={formData.presentJobTitle}
                     onChange={(e) => handleInputChange("presentJobTitle", e.target.value)}
                     required
+                    disabled={formData.presentJobTitle !== ""}
                   />
                 </div>
                 <div className="space-y-2">
@@ -439,6 +457,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                     value={formData.gradeSalary}
                     onChange={(e) => handleInputChange("gradeSalary", e.target.value)}
                     required
+                    // disabled={formData.gradeSalary !== ""}
                   />
                 </div>
                 <div className="space-y-2">
@@ -448,6 +467,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                     value={formData.division}
                     onChange={(e) => handleInputChange("division", e.target.value)}
                     required
+                    disabled={formData.division !== ""}
                   />
                 </div>
                 <div className="space-y-2">
@@ -458,6 +478,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                     value={formData.dateOfAppointment}
                     onChange={(e) => handleInputChange("dateOfAppointment", e.target.value)}
                     required
+                    disabled={formData.dateOfAppointment !== ""}
                   />
                 </div>
               </div>
@@ -555,24 +576,27 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                       <div className="flex items-center space-x-2">
                         <Checkbox
                           id="appraiser-mr"
-                          checked={formData.appraiserTitle === "Mr."}
-                          onCheckedChange={() => handleInputChange("appraiserTitle", "Mr.")}
+                          checked={formData.appraiserTitle === "Mr"}
+                          onCheckedChange={() => handleInputChange("appraiserTitle", "Mr")}
+                          disabled={formData.appraiserTitle !== ""}
                         />
                         <Label htmlFor="appraiser-mr">Mr.</Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Checkbox
                           id="appraiser-mrs"
-                          checked={formData.appraiserTitle === "Mrs."}
-                          onCheckedChange={() => handleInputChange("appraiserTitle", "Mrs.")}
+                          checked={formData.appraiserTitle === "Mrs"}
+                          onCheckedChange={() => handleInputChange("appraiserTitle", "Mrs")}
+                          disabled={formData.appraiserTitle !== ""}
                         />
                         <Label htmlFor="appraiser-mrs">Mrs.</Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Checkbox
                           id="appraiser-ms"
-                          checked={formData.appraiserTitle === "Ms."}
-                          onCheckedChange={() => handleInputChange("appraiserTitle", "Ms.")}
+                          checked={formData.appraiserTitle === "Ms"}
+                          onCheckedChange={() => handleInputChange("appraiserTitle", "Ms")}
+                          disabled={formData.appraiserTitle !== ""}
                         />
                         <Label htmlFor="appraiser-ms">Ms.</Label>
                       </div>
@@ -581,6 +605,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                           id="appraiser-other"
                           checked={formData.appraiserTitle === "Other"}
                           onCheckedChange={() => handleInputChange("appraiserTitle", "Other")}
+                          disabled={formData.appraiserTitle !== ""}
                         />
                         <Label htmlFor="appraiser-other">Other (Pls. specify):</Label>
                       </div>
@@ -590,6 +615,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                           onChange={(e) => handleInputChange("appraiserOtherTitle", e.target.value)}
                           placeholder="Specify title"
                           className="w-64"
+                          disabled={formData.appraiserTitle !== "Other"}
                         />
                       )}
                     </div>
@@ -603,6 +629,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                         id="appraiserSurname"
                         value={formData.appraiserSurname}
                         onChange={(e) => handleInputChange("appraiserSurname", e.target.value)}
+                        disabled={formData.appraiserSurname !== ""}
                       />
                     </div>
                     <div className="space-y-2">
@@ -611,6 +638,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                         id="appraiserFirstName"
                         value={formData.appraiserFirstName}
                         onChange={(e) => handleInputChange("appraiserFirstName", e.target.value)}
+                        disabled={formData.appraiserFirstName !== ""}
                       />
                     </div>
                   </div>
@@ -622,6 +650,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                       id="appraiserOtherNames"
                       value={formData.appraiserOtherNames}
                       onChange={(e) => handleInputChange("appraiserOtherNames", e.target.value)}
+                      disabled
                     />
                   </div>
 
@@ -632,6 +661,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                       id="appraiserPosition"
                       value={formData.appraiserPosition}
                       onChange={(e) => handleInputChange("appraiserPosition", e.target.value)}
+                      disabled
                     />
                   </div>
                 </div>

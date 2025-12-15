@@ -22,7 +22,7 @@ type Step = 'personal-info' | 'performance-planning' | 'mid-year-review' | 'end-
 export default function TeamMemberAppraisalPage() {
   const router = useRouter()
   const params = useParams()
-  const userId = params?.userId as string
+  const user_id = params?.user_id as string
   const { user, isAuthenticated, token } = useAuthStore()
   const [isLoading, setIsLoading] = useState(true)
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo | null>(null)
@@ -48,14 +48,14 @@ export default function TeamMemberAppraisalPage() {
   // Fetch team member's personal info
   useEffect(() => {
     const fetchPersonalInfo = async () => {
-      if (!userId) {
+      if (!user_id) {
         console.log("No user ID provided")
         return
       }
 
       try {
         setIsLoading(true)
-        const data = await getPersonalInfoByUserId(userId)
+        const data = await getPersonalInfoByUserId(user_id)
         if (data && data.length > 0) {
           setPersonalInfo(data[0])
         }
@@ -69,7 +69,7 @@ export default function TeamMemberAppraisalPage() {
     if (isAuthenticated) {
       fetchPersonalInfo()
     }
-  }, [userId, isAuthenticated])
+  }, [user_id, isAuthenticated])
 
   if (!isAuthenticated || !user) {
     return (
@@ -252,42 +252,42 @@ export default function TeamMemberAppraisalPage() {
                   onNext={handlePersonalInfoNext}
                   onBack={() => router.push("/team-appraisals")}
                   isReviewMode={true}
-                  reviewUserId={userId}
+                  reviewUserId={user_id}
                 />
               ) : currentStep === 'performance-planning' ? (
                 <PerformancePlanningForm 
                   onNext={handlePerformancePlanningNext}
                   onBack={handleBackToPersonalInfo}
                   isReviewMode={true}
-                  reviewUserId={userId}
+                  reviewUserId={user_id}
                 />
               ) : currentStep === 'mid-year-review' ? (
                 <MidYearReviewForm 
                   onNext={handleMidYearReviewNext}
                   onBack={handleBackToPerformancePlanning}
                   isReviewMode={true}
-                  reviewUserId={userId}
+                  reviewUserId={user_id}
                 />
               ) : currentStep === 'end-year-review' ? (
                 <EndYearReviewForm 
                   onNext={handleEndYearReviewNext}
                   onBack={handleBackToMidYearReview}
                   isReviewMode={true}
-                  reviewUserId={userId}
+                  reviewUserId={user_id}
                 />
               ) : currentStep === 'annual-appraisal' ? (
                 <AnnualAppraisalForm 
                   onNext={handleAnnualAppraisalNext}
                   onBack={handleBackToEndYearReview}
                   isReviewMode={true}
-                  reviewUserId={userId}
+                  reviewUserId={user_id}
                 />
               ) : (
                 <FinalSectionsForm 
                   onNext={handleFinalSectionsNext}
                   onBack={handleBackToAnnualAppraisal}
                   isReviewMode={true}
-                  reviewUserId={userId}
+                  reviewUserId={user_id}
                 />
               )}
             </>

@@ -15,22 +15,22 @@ import { Plus, Minus, Save, Send, FileText, Target, Star, BookOpen } from "lucid
 
 interface AppraisalFormProps {
   appraisal?: Appraisal
-  employeeId?: string
+  employee_id?: string
   onSave?: (appraisal: Partial<Appraisal>) => void
   onSubmit?: (appraisal: Partial<Appraisal>) => void
   readOnly?: boolean
 }
 
-export function AppraisalForm({ appraisal, employeeId, onSave, onSubmit, readOnly = false }: AppraisalFormProps) {
+export function AppraisalForm({ appraisal, employee_id, onSave, onSubmit, readOnly = false }: AppraisalFormProps) {
   const { user } = useAuthStore()
   const { users, addAppraisal, updateAppraisal } = useAppStore()
 
-  const employee = employeeId
-    ? users.find((u) => u.id === employeeId)
-    : users.find((u) => u.id === appraisal?.employeeId)
+  const employee = employee_id
+    ? users.find((u) => u.id === employee_id)
+    : users.find((u) => u.id === appraisal?.employee_id)
 
   const [formData, setFormData] = useState<Partial<Appraisal>>({
-    employeeId: employeeId || appraisal?.employeeId || "",
+    employee_id: employee_id || appraisal?.employee_id || "",
     appraiserId: user?.id || appraisal?.appraiserId || "",
     periodStart: appraisal?.periodStart || new Date().getFullYear() + "-01-01",
     periodEnd: appraisal?.periodEnd || new Date().getFullYear() + "-12-31",
@@ -459,7 +459,7 @@ export function AppraisalForm({ appraisal, employeeId, onSave, onSubmit, readOnl
               onChange={(e) => setFormData((prev) => ({ ...prev, employeeComments: e.target.value }))}
               placeholder="Add your comments as the employee..."
               rows={4}
-              disabled={readOnly || user?.id !== formData.employeeId}
+              disabled={readOnly || user?.id !== formData.employee_id}
             />
           </div>
         </CardContent>

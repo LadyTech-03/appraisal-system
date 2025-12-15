@@ -20,14 +20,14 @@ export default function RegisterPage() {
   const roles = useAppStore((state) => state.roles)
 
   const [formData, setFormData] = useState({
-    employeeId: "",
+    employee_id: "",
     name: "",
     email: "",
     password: "",
     role: roles[0] ?? "Director-General",
     division: "",
     unit: "",
-    managerId: "",
+    manager_id: "",
     phone: "",
   })
   const [formError, setFormError] = useState<string | null>(null)
@@ -41,14 +41,14 @@ export default function RegisterPage() {
 
     try {
       await register({
-        employeeId: formData.employeeId,
+        employee_id: formData.employee_id,
         name: formData.name,
         email: formData.email,
         password: formData.password,
         role: formData.role,
         division: formData.division || undefined,
         unit: formData.unit || undefined,
-        managerId: formData.managerId || undefined,
+        manager_id: formData.manager_id || undefined,
         phone: formData.phone || undefined,
       })
 
@@ -116,11 +116,11 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="employeeId">Employee ID</Label>
+                <Label htmlFor="employee_id">Employee ID</Label>
                 <Input
-                  id="employeeId"
-                  value={formData.employeeId}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, employeeId: e.target.value }))}
+                  id="employee_id"
+                  value={formData.employee_id}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, employee_id: e.target.value }))}
                   placeholder="Provide if available"
                 />
               </div>
@@ -160,11 +160,11 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="managerId">Manager ID</Label>
+                <Label htmlFor="manager_id">Manager ID</Label>
                 <Input
-                  id="managerId"
-                  value={formData.managerId}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, managerId: e.target.value }))}
+                  id="manager_id"
+                  value={formData.manager_id}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, manager_id: e.target.value }))}
                   placeholder="Optional"
                 />
               </div>

@@ -99,6 +99,16 @@ export const appraisalsApi = {
       throw parseApiError(error)
     }
   },
+
+  async updateAppraisalStatus(id: string, status: string) {
+    try {
+      const response = await apiClient.patch(`/appraisals/${id}/status`, { status })
+      return response.data?.data
+    } catch (error) {
+      throw parseApiError(error)
+    }
+  },
 }
+
 
 

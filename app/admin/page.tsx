@@ -56,7 +56,7 @@ export default function AdminPage() {
           </div>
           <div className="text-right">
             <p className="text-sm text-muted-foreground">Logged in as</p>
-            <p className="font-semibold">{user?.name}</p>
+            <p className="font-semibold">{user?.first_name}</p>
             <p className="text-sm text-primary">
               {user?.role}
             </p>

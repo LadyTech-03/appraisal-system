@@ -555,7 +555,7 @@ export default function AppraisalPrintView({ appraisalId }: AppraisalViewProps) 
                         className="max-h-12 object-contain"
                       />
                     ) : (
-                      <span className="text-gray-400 text-sm"></span>
+                      <span className="text-gray-400 text-sm">No signature</span>
                     )}
                   </div>
                 </div>
@@ -577,7 +577,7 @@ export default function AppraisalPrintView({ appraisalId }: AppraisalViewProps) 
                         APPRAISER'S SIGNATURE
                       </div>
                     </div>
-                  <div className="border-gray-400 p-2 h-12 flex items-center justify-end">
+                  <div className="border-gray-400 p-2 h-12 flex items-center justify-center">
                     {appraisal.midYearReview?.appraiser_signature_url ? (
                       <img 
                         src={appraisal.midYearReview.appraiser_signature_url} 
@@ -585,7 +585,7 @@ export default function AppraisalPrintView({ appraisalId }: AppraisalViewProps) 
                         className="max-h-12 object-contain"
                       />
                     ) : (
-                      <span className="text-gray-400 text-sm"></span>
+                      <span className="text-gray-400 text-sm">No signature</span>
                     )}
                   </div>
                 </div>
@@ -720,7 +720,7 @@ export default function AppraisalPrintView({ appraisalId }: AppraisalViewProps) 
                         className="max-h-12 object-contain"
                       />
                     ) : (
-                      <span className="text-gray-400 text-sm"></span>
+                      <span className="text-gray-400 text-sm">No signature</span>
                     )}
                   </div>
                 </div>
@@ -742,7 +742,7 @@ export default function AppraisalPrintView({ appraisalId }: AppraisalViewProps) 
                         APPRAISER'S SIGNATURE
                       </div>
                     </div>
-                  <div className="border-gray-400 p-2 h-12 flex items-center justify-end">
+                  <div className="border-gray-400 p-2 h-12 flex items-center justify-center">
                     {appraisal.endOfYearReview?.appraiser_signature_url ? (
                       <img 
                         src={appraisal.endOfYearReview.appraiser_signature_url} 
@@ -750,7 +750,7 @@ export default function AppraisalPrintView({ appraisalId }: AppraisalViewProps) 
                         className="max-h-12 object-contain"
                       />
                     ) : (
-                      <span className="text-gray-400 text-sm"></span>
+                      <span className="text-gray-400 text-sm">No signature</span>
                     )}
                   </div>
                 </div>
@@ -959,7 +959,7 @@ export default function AppraisalPrintView({ appraisalId }: AppraisalViewProps) 
                     = {appraisal.overallAssessment?.overall_total || "0.00"}
                   </span>
                 </div>
-                <div className="flex justify-between items-center pt-2 bg-yellow-50 p-3 rounded">
+                <div className="flex justify-between items-center pt-2 bg-blue-100 p-3 rounded">
                   <span className="font-bold text-base">OVERALL ASSESSMENT/SCORE (Z) = T/5 X 100</span>
                   <span className="font-bold text-lg text-primary">
                     = {appraisal.overallAssessment?.overall_score_percentage || "0"}%
@@ -985,7 +985,7 @@ export default function AppraisalPrintView({ appraisalId }: AppraisalViewProps) 
                         className="max-h-12 object-contain"
                       />
                     ) : (
-                      <span className="text-gray-400 text-sm"></span>
+                      <span className="text-gray-400 text-sm">No signature</span>
                     )}
                   </div>
                 </div>
@@ -1045,7 +1045,7 @@ export default function AppraisalPrintView({ appraisalId }: AppraisalViewProps) 
                         className="max-h-12 object-contain"
                       />
                     ) : (
-                      <span className="text-gray-400 text-sm"></span>
+                      <span className="text-gray-400 text-sm">No signature</span>
                     )}
                   </div>
                 </div>
@@ -1189,6 +1189,60 @@ export default function AppraisalPrintView({ appraisalId }: AppraisalViewProps) 
             <span>PUBLIC SERVICES COMMISSION, ME-SPRASG1</span>
             <span className="font-bold">STRICTLY CONFIDENTIAL</span>
             <span>PAGE 11 OF 11</span>
+          </div>
+        </div>
+
+        {/* SECTION 10: HOD Comments */}
+        <div className="mb-6 page-break">
+          <div className="bg-orange-700 text-white px-3 py-2 font-bold">
+            SECTION 10: Head of Department's / Division's (HOD) Comments
+          </div>
+          <div className="border border-gray-400 p-4">
+            <div className="border-2 border-gray-800 p-4 min-h-48 whitespace-pre-wrap text-sm mb-6">
+              {appraisal.hodComments || ""}
+            </div>
+
+            {/* HOD Name and Date */}
+            <div className="grid grid-cols-2 gap-20 mt-6">
+              <div>
+                <div className="border border-gray-400 p-3">
+                  <div className="bg-orange-700 text-white px-2 py-1 text-center font-bold text-xs mb-2">
+                    NAME AND HOD'S SIGNATURE
+                  </div>
+                  <div className="text-sm text-center font-medium">
+                    {appraisal.hodName || "sdfsdfsdfsdf"}
+                  </div>
+                  <div className="">
+                    {appraisal.hodSignature && (
+                    <img 
+                        src={appraisal.hodSignature } 
+                        alt="Appraisee Signature" 
+                        className="max-h-12 object-contain justify-self-center"
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div className="border border-gray-400 p-2 w-42 justify-self-end">
+                  <div className="bg-orange-700 text-white px-2 py-1 text-center font-bold text-xs">
+                    DATE (dd/mm/yyyy)
+                  </div>
+                  <div className="text-center text-sm mt-1">
+                    {appraisal.hodDate 
+                      ? new Date(appraisal.hodDate).toLocaleDateString("en-GB")
+                      : ""}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="flex justify-between text-xs mt-2">
+            <span>PUBLIC SERVICES COMMISSION, ME-SPRASG1</span>
+            <span className="font-bold">STRICTLY CONFIDENTIAL</span>
+            <span>PAGE 12 OF 12</span>
           </div>
         </div>
       </div>

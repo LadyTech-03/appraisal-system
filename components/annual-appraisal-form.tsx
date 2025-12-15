@@ -35,6 +35,7 @@ import {
 } from "@/lib/api/annualAppraisal"
 import { usersApi } from "@/lib/api/users"
 import { authApi } from "@/lib/api/auth"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 
 // Initial Core Competencies structure
 const initialCoreCompetencies: CompetencyCategory[] = [
@@ -239,7 +240,8 @@ export function AnnualAppraisalForm({
         weightedScore: item.score * item.weight
       }))
       const total = items.reduce((sum, item) => sum + item.weightedScore, 0)
-      const average = items.length > 0 ? total / items.reduce((sum, item) => sum + item.weight, 0) : 0
+      const scoredItemsCount = items.filter(item => item.score > 0).length
+      const average = scoredItemsCount > 0 ? total / scoredItemsCount : 0
       return { ...category, items, total, average }
     })
 
@@ -250,7 +252,8 @@ export function AnnualAppraisalForm({
         weightedScore: item.score * item.weight
       }))
       const total = items.reduce((sum, item) => sum + item.weightedScore, 0)
-      const average = items.length > 0 ? total / items.reduce((sum, item) => sum + item.weight, 0) : 0
+      const scoredItemsCount = items.filter(item => item.score > 0).length
+      const average = scoredItemsCount > 0 ? total / scoredItemsCount : 0
       return { ...category, items, total, average }
     })
 
@@ -294,8 +297,8 @@ export function AnnualAppraisalForm({
         // console.log(performanceAssessment, 'performanceAssessment')
         setPeformanceAssessmentScore(performanceAssessment?.[0].calculations?.finalScore || 0)
         console.log(performanceAssessment?.[0].calculations?.finalScore, 'performanceAssessment')
-        if (profile?.data?.signatureUrl && isReviewMode) {
-          setAppraiserSignatureUrl(profile.data.signatureUrl)
+        if (profile?.data?.signature_url && isReviewMode) {
+          setAppraiserSignatureUrl(profile.data.signature_url)
         }
 
         // Load existing draft
@@ -481,18 +484,22 @@ export function AnnualAppraisalForm({
             <span className="font-medium">{item.weight}</span>
           </div>
           <div className="col-span-1">
-            <select
-              value={item.score}
-              onChange={(e) => updateCompetencyScore(type, category.id, item.id, parseInt(e.target.value))}
-              className="w-full h-8 text-xs border rounded px-1"
+            <Select
+              value={item.score.toString()}
+              onValueChange={(value) => updateCompetencyScore(type, category.id, item.id, parseInt(value) || 0)}
             >
-              <option value={0}>-</option>
-              <option value={1}>1</option>
-              <option value={2}>2</option>
-              <option value={3}>3</option>
-              <option value={4}>4</option>
-              <option value={5}>5</option>
-            </select>
+              <SelectTrigger className="h-10 w-full text-sm text-center">
+                <SelectValue placeholder="0" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">0</SelectItem>
+                <SelectItem value="1">1</SelectItem>
+                <SelectItem value="2">2</SelectItem>
+                <SelectItem value="3">3</SelectItem>
+                <SelectItem value="4">4</SelectItem>
+                <SelectItem value="5">5</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="col-span-1 text-center">
             <span className="font-medium">{item.weightedScore.toFixed(2)}</span>

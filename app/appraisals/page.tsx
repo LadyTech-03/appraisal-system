@@ -80,10 +80,10 @@ export default function AppraisalsPage() {
 
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; className: string }> = {
-      "in-progress": { label: "In Progress", className: "bg-gray-100 text-gray-800" },
+      "in-progress": { label: "In Progress", className: "bg-orange-100 text-orange-800" },
       submitted: { label: "Submitted", className: "bg-blue-100 text-blue-800" },
       reviewed: { label: "Reviewed", className: "bg-purple-100 text-purple-800" },
-      closed: { label: "Closed", className: "bg-green-100 text-green-800" },
+      completed: { label: "Completed", className: "bg-green-100 text-green-800" },
     }
     const config = statusConfig[status] || statusConfig["in-progress"]
     return <Badge className={config.className}>{config.label}</Badge>
@@ -102,8 +102,10 @@ export default function AppraisalsPage() {
   const handleViewAppraisal = (appraisal: Appraisal) => {
     if(appraisal.status === "reviewed") {
       // We'll populate the appraisal-view with the data so we can print it. 
+      router.push(`/appraisal-print/${appraisal.id}`)
     } else {
-      router.push(`/appraisals/${appraisal.id}`)
+      // router.push(`/appraisals/${appraisal.id}`)
+      router.push(`/appraisal-print/${appraisal.id}`)
     }
   }
 
@@ -121,9 +123,6 @@ export default function AppraisalsPage() {
               <h1 className="text-3xl font-bold text-primary">My Appraisals</h1>
               <p className="text-muted-foreground">View and track your submitted performance appraisals</p>
             </div>
-            <Badge variant="secondary" className="text-lg px-4 py-2">
-              {appraisals.length} Total
-            </Badge>
           </div>
 
           {/* Appraisals Table */}
@@ -181,8 +180,6 @@ export default function AppraisalsPage() {
                           </TableCell>
                           <TableCell className="text-right">
                             <Button
-                              variant="outline"
-                              size="sm"
                               onClick={() => handleViewAppraisal(appraisal)}
                             >
                               <Eye className="h-4 w-4 mr-2" />

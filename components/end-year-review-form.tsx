@@ -31,6 +31,7 @@ import {
 } from "@/lib/api/endYearReview"
 import { usersApi } from "@/lib/api/users"
 import { authApi } from "@/lib/api/auth"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 
 interface TargetEvaluation {
   id: string
@@ -83,7 +84,7 @@ export function EndYearReviewForm({
   useEffect(() => {
     const totalWeight = formData.targets.reduce((sum: number, target: TargetEvaluation) => sum + target.weightOfTarget, 0)
     const totalScore = formData.targets.reduce((sum: number, target: TargetEvaluation) => sum + target.score, 0)
-    const average = totalWeight > 0 ? totalScore / totalWeight : 0
+    const average = totalWeight > 0 ? totalScore / formData.targets.length : 0
     const finalScore = average * 0.6
 
     setCalculations({
@@ -100,10 +101,10 @@ export function EndYearReviewForm({
       try {
         // Load user profile for signature
         const profile = await authApi.getProfile()
-        if (profile?.data?.signatureUrl && !isReviewMode) {
-          setAppraiseeSignatureUrl(profile.data.signatureUrl)
-        } else if (profile?.data?.signatureUrl && isReviewMode) {
-          setAppraiserSignatureUrl(profile.data.signatureUrl)
+        if (profile?.data?.signature_url && !isReviewMode) {
+          setAppraiseeSignatureUrl(profile.data.signature_url)
+        } else if (profile?.data?.signature_url && isReviewMode) {
+          setAppraiserSignatureUrl(profile.data.signature_url)
         }
 
         // Load existing draft
@@ -335,10 +336,26 @@ export function EndYearReviewForm({
                       onChange={(e) => updateTarget(target.id, "performanceAssessment", e.target.value)}
                       placeholder=""
                       className="min-h-10 resize-none text-sm"
-                      required
+                      disabled={!isReviewMode}
                     />
                   </div>
                   <div className="col-span-1">
+                    {/* <Select
+                      value={target.weightOfTarget.toString()}
+                      onValueChange={(value) => updateTarget(target.id, "weightOfTarget", parseInt(value) || 0)}
+                      disabled={!isReviewMode}
+                    >
+                      <SelectTrigger className="h-10 text-sm text-center">
+                        <SelectValue placeholder="-" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[...Array(5).keys()].map((value) => (
+                          <SelectItem key={value} value={value.toString()}>
+                            {value}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select> */}
                     <Input
                       type="number"
                       value={target.weightOfTarget}
@@ -350,15 +367,23 @@ export function EndYearReviewForm({
                     />
                   </div>
                   <div className="col-span-1">
-                    <Input
-                      type="number"
-                      value={target.score}
-                      onChange={(e) => updateTarget(target.id, "score", parseInt(e.target.value) || 0)}
-                      className="h-10 text-sm text-center"
+                    <Select
+                      value={target.score.toString()}
+                      onValueChange={(value) => updateTarget(target.id, "score", parseInt(value) || 0)}
                       disabled={!isReviewMode}
-                      min="0"
-                      max="10"
-                    />
+                    >
+                      <SelectTrigger className="h-10 w-full text-sm text-center">
+                        <SelectValue placeholder="0" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="0">0</SelectItem>
+                        <SelectItem value="1">1</SelectItem>
+                        <SelectItem value="2">2</SelectItem>
+                        <SelectItem value="3">3</SelectItem>
+                        <SelectItem value="4">4</SelectItem>
+                        <SelectItem value="5">5</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                    <div className={`col-span-2 ${!isReviewMode ? 'opacity-50' : ''}`}>
                      <Textarea

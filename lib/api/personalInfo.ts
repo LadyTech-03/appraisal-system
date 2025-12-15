@@ -108,8 +108,8 @@ export async function getTeamAppraisals(): Promise<PersonalInfo[]> {
 /**
  * Get personal info by user ID
  */
-export async function getPersonalInfoByUserId(userId: string): Promise<PersonalInfo[]> {
-    const response = await apiClient.get<{ success: boolean; data: PersonalInfo[] }>(`/personal-info/user/${userId}`)
+export async function getPersonalInfoByUserId(user_id: string): Promise<PersonalInfo[]> {
+    const response = await apiClient.get<{ success: boolean; data: PersonalInfo[] }>(`/personal-info/user/${user_id}`)
     return response.data.data
 }
 

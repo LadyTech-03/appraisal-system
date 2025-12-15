@@ -153,7 +153,7 @@ export default function CreateAppraisalPage() {
           {/* Progress Indicator */}
           <div className="max-w-full mx-auto flex flex-wrap items-center gap-4 justify-center ">
             {steps.map((step)=>(
-              <div className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
+              <div key={step.id} className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
                 currentStep === step.id 
                   ? 'bg-primary text-primary-foreground' 
                   : appraisalData[step.status] 

@@ -6,14 +6,14 @@ interface LoginPayload {
 }
 
 interface RegisterPayload {
-  employeeId: string
+  employee_id: string
   email: string
   password: string
   name: string
   role: string
   division?: string
   unit?: string
-  managerId?: string
+  manager_id?: string
   phone?: string
 }
 
@@ -21,6 +21,7 @@ export const authApi = {
   async login(payload: LoginPayload) {
     try {
       const response = await apiClient.post("/auth/login", payload)
+      console.log(response.data, 'response data')
       return response.data
     } catch (error) {
       throw parseApiError(error)

@@ -19,10 +19,10 @@ import { AccessRequestsPanel } from "./access-requests-panel"
 
 interface UserFormData {
   name: string
-  employeeId: string
+  employee_id: string
   email: string
   role: string
-  managerId: string
+  manager_id: string
   division: string
   region: string
   passwordHash: string
@@ -37,10 +37,10 @@ export function UserManagement() {
   const [searchQuery, setSearchQuery] = useState("")
   const [formData, setFormData] = useState<UserFormData>({
     name: "",
-    employeeId: "",
+    employee_id: "",
     email: "",
     role: "",
-    managerId: "",
+    manager_id: "",
     division: "",
     region: "",
     passwordHash: "",
@@ -54,10 +54,10 @@ export function UserManagement() {
   const resetForm = () => {
     setFormData({
       name: "",
-      employeeId: "",
+      employee_id: "",
       email: "",
       role: "",
-      managerId: "",
+      manager_id: "",
       division: "",
       region: "",
       passwordHash: "",
@@ -86,11 +86,11 @@ export function UserManagement() {
   const handleEdit = (user: User) => {
     setEditingUser(user)
     setFormData({
-      name: user.name,
-      employeeId: user.employeeId,
+      name: user.first_name,
+      employee_id: user.employee_id,
       email: user.email || "",
       role: user.role,
-      managerId: user.managerId || "",
+      manager_id: user.manager_id || "",
       division: user.division || "",
       region: user.region || "",
       passwordHash: user.passwordHash || "",
@@ -98,9 +98,9 @@ export function UserManagement() {
     setActiveTab("add")
   }
 
-  const handleDelete = (userId: string) => {
+  const handleDelete = (user_id: string) => {
     if (confirm("Are you sure you want to delete this user?")) {
-      deleteUser(userId)
+      deleteUser(user_id)
       setMessage({ type: "success", text: "User deleted successfully!" })
     }
   }
@@ -118,7 +118,7 @@ export function UserManagement() {
           userData[header] = values[index] || ""
         })
 
-        if (userData.name && userData.employeeId && userData.role) {
+        if (userData.name && userData.employee_id && userData.role) {
           addUser(userData)
         }
       }
@@ -143,9 +143,9 @@ export function UserManagement() {
   }
 
   const handleImpersonate = (user: User) => {
-    if (confirm(`Impersonate ${user.name}? You will be logged in as this user.`)) {
+    if (confirm(`Impersonate ${user.first_name}? You will be logged in as this user.`)) {
       impersonate(user.id)
-      setMessage({ type: "success", text: `Now logged in as ${user.name}` })
+      setMessage({ type: "success", text: `Now logged in as ${user.first_name}` })
     }
   }
 
@@ -239,16 +239,13 @@ export function UserManagement() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-semibold">
-                          {user.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
+                          {user.first_name}
                         </div>
                         <div>
-                          <h4 className="font-semibold">{user.name}</h4>
+                          <h4 className="font-semibold">{user.first_name}</h4>
                           <p className="text-sm text-muted-foreground">{user.role}</p>
                           <div className="flex items-center space-x-2 mt-1">
-                            <Badge variant="outline">{user.employeeId}</Badge>
+                            <Badge variant="outline">{user.employee_id}</Badge>
                             {user.email && <Badge variant="secondary">{user.email}</Badge>}
                             {user.division && <Badge>{user.division}</Badge>}
                           </div>
@@ -295,11 +292,11 @@ export function UserManagement() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="employeeId">Staff ID *</Label>
+                  <Label htmlFor="employee_id">Staff ID *</Label>
                   <Input
-                    id="employeeId"
-                    value={formData.employeeId}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, employeeId: e.target.value }))}
+                    id="employee_id"
+                    value={formData.employee_id}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, employee_id: e.target.value }))}
                     required
                   />
                 </div>
@@ -337,10 +334,10 @@ export function UserManagement() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="managerId">Manager/Reporting Authority</Label>
+                  <Label htmlFor="manager_id">Manager/Reporting Authority</Label>
                   <Select
-                    value={formData.managerId}
-                    onValueChange={(value) => setFormData((prev) => ({ ...prev, managerId: value }))}
+                    value={formData.manager_id}
+                    onValueChange={(value) => setFormData((prev) => ({ ...prev, manager_id: value }))}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select manager" />
@@ -349,7 +346,7 @@ export function UserManagement() {
                       <SelectItem value="none">No Manager</SelectItem>
                       {managerOptions.map((manager) => (
                         <SelectItem key={manager.id} value={manager.id}>
-                          {manager.name} - {manager.role}
+                          {manager.first_name} - {manager.role}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -410,13 +407,13 @@ export function UserManagement() {
                 id="csvData"
                 value={csvData}
                 onChange={(e) => setCsvData(e.target.value)}
-                placeholder="name,employeeId,email,role,managerId,division,region,passwordHash&#10;John Doe,STF001,john@example.com,Staff Member,,HR,,password123"
+                placeholder="name,employee_id,email,role,manager_id,division,region,passwordHash&#10;John Doe,STF001,john@example.com,Staff Member,,HR,,password123"
                 rows={10}
               />
             </div>
             <div className="text-sm text-muted-foreground">
-              <p>Format: name,employeeId,email,role,managerId,division,region,passwordHash</p>
-              <p>Required fields: name, employeeId, role</p>
+              <p>Format: name,employee_id,email,role,manager_id,division,region,passwordHash</p>
+              <p>Required fields: name, employee_id, role</p>
             </div>
             <Button onClick={handleBulkImport} disabled={!csvData.trim()}>
               <Upload className="h-4 w-4 mr-2" />

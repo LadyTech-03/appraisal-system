@@ -15,7 +15,7 @@ interface AuthPersistState {
 }
 
 export const useAuthStore = create<AuthState & AuthPersistState & {
-  register: (data: { employeeId: string; email: string; password: string; name: string; role: string; division?: string; unit?: string; managerId?: string; phone?: string }) => Promise<void>
+  register: (data: { employee_id: string; email: string; password: string; name: string; role: string; division?: string; unit?: string; manager_id?: string; phone?: string }) => Promise<void>
   bootstrap: () => Promise<void>
   error: string | null
   hasHydrated: boolean
@@ -85,7 +85,7 @@ export const useAuthStore = create<AuthState & AuthPersistState & {
           set({ user: null, isAuthenticated: false, token: null })
         }
       },
-      impersonate: (userId: string) => {
+      impersonate: (user_id: string) => {
         console.warn('Impersonation is disabled in production mode.')
       },
     }),
@@ -149,9 +149,9 @@ export const useAppStore = create<AppState>()(
         "3": [], // DDG Operations (would manage other division heads)
       },
       dashboardOverview: null,
-      getReports: (managerId: string) => {
+      getReports: (manager_id: string) => {
         const state = get()
-        return state.users.filter((user) => user.managerId === managerId)
+        return state.users.filter((user) => user.manager_id === manager_id)
       },
       filteredUsers: (query: string) => {
         const state = get()
@@ -160,8 +160,8 @@ export const useAppStore = create<AppState>()(
         const searchTerm = query.toLowerCase()
         return state.users.filter(
           (user) =>
-            user.name.toLowerCase().includes(searchTerm) ||
-            user.employeeId.toLowerCase().includes(searchTerm) ||
+            user.first_name.toLowerCase().includes(searchTerm) ||
+            user.employee_id.toLowerCase().includes(searchTerm) ||
             user.role.toLowerCase().includes(searchTerm) ||
             (user.division && user.division.toLowerCase().includes(searchTerm)) ||
             (user.email && user.email.toLowerCase().includes(searchTerm)),

@@ -105,16 +105,16 @@ export async function deleteAnnualAppraisal(id: string): Promise<void> {
 /**
  * Get annual appraisal by User ID
  */
-export async function getAnnualAppraisalByUserId(userId: string): Promise<AnnualAppraisal[]> {
-    const response = await apiClient.get<{ success: boolean; data: AnnualAppraisal[] }>(`/annual-appraisal/user/${userId}`)
+export async function getAnnualAppraisalByUserId(user_id: string): Promise<AnnualAppraisal[]> {
+    const response = await apiClient.get<{ success: boolean; data: AnnualAppraisal[] }>(`/annual-appraisal/user/${user_id}`)
     return response.data.data
 }
 
 /**
  * Get performance assessment by User ID
  */
-export async function getPerformanceAssessment(userId: string): Promise<PerformanceAssessment[]> {
-    const response = await apiClient.get<{ success: boolean; data: PerformanceAssessment[] }>(`/annual-appraisal/performance-assessment/${userId}`)
+export async function getPerformanceAssessment(user_id: string): Promise<PerformanceAssessment[]> {
+    const response = await apiClient.get<{ success: boolean; data: PerformanceAssessment[] }>(`/annual-appraisal/performance-assessment/${user_id}`)
     return response.data.data
 }
 

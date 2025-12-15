@@ -23,7 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Loader2, Eye, CheckCircle, AlertCircle } from "lucide-react"
+import { Loader2, Eye, CheckCircle, AlertCircle, Printer } from "lucide-react"
 import { getTeamAppraisals, PersonalInfo } from "@/lib/api/personalInfo"
 import { appraisalsApi } from "@/lib/api/appraisals"
 import { toast } from "sonner"
@@ -68,7 +68,7 @@ export default function TeamAppraisalsPage() {
 
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; className: string }> = {
-      "in-progress": { label: "In Progress", className: "bg-green-100 text-green-800 font-bold" },
+      "in-progress": { label: "In Progress", className: "bg-orange-100 text-orange-800 font-bold" },
       submitted: { label: "Submitted", className: "bg-blue-100 text-blue-800 font-bold" },
       reviewed: { label: "Reviewed", className: "bg-purple-100 text-purple-800 font-bold" },
       closed: { label: "Closed", className: "bg-green-100 text-green-800 font-bold" },
@@ -86,15 +86,26 @@ export default function TeamAppraisalsPage() {
     setShowCompleteDialog(true)
   }
 
+  const handlePrintClick = (appraisal: PersonalInfo) => {
+    setSelectedAppraisal(appraisal)
+    router.push(`/appraisal-print/${appraisal.appraisal_id}`)
+  }
+
   const handleCompleteConfirm = async () => {
     if (!selectedAppraisal?.appraisal_id) {
       toast.error("Appraisal ID not found")
       return
     }
 
+    if (selectedAppraisal.status !== "reviewed") {
+      toast.error("Appraisal must be reviewed before it can be completed")
+      return
+    }
+
     try {
       setCompletingId(selectedAppraisal.appraisal_id)
       await appraisalsApi.completeAppraisal(selectedAppraisal.appraisal_id)
+      appraisalsApi.updateAppraisalStatus(selectedAppraisal.appraisal_id, "completed")
       
       toast.success("Appraisal completed and sealed successfully!")
       
@@ -133,9 +144,9 @@ export default function TeamAppraisalsPage() {
               <h1 className="text-3xl font-bold text-primary">Team Appraisals</h1>
               <p className="text-muted-foreground">Review and complete appraisals for your team members</p>
             </div>
-            <Badge variant="secondary" className="text-lg px-4 py-2">
+            {/* <Badge variant="secondary" className="text-lg px-4 py-2">
               {teamAppraisals.length} Total
-            </Badge>
+            </Badge> */}
           </div>
 
           {/* Loading State */}
@@ -212,15 +223,27 @@ export default function TeamAppraisalsPage() {
                           <Eye className="h-4 w-4 mr-1" />
                           Review
                         </Button>
-                        <Button
-                          variant="default"
-                          size="sm"
-                          onClick={() => handleCompleteClick(appraisal)}
-                          disabled={!appraisal.appraisal_id}
+                        {appraisal.status === "reviewed" ? (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => handleCompleteClick(appraisal)}
+                            disabled={!appraisal.appraisal_id }
                         >
                           <CheckCircle className="h-4 w-4 mr-1" />
                           Complete
                         </Button>
+                        ):(
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => handlePrintClick(appraisal)}
+                            disabled={!appraisal.appraisal_id }
+                        >
+                          <Printer className="h-4 w-4 mr-1" />
+                          Preview
+                        </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -244,9 +267,9 @@ export default function TeamAppraisalsPage() {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
               <p className="text-sm font-medium text-blue-800">ℹ️ What happens next:</p>
               <ul className="text-sm text-blue-700 list-disc list-inside space-y-1">
-                <li>The appraisal status will be set to "Reviewed"</li>
-                <li>Individual form records will be archived</li>
-                <li>The consolidated record will be preserved</li>
+                <li>The appraisal status will be set to "Completed"</li>
+                <li>Changes cannot be made after completion</li>
+                <li>Appraisal will be saved in the system</li>
               </ul>
             </div>
           </div>

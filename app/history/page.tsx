@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { formatDistanceToNow } from "date-fns"
-import { Search, Eye, Download, Loader2, FileText } from "lucide-react"
+import { Search, Eye, Download, Loader2, FileText, Printer } from "lucide-react"
 import { appraisalsApi } from "@/lib/api/appraisals"
 import { toast } from "sonner"
 
@@ -31,7 +31,7 @@ interface Appraisal {
     first_name: string
     surname: string
   }
-  employeeId: string
+  employee_id: string
   employee_info?: {
     first_name: string
     surname: string
@@ -123,10 +123,10 @@ export default function HistoryPage() {
 
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; className: string }> = {
-      "in-progress": { label: "In Progress", className: "bg-green-100 text-green-800 font-bold" },
+      "in-progress": { label: "In Progress", className: "bg-orange-100 text-orange-800 font-bold" },
       submitted: { label: "Submitted", className: "bg-blue-100 text-blue-800 font-bold" },
       reviewed: { label: "Reviewed", className: "bg-purple-100 text-purple-800 font-bold" },
-      closed: { label: "Closed", className: "bg-green-100 text-green-800 font-bold" },
+      completed: { label: "Completed", className: "bg-green-100 text-green-800 font-bold" },
     }
     const config = statusConfig[status] || statusConfig["in-progress"]
     return <Badge className={config.className}>{config.label}</Badge>
@@ -155,13 +155,14 @@ export default function HistoryPage() {
     toast.success("History exported successfully!")
   }
 
-  const handleViewAppraisal = (appraisal: Appraisal) => {
-    if(appraisal.status === "reviewed") {
+  const handlePrintAppraisal = (appraisal: Appraisal) => {
+    if(appraisal.status === "reviewed" || appraisal.status === "completed" || appraisal.status === "submitted") {
       // Navigate to printable view
       router.push(`/appraisal-print/${appraisal.id}`)
     } else {
       // Navigate to editable appraisal form
-      router.push(`/appraisals/${appraisal.id}`)
+      // router.push(`/appraisals/${appraisal.id}`)
+      router.push(`/appraisal-print/${appraisal.id}`)
     }
   }
 
@@ -212,7 +213,7 @@ export default function HistoryPage() {
                     <SelectItem value="in-progress">In Progress</SelectItem>
                     <SelectItem value="submitted">Submitted</SelectItem>
                     <SelectItem value="reviewed">Reviewed</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={dateRangeFilter} onValueChange={setDateRangeFilter}>
@@ -288,7 +289,7 @@ export default function HistoryPage() {
                           <p className="font-bold">
                             {appraisal.employeeInfo?.first_name} {appraisal.employeeInfo?.surname}
                           </p>
-                          {/* <p className="text-sm text-muted-foreground font-bold">{appraisal.employeeId}</p> */}
+                          {/* <p className="text-sm text-muted-foreground font-bold">{appraisal.employee_id}</p> */}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -300,7 +301,7 @@ export default function HistoryPage() {
                       <TableCell>{getStatusBadge(appraisal.status)}</TableCell>
                       <TableCell>
                         <span className="font-semibold text-primary">
-                          {appraisal.overallAssessment?.overall_score_percentage && appraisal.status === "reviewed"
+                          {appraisal.overallAssessment?.overall_score_percentage && appraisal.status === "completed"
                             ? `${appraisal.overallAssessment.overall_score_percentage}%`
                             : "N/A"}
                         </span>
@@ -311,13 +312,19 @@ export default function HistoryPage() {
                           : "N/A"}
                       </TableCell>
                       <TableCell className="text-right">
+                        {/* {isReviewMode && (
+                          <Button
+                            onClick={() => handlePrintAppraisal(appraisal)}
+                          >
+                            <Printer className="h-4 w-4 mr-1" />
+                            Print
+                        </Button>
+                        )} */}
                         <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleViewAppraisal(appraisal)}
+                          onClick={() => handlePrintAppraisal(appraisal)}
                         >
-                          <Eye className="h-4 w-4 mr-1" />
-                          View
+                          <Printer className="h-4 w-4 mr-1" />
+                          Print
                         </Button>
                       </TableCell>
                     </TableRow>

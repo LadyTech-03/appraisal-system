@@ -37,7 +37,7 @@ export default function AppraisalReviewPage() {
     }
 
     // Check if user is the appraiser for this appraisal
-    const employee = users.find(u => u.id === appraisal.employeeId)
+    const employee = users.find(u => u.id === appraisal.employee_id)
     if (!employee || !user?.id) {
       router.push("/team-appraisals")
       return
@@ -70,7 +70,7 @@ export default function AppraisalReviewPage() {
     )
   }
 
-  const employee = users.find(u => u.id === appraisalData.employeeId)
+  const employee = users.find(u => u.id === appraisalData.employee_id)
 
   const handlePersonalInfoNext = (data: any) => {
     setAppraisalData((prev: any) => ({ ...prev, personalInfo: data }))
@@ -143,7 +143,7 @@ export default function AppraisalReviewPage() {
               <div>
                 <h1 className="text-2xl font-bold text-primary">Review Appraisal</h1>
                 <p className="text-muted-foreground">
-                  Reviewing appraisal for {employee?.name} • {employee?.employeeId}
+                  Reviewing appraisal for {employee?.name} • {employee?.employee_id}
                 </p>
               </div>
             </div>

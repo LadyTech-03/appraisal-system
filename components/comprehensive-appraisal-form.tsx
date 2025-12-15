@@ -13,21 +13,21 @@ import { Plus, Trash2, Save, Send } from "lucide-react"
 import type { Appraisal } from "@/lib/types"
 
 interface ComprehensiveAppraisalFormProps {
-  employeeId: string
+  employee_id: string
   onSave: () => void
   onSubmit: () => void
 }
 
-export function ComprehensiveAppraisalForm({ employeeId, onSave, onSubmit }: ComprehensiveAppraisalFormProps) {
+export function ComprehensiveAppraisalForm({ employee_id, onSave, onSubmit }: ComprehensiveAppraisalFormProps) {
   const { user } = useAuthStore()
   const { users, addAppraisal, updateAppraisal } = useAppStore()
   const [isDraft, setIsDraft] = useState(true)
 
-  const employee = users.find((u) => u.id === employeeId)
+  const employee = users.find((u) => u.id === employee_id)
   const appraiser = user
 
   const [formData, setFormData] = useState<Partial<Appraisal>>(() => ({
-    employeeId,
+    employee_id,
     appraiserId: user?.id || "",
     periodStart: new Date().getFullYear() + "-01-01",
     periodEnd: new Date().getFullYear() + "-12-31",

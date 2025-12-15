@@ -27,7 +27,7 @@ export function AccessRequestsPanel() {
     setEditData({
       name: request.name,
       email: request.email,
-      employeeId: request.employeeId,
+      employee_id: request.employee_id,
       role: request.role,
       division: request.division,
       notes: request.notes,
@@ -50,15 +50,15 @@ export function AccessRequestsPanel() {
     if (!request) return
 
     // Simple manager assignment logic - could be more sophisticated
-    let managerId = "1" // Default to DG
+    let manager_id = "1" // Default to DG
 
     if (request.division === "Management Services") {
-      managerId = "2" // DDG Management Services
+      manager_id = "2" // DDG Management Services
     } else if (request.division === "Operations") {
-      managerId = "3" // DDG Operations
+      manager_id = "3" // DDG Operations
     }
 
-    approveAccessRequest(requestId, managerId)
+    approveAccessRequest(requestId, manager_id)
     setSelectedRequest(null)
   }
 
@@ -138,8 +138,8 @@ export function AccessRequestsPanel() {
                         <Building className="w-4 h-4" />
                         {request.role} • {request.division}
                       </div>
-                      {request.employeeId && (
-                        <div className="text-sm text-muted-foreground">Staff ID: {request.employeeId}</div>
+                      {request.employee_id && (
+                        <div className="text-sm text-muted-foreground">Staff ID: {request.employee_id}</div>
                       )}
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="w-4 h-4" />
@@ -248,11 +248,11 @@ export function AccessRequestsPanel() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="edit-employeeId">Staff ID</Label>
+              <Label htmlFor="edit-employee_id">Staff ID</Label>
               <Input
-                id="edit-employeeId"
-                value={editData.employeeId || ""}
-                onChange={(e) => setEditData((prev) => ({ ...prev, employeeId: e.target.value }))}
+                id="edit-employee_id"
+                value={editData.employee_id || ""}
+                onChange={(e) => setEditData((prev) => ({ ...prev, employee_id: e.target.value }))}
               />
             </div>
 

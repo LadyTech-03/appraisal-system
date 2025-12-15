@@ -72,7 +72,7 @@ export async function deletePerformancePlanning(id: string): Promise<void> {
 /**
  * Get performance planning by User ID
  */
-export async function getPerformancePlanningByUserId(userId: string): Promise<PerformancePlanning[]> {
-    const response = await apiClient.get<{ success: boolean; data: PerformancePlanning[] }>(`/performance-planning/user/${userId}`)
+export async function getPerformancePlanningByUserId(user_id: string): Promise<PerformancePlanning[]> {
+    const response = await apiClient.get<{ success: boolean; data: PerformancePlanning[] }>(`/performance-planning/user/${user_id}`)
     return response.data.data
 }

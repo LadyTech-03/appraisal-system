@@ -9,6 +9,10 @@ export interface FinalSectionsData {
     appraiseeComments?: string
     appraiseeSignatureUrl?: string
     appraiseeDate?: string
+    hodComments?: string
+    hodName?: string
+    hodSignatureUrl?: string
+    hodDate?: string
 }
 
 export interface FinalSections extends FinalSectionsData {
@@ -22,8 +26,13 @@ export interface FinalSections extends FinalSectionsData {
     appraisee_comments?: string
     appraisee_signature_url?: string
     appraisee_date?: string
+    appraisal_id?: string
     created_at: string
     updated_at: string
+    hod_comments?: string
+    hod_name?: string
+    hod_signature_url?: string
+    hod_date?: string
 }
 
 /**
@@ -65,8 +74,8 @@ export async function deleteFinalSections(id: string): Promise<void> {
     await apiClient.delete(`/final-sections/${id}`)
 }
 
-export async function getFinalSectionsByUserId(userId: string): Promise<FinalSections[]> {
-    const response = await apiClient.get<{ success: boolean; data: FinalSections[] }>(`/final-sections/user/${userId}`)
+export async function getFinalSectionsByUserId(user_id: string): Promise<FinalSections[]> {
+    const response = await apiClient.get<{ success: boolean; data: FinalSections[] }>(`/final-sections/user/${user_id}`)
     return response.data.data
 }
 

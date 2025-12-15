@@ -1,32 +1,41 @@
 export interface User {
   id: string
-  name: string
-  email?: string
-  employeeId: string
+  employee_id: string
+  email: string
   role: string
+  position: string
+  manager_id?: string
   division?: string
   unit?: string
-  managerId?: string
   region?: string
-  passwordHash?: string // for local auth simulation
+  is_active: boolean
   createdAt: string
   updatedAt: string
+
+  // Personal information fields
+  title: string
   first_name: string
   surname: string
+  other_title?: string
+  other_names?: string
+  gender: string
+  appointment_date: string
+  grade?: string
+  notch?: string
 }
 
 export interface Appraisal {
   id: string
-  employeeId: string
-  appraiserId: string
+  employee_id: string
+  appraiser_id: string
   periodStart: string
   periodEnd: string
-  status: "draft" | "submitted" | "reviewed" | "closed"
+  status: "draft" | "submitted" | "reviewed" | "completed"
   employeeName?: string
   employeeInfo?: User
-  employeeEmployeeId?: string
+  employee_employee_id?: string
   appraiserName?: string
-  appraiserEmployeeId?: string
+  appraiser_employee_id?: string
   objectives: {
     id: string
     desc: string
@@ -66,11 +75,15 @@ export interface Appraisal {
   appraiseeSignatureDate: string
   createdAt: string
   updatedAt: string
+
+  appraisalsInProgress: number
+  appraisalsSubmitted: number
+  appraisalsCompleted: number
 }
 
 export interface ComprehensiveAppraisal {
   id: string
-  employeeId: string
+  employee_id: string
   appraiserId: string
   periodStart: string
   periodEnd: string
@@ -347,19 +360,19 @@ export interface AuthState {
   error: string | null
   login: (emailOrEmployeeId: string, password: string) => Promise<boolean>
   register: (data: {
-    employeeId: string
+    employee_id: string
     email: string
     password: string
     name: string
     role: string
     division?: string
     unit?: string
-    managerId?: string
+    manager_id?: string
     phone?: string
   }) => Promise<void>
   logout: () => Promise<void>
   bootstrap: () => Promise<void>
-  impersonate: (userId: string) => void
+  impersonate: (user_id: string) => void
   clearError: () => void
 }
 
@@ -367,7 +380,7 @@ export interface AccessRequest {
   id: string
   name: string
   email: string
-  employeeId?: string
+  employee_id?: string
   role: string
   division: string
   notes?: string
@@ -384,7 +397,7 @@ export interface AppState {
   orgHierarchy: Record<string, string[]>
   accessRequests: AccessRequest[]
   dashboardOverview: DashboardOverview | null
-  getReports: (managerId: string) => User[]
+  getReports: (manager_id: string) => User[]
   filteredUsers: (query: string) => User[]
   addUser: (user: Omit<User, "id" | "createdAt" | "updatedAt">) => void
   updateUser: (id: string, updates: Partial<User>) => void
@@ -393,7 +406,7 @@ export interface AppState {
   updateAppraisal: (id: string, updates: Partial<Appraisal>) => void
   addAccessRequest: (request: Omit<AccessRequest, "id" | "submittedAt" | "status">) => void
   updateAccessRequest: (id: string, updates: Partial<AccessRequest>) => void
-  approveAccessRequest: (id: string, managerId?: string) => void
+  approveAccessRequest: (id: string, manager_id?: string) => void
   rejectAccessRequest: (id: string) => void
   exportData: () => string
   importData: (data: string) => void

@@ -35,7 +35,7 @@ export default function AppraisalDetailPage() {
       return
     }
 
-    const canView = appraisal.employeeId === user?.id || appraisal.appraiserId === user?.id
+    const canView = appraisal.employee_id === user?.id || appraisal.appraiserId === user?.id
     if (!canView) {
       router.push("/dashboard")
       return
@@ -50,18 +50,18 @@ export default function AppraisalDetailPage() {
     )
   }
 
-  const employee = users.find((u) => u.id === appraisal.employeeId)
+  const employee = users.find((u) => u.id === appraisal.employee_id)
   const appraiser = users.find((u) => u.id === appraisal.appraiserId)
-  const isMyAppraisal = appraisal.employeeId === user.id
+  const isMyAppraisal = appraisal.employee_id === user.id
   const canEdit =
     appraisal.status === "draft" || (appraisal.status === "submitted" && appraisal.appraiserId === user.id)
 
-  const handleStatusChange = (newStatus: "reviewed" | "closed") => {
+  const handleStatusChange = (newStatus: "reviewed" | "completed") => {
     try {
       updateAppraisal(appraisal.id, { status: newStatus })
       setMessage({
         type: "success",
-        text: `Appraisal ${newStatus === "reviewed" ? "marked as reviewed" : "closed"} successfully!`,
+        text: `Appraisal ${newStatus === "reviewed" ? "marked as reviewed" : "completed"} successfully!`,
       })
     } catch (error) {
       setMessage({ type: "error", text: "Failed to update appraisal status. Please try again." })
@@ -76,7 +76,7 @@ export default function AppraisalDetailPage() {
         return "bg-blue-100 text-blue-800"
       case "reviewed":
         return "bg-purple-100 text-purple-800"
-      case "closed":
+      case "completed":
         return "bg-green-100 text-green-800"
       default:
         return "bg-gray-100 text-gray-800"
@@ -165,7 +165,7 @@ export default function AppraisalDetailPage() {
                     <CheckCircle className="h-4 w-4 mr-2" />
                     Mark as Reviewed
                   </Button>
-                  <Button variant="outline" onClick={() => handleStatusChange("closed")}>
+                  <Button variant="outline" onClick={() => handleStatusChange("completed")}>
                     Complete Appraisal
                   </Button>
                 </div>
@@ -185,7 +185,7 @@ export default function AppraisalDetailPage() {
                 <p className="text-muted-foreground mb-4">
                   This appraisal has been reviewed. You can now close it to complete the process.
                 </p>
-                <Button onClick={() => handleStatusChange("closed")}>
+                <Button onClick={() => handleStatusChange("completed")}>
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Close Appraisal
                 </Button>
