@@ -1199,7 +1199,7 @@ export default function AppraisalPrintView({ appraisalId }: AppraisalViewProps) 
           </div>
           <div className="border border-gray-400 p-4">
             <div className="border-2 border-gray-800 p-4 min-h-48 whitespace-pre-wrap text-sm mb-6">
-              {appraisal.hodComments || ""}
+              {appraisal.hod_comments || ""}
             </div>
 
             {/* HOD Name and Date */}
@@ -1210,13 +1210,13 @@ export default function AppraisalPrintView({ appraisalId }: AppraisalViewProps) 
                     NAME AND HOD'S SIGNATURE
                   </div>
                   <div className="text-sm text-center font-medium">
-                    {appraisal.hodName || "sdfsdfsdfsdf"}
+                    {appraisal.hod_name || ""}
                   </div>
                   <div className="">
-                    {appraisal.hodSignature && (
+                    {appraisal.hod_signature && (
                     <img 
-                        src={appraisal.hodSignature } 
-                        alt="Appraisee Signature" 
+                        src={appraisal.hod_signature} 
+                        alt="HOD Signature" 
                         className="max-h-12 object-contain justify-self-center"
                       />
                     )}
@@ -1229,8 +1229,8 @@ export default function AppraisalPrintView({ appraisalId }: AppraisalViewProps) 
                     DATE (dd/mm/yyyy)
                   </div>
                   <div className="text-center text-sm mt-1">
-                    {appraisal.hodDate 
-                      ? new Date(appraisal.hodDate).toLocaleDateString("en-GB")
+                    {appraisal.hod_date 
+                      ? new Date(appraisal.hod_date).toLocaleDateString("en-GB")
                       : ""}
                   </div>
                 </div>

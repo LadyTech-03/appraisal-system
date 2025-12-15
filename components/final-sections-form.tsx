@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Loader2, Trash2 } from "lucide-react"
+import { Eye, Loader2, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import {
   AlertDialog,
@@ -227,6 +227,49 @@ export function FinalSectionsForm({
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handlePreview = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    try {
+      const payload: FinalSectionsData = {
+        appraiserComments: formData.appraiserComments || undefined,
+        appraiserSignatureUrl: formData.appraiserSignatureUrl || undefined,
+        appraiserDate: formData.appraiserDate || undefined,
+        careerDevelopmentComments: formData.careerDevelopmentComments || undefined,
+        assessmentDecision: formData.assessmentDecision || undefined,
+        appraiseeComments: formData.appraiseeComments || undefined,
+        appraiseeSignatureUrl: formData.appraiseeSignatureUrl || undefined,
+        appraiseeDate: formData.appraiseeDate || undefined,
+        hodComments: formData.hodComments || undefined,
+        hodName: formData.hodName || undefined,
+        hodSignatureUrl: formData.hodSignatureUrl || undefined,
+        hodDate: formData.hodDate || undefined
+      }
+
+      let savedSections
+      if (existingFinalSectionsId) {
+        savedSections = await updateFinalSections(existingFinalSectionsId, payload)
+        appraisalsApi.updateAppraisalStatus(formData.appraisalId, "reviewed")
+      } else {
+        savedSections = await createFinalSections(payload)
+        setExistingFinalSectionsId(savedSections.id)
+        appraisalsApi.updateAppraisalStatus(formData.appraisalId, "submitted")
+      }
+
+      // Appraisal is automatically submitted via the service
+      toast.success("Appraisal submitted successfully!")
+      
+      // Redirect
+      router.push(`/appraisal-print/${formData.appraisalId}`)
+    } catch (error) {
+      console.error("Error saving final sections:", error)
+      toast.error("Failed to save final sections. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
+    
   }
 
   const handleClearForm = async () => {
@@ -713,6 +756,15 @@ export function FinalSectionsForm({
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
+
+              <Button
+              type="button"
+              disabled={isLoading || isClearingForm}
+              onClick={handlePreview}
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                Preview
+              </Button>
 
               <Button
                 type="submit"
