@@ -67,7 +67,17 @@ export default function AppraisalPrintView({ appraisalId }: AppraisalViewProps) 
     <div className="min-h-screen bg-white">
       {/* Print Controls - Hidden when printing */}
       <div className="print:hidden sticky top-0 bg-white border-b shadow-sm p-4 flex justify-between items-center z-10">
-        <Button variant="outline" onClick={() => router.back()}>
+        <Button variant="outline" onClick={() => {
+          const params = new URLSearchParams(window.location.search)
+          const returnTo = params.get('returnTo')
+          const step = params.get('step')
+          
+          if (returnTo && step) {
+            router.push(`/${returnTo}?step=${step}`)
+          } else {
+            router.back()
+          }
+        }}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
@@ -1175,8 +1185,8 @@ export default function AppraisalPrintView({ appraisalId }: AppraisalViewProps) 
                     DATE (dd/mm/yyyy)
                   </div>
                   <div className="text-center text-sm mt-1">
-                    {appraisal.appraiseeComments?.appraisee_date 
-                      ? new Date(appraisal.appraiseeComments.appraisee_date).toLocaleDateString("en-GB")
+                    {appraisal.createdAt 
+                      ? new Date(appraisal.createdAt).toLocaleDateString("en-GB")
                       : ""}
                   </div>
                 </div>

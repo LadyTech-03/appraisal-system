@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useAuthStore } from "@/lib/store"
 import { Sidebar } from "@/components/sidebar"
 import { Topbar } from "@/components/topbar"
@@ -33,6 +33,7 @@ const steps = [
 
 export default function CreateAppraisalPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user, isAuthenticated } = useAuthStore()
   const [currentStep, setCurrentStep] = useState<'personal-info' | 'performance-planning' | 'mid-year-review' | 'end-year-review' | 'annual-appraisal' | 'final-sections'>('personal-info')
   const [appraisalData, setAppraisalData] = useState<any>({
@@ -50,6 +51,24 @@ export default function CreateAppraisalPage() {
       return
     }
   }, [isAuthenticated, router])
+
+  // Check for step parameter in URL
+  useEffect(() => {
+    const stepParam = searchParams.get('step')
+    if (stepParam) {
+      const stepMap: { [key: string]: typeof currentStep } = {
+        '1': 'personal-info',
+        '2': 'performance-planning',
+        '3': 'mid-year-review',
+        '4': 'end-year-review',
+        '5': 'final-sections',
+      }
+      const step = stepMap[stepParam]
+      if (step) {
+        setCurrentStep(step)
+      }
+    }
+  }, [searchParams])
 
   if (!isAuthenticated || !user) {
     return (

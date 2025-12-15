@@ -261,8 +261,8 @@ export function FinalSectionsForm({
       // Appraisal is automatically submitted via the service
       toast.success("Appraisal submitted successfully!")
       
-      // Redirect
-      router.push(`/appraisal-print/${formData.appraisalId}`)
+      // Redirect with return path
+      router.push(`/appraisal-print/${formData.appraisalId}?returnTo=create-appraisal&step=5`)
     } catch (error) {
       console.error("Error saving final sections:", error)
       toast.error("Failed to save final sections. Please try again.")
@@ -759,6 +759,7 @@ export function FinalSectionsForm({
 
               <Button
               type="button"
+              size="lg"
               disabled={isLoading || isClearingForm}
               onClick={handlePreview}
               >
