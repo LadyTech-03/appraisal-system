@@ -55,6 +55,7 @@ export function FinalSectionsForm({
   const [appraiserSignatureUrl, setAppraiserSignatureUrl] = useState<string | null>(null)
   const [appraiseeSignatureUrl, setAppraiseeSignatureUrl] = useState<string | null>(null)
   const [hodSignatureUrl, setHodSignatureUrl] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
 
 
   const [formData, setFormData] = useState({
@@ -93,6 +94,7 @@ export function FinalSectionsForm({
           finalSections = await getFinalSectionsByUserId(reviewUserId)
           console.log(finalSections, 'first log')
           setAppraiseeSignatureUrl(finalSections[0].appraisee_signature_url || null)
+          setUserId(finalSections[0].user_id || null)
         } else {
           finalSections = await getMyFinalSections()
           console.log(finalSections, 'second log')
@@ -255,18 +257,20 @@ export function FinalSectionsForm({
       let savedSections
       if (existingFinalSectionsId) {
         savedSections = await updateFinalSections(existingFinalSectionsId, payload)
-        appraisalsApi.updateAppraisalStatus(formData.appraisalId, "reviewed")
       } else {
         savedSections = await createFinalSections(payload)
         setExistingFinalSectionsId(savedSections.id)
-        appraisalsApi.updateAppraisalStatus(formData.appraisalId, "submitted")
       }
 
       // Appraisal is automatically submitted via the service
       toast.success("Appraisal submitted successfully!")
       
       // Redirect with return path
-      router.push(`/appraisal-print/${formData.appraisalId}?returnTo=create-appraisal&step=5`)
+      if(isReviewMode){
+        router.push(`/appraisal-print/${formData.appraisalId}?returnTo=team-appraisals/${userId}&step=5`)
+      }else{
+        router.push(`/appraisal-print/${formData.appraisalId}?returnTo=create-appraisal&step=5`)
+      }
     } catch (error) {
       console.error("Error saving final sections:", error)
       toast.error("Failed to save final sections. Please try again.")

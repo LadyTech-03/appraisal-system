@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter, useParams } from "next/navigation"
+import { useRouter, useParams, useSearchParams } from "next/navigation"
 import { useAuthStore } from "@/lib/store"
 import { Sidebar } from "@/components/sidebar"
 import { Topbar } from "@/components/topbar"
@@ -22,6 +22,7 @@ type Step = 'personal-info' | 'performance-planning' | 'mid-year-review' | 'end-
 export default function TeamMemberAppraisalPage() {
   const router = useRouter()
   const params = useParams()
+  const searchParams = useSearchParams()
   const user_id = params?.user_id as string
   const { user, isAuthenticated, token } = useAuthStore()
   const [isLoading, setIsLoading] = useState(true)
@@ -44,6 +45,25 @@ export default function TeamMemberAppraisalPage() {
         }
     }
   }, [isAuthenticated, token, router])
+
+
+    // Check for step parameter in URL
+    useEffect(() => {
+      const stepParam = searchParams.get('step')
+      if (stepParam) {
+        const stepMap: { [key: string]: typeof currentStep } = {
+          '1': 'personal-info',
+          '2': 'performance-planning',
+          '3': 'mid-year-review',
+          '4': 'end-year-review',
+          '5': 'final-sections',
+        }
+        const step = stepMap[stepParam]
+        if (step) {
+          setCurrentStep(step)
+        }
+      }
+    }, [searchParams])
 
   // Fetch team member's personal info
   useEffect(() => {
