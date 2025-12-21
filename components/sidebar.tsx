@@ -77,6 +77,12 @@ const menuItems: MenuItem[] = [
   },
   {
     icon: Settings,
+    label: "Form Management",
+    href: "/form-management",
+    roles: ADMIN_ROLES,
+  },
+  {
+    icon: Settings,
     label: "Settings",
     href: "/settings",
   },

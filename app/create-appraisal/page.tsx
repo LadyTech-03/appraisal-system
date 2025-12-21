@@ -11,8 +11,11 @@ import { MidYearReviewForm } from "@/components/mid-year-review-form"
 import { EndYearReviewForm } from "@/components/end-year-review-form"
 import { AnnualAppraisalForm } from "@/components/annual-appraisal-form"
 import { FinalSectionsForm } from "@/components/final-sections-form"
+import { FormUnavailable } from "@/components/form-unavailable"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Check, Info } from "lucide-react"
+import { ArrowLeft, Check, Info, Loader2 } from "lucide-react"
+import { appraisalPeriodsApi, type AppraisalPeriod } from "@/lib/api/appraisalPeriods"
+import { toast } from "sonner"
 import {
   Sheet,
   SheetContent,
@@ -44,6 +47,8 @@ export default function CreateAppraisalPage() {
     annualAppraisal: null,
     finalSections: null
   })
+  const [availability, setAvailability] = useState<{ [key: string]: AppraisalPeriod }>({})
+  const [isLoadingAvailability, setIsLoadingAvailability] = useState(true)
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -51,6 +56,30 @@ export default function CreateAppraisalPage() {
       return
     }
   }, [isAuthenticated, router])
+
+  // Fetch availability on mount
+  useEffect(() => {
+    const fetchAvailability = async () => {
+      try {
+        const periods = await appraisalPeriodsApi.getAvailability()
+        const availabilityMap = periods.reduce((acc, period) => {
+          acc[period.section_name] = period
+          return acc
+        }, {} as { [key: string]: AppraisalPeriod })
+        console.log(availabilityMap, 'available periods')
+        setAvailability(availabilityMap)
+      } catch (error) {
+        console.error('Failed to fetch availability:', error)
+        toast.error('Failed to load form availability status')
+      } finally {
+        setIsLoadingAvailability(false)
+      }
+    }
+
+    if (isAuthenticated) {
+      fetchAvailability()
+    }
+  }, [isAuthenticated])
 
   // Check for step parameter in URL
   useEffect(() => {
@@ -73,7 +102,17 @@ export default function CreateAppraisalPage() {
   if (!isAuthenticated || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-foreground"></div>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (isLoadingAvailability) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
       </div>
     )
   }
@@ -127,6 +166,24 @@ export default function CreateAppraisalPage() {
 
   const handleBackToEndYearReview = () => {
     setCurrentStep('end-year-review')
+  }
+
+  // Helper to check if a section is available
+  const getSectionAvailability = (stepId: string) => {
+    const sectionMap: { [key: string]: string } = {
+      'personal-info': 'personal_info',
+      'performance-planning': 'performance_planning',
+      'mid-year-review': 'mid_year_review',
+      'end-year-review': 'end_year_review',
+      'final-sections': 'final_sections'
+    }
+    const sectionName = sectionMap[stepId]
+    return availability[sectionName] || { is_available: true, message: '' }
+  }
+
+  const isStepAvailable = (stepId: string) => {
+    const section = getSectionAvailability(stepId)
+    return section.is_available
   }
 
   const handleBackToAnnualAppraisal = () => {
@@ -187,38 +244,83 @@ export default function CreateAppraisalPage() {
             ))}
           </div>
 
-            <div className="flex p-6 space-y-6">
+            <div className="flex p-6 space-y-6 justify-center">
               {/* Form Content */}
               {currentStep === 'personal-info' ? (
-                <AppraiseePersonalInfoForm 
-                onNext={handlePersonalInfoNext} 
-                onBack={handleBackToPersonalInfo}
-                />
+                isStepAvailable('personal-info') ? (
+                  <AppraiseePersonalInfoForm 
+                    onNext={handlePersonalInfoNext} 
+                    onBack={handleBackToPersonalInfo}
+                  />
+                ) : (
+                  <FormUnavailable
+                    sectionName="personal_info"
+                    message={getSectionAvailability('personal-info').message || ''}
+                    opensAt={getSectionAvailability('personal-info').opens_at}
+                    onBack={() => router.push('/dashboard')}
+                  />
+                )
               ) : currentStep === 'performance-planning' ? (
-                <PerformancePlanningForm 
-                  onNext={handlePerformancePlanningNext}
-                  onBack={handleBackToPersonalInfo}
-                />
+                isStepAvailable('performance-planning') ? (
+                  <PerformancePlanningForm 
+                    onNext={handlePerformancePlanningNext}
+                    onBack={handleBackToPersonalInfo}
+                  />
+                ) : (
+                  <FormUnavailable
+                    sectionName="performance_planning"
+                    message={getSectionAvailability('performance-planning').message || ''}
+                    opensAt={getSectionAvailability('performance-planning').opens_at}
+                    onBack={handleBackToPersonalInfo}
+                  />
+                )
               ) : currentStep === 'mid-year-review' ? (
-                <MidYearReviewForm 
-                  onNext={handleMidYearReviewNext}
-                  onBack={handleBackToPerformancePlanning}
-                />
+                isStepAvailable('mid-year-review') ? (
+                  <MidYearReviewForm 
+                    onNext={handleMidYearReviewNext}
+                    onBack={handleBackToPerformancePlanning}
+                  />
+                ) : (
+                  <FormUnavailable
+                    sectionName="mid_year_review"
+                    message={getSectionAvailability('mid-year-review').message || ''}
+                    opensAt={getSectionAvailability('mid-year-review').opens_at}
+                    onBack={handleBackToPerformancePlanning}
+                  />
+                )
               ) : currentStep === 'end-year-review' ? (
-                <EndYearReviewForm 
-                  onNext={handleEndYearReviewNext}
-                  onBack={handleBackToMidYearReview}
-                />
+                isStepAvailable('end-year-review') ? (
+                  <EndYearReviewForm 
+                    onNext={handleEndYearReviewNext}
+                    onBack={handleBackToMidYearReview}
+                  />
+                ) : (
+                  <FormUnavailable
+                    sectionName="end_year_review"
+                    message={getSectionAvailability('end-year-review').message || ''}
+                    opensAt={getSectionAvailability('end-year-review').opens_at}
+                    onBack={handleBackToMidYearReview}
+                  />
+                )
               ) : currentStep === 'annual-appraisal' ? (
                 <AnnualAppraisalForm 
                   onNext={handleAnnualAppraisalNext}
                   onBack={handleBackToEndYearReview}
                 />
               ) : (
-                <FinalSectionsForm 
-                  onNext={handleFinalSectionsNext}
-                  onBack={handleBackToEndYearReview}
-                />
+                isStepAvailable('final-sections') ? (
+                  <FinalSectionsForm 
+                    onNext={handleFinalSectionsNext}
+                    onBack={handleBackToEndYearReview}
+                  />
+                ) : (
+                  <FormUnavailable
+                    sectionName="final_sections"
+                    message={getSectionAvailability('final-sections').message || ''}
+                    opensAt={getSectionAvailability('final-sections').opens_at}
+                    onBack={handleBackToEndYearReview}
+                  />
+                )
               )}
 
               {/* Guidance Notes Sheet */}

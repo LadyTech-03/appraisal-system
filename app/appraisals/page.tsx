@@ -169,7 +169,7 @@ export default function AppraisalsPage() {
                           <TableCell>{getStatusBadge(appraisal.status)}</TableCell>
                           {/* <TableCell>{getManagerStatusBadge(appraisal.manager_status)}</TableCell> */}
                           <TableCell>
-                            {appraisal.overallAssessment?.overall_score_percentage && appraisal.status === "reviewed"
+                            {appraisal.overallAssessment?.overall_score_percentage && appraisal.status === "completed"
                               ? `${appraisal.overallAssessment.overall_score_percentage}%`
                               : "N/A"}
                           </TableCell>
