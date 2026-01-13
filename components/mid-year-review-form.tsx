@@ -337,14 +337,32 @@ export function MidYearReviewForm({
               </div>
               <div className="col-span-1 flex items-center justify-center">
                 {items.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={() => removeReviewItem(type, item.id)}
-                    className="text-xs p-1"
-                  >
-                    Remove
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button className="">
+                        Edit
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Remove {isTargets ? 'Target' : 'Competency'}?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to remove this {isTargets ? 'target' : 'competency'}?
+                          <br /><br />
+                          <strong>{isTargets ? 'Target' : 'Competency'}:</strong> {item.description || "(empty)"}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => removeReviewItem(type, item.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Yes, Remove
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 )}
               </div>
             </div>

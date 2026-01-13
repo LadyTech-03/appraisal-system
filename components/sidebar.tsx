@@ -16,11 +16,11 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Shield,
   UserCheck,
   Calendar,
   Target,
   Menu,
+  FileCog
 } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import Image from "next/image"
@@ -69,17 +69,17 @@ const menuItems: MenuItem[] = [
     roles: ADMIN_ROLES,
   },
   {
+    icon: FileCog,
+    label: "Form Management",
+    href: "/form-management",
+    roles: ADMIN_ROLES,
+  },
+  {
     icon: Users,
     label: "User Management",
     href: "/admin",
     roles: ADMIN_ROLES,
     // badge: "System Admin",
-  },
-  {
-    icon: Settings,
-    label: "Form Management",
-    href: "/form-management",
-    roles: ADMIN_ROLES,
   },
   {
     icon: Settings,
@@ -175,7 +175,7 @@ function SidebarContent() {
           return (
             <Button
               key={item.href}
-              variant={is_active ? "secondary" : "ghost"}
+              variant={is_active ? "default" : "ghost"}
               className={`w-full justify-start ${isCollapsed ? "px-2" : "px-3"}`}
               onClick={() => router.push(item.href)}
             >

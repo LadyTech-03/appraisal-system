@@ -179,7 +179,7 @@ export default function FormManagementPage() {
                       <div className="space-y-2">
                         <Label htmlFor={`opens-${period.section_name}`}>
                           <Calendar className="w-4 h-4 inline mr-2" />
-                          Opens At (Optional)
+                          Opens At
                         </Label>
                         <Input
                           id={`opens-${period.section_name}`}

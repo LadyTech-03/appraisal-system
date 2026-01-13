@@ -384,14 +384,33 @@ export function PerformancePlanningForm({
                   </div>
                   <div className="col-span-1 flex items-start justify-center">
                     {formData.keyResultAreas.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => removeKeyResultArea(area.id)}
-                      >
-                        Remove
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button className="">
+                            Edit
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Remove Target?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to remove this target?
+                              <br /><br />
+                              <strong>Key Result Area:</strong> {area.keyResultArea || "(empty)"}<br />
+                              <strong>Target:</strong> {area.targets || "(empty)"}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => removeKeyResultArea(area.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Yes, Remove
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     )}
                   </div>
                 </div>
@@ -432,14 +451,32 @@ export function PerformancePlanningForm({
                       />
                     </div>
                     {formData.keyCompetencies.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => removeKeyCompetency(comp.id)}
-                      >
-                        Remove
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button className="">
+                            Edit
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Remove Competency?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to remove this competency?
+                              <br /><br />
+                              <strong>Competency:</strong> {comp.competency || "(empty)"}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => removeKeyCompetency(comp.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Yes, Remove
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     )}
                   </div>
                 </Card>

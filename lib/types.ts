@@ -7,7 +7,7 @@ export interface User {
   manager_id?: string
   division?: string
   unit?: string
-  region?: string
+  phone?: string
   is_active: boolean
   createdAt: string
   updatedAt: string
@@ -22,6 +22,7 @@ export interface User {
   appointment_date: string
   grade?: string
   notch?: string
+  password_change_required?: boolean
 }
 
 export interface Appraisal {

@@ -13,10 +13,12 @@ import { useAuthStore } from "@/lib/store"
 import { Shield, BookOpen, GraduationCap, Award } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import { ChangePasswordModal } from "@/components/change-password-modal"
 
 export default function LoginPage() {
   const router = useRouter()
   const login = useAuthStore((state) => state.login)
+  const user = useAuthStore((state) => state.user)
   const [formData, setFormData] = useState({
     emailOrEmployeeId: "",
     password: "",
@@ -25,6 +27,7 @@ export default function LoginPage() {
   const clearError = useAuthStore((state) => state.clearError)
   const [formError, setFormError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [showPasswordChangeModal, setShowPasswordChangeModal] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,9 +36,15 @@ export default function LoginPage() {
     clearError()
 
     try {
-      const success = await login(formData.emailOrEmployeeId, formData.password)
-      if (success) {
-        router.push("/dashboard")
+      const result = await login(formData.emailOrEmployeeId, formData.password)
+      if (result) {
+        // Check if user needs to change password
+        const currentUser = useAuthStore.getState().user
+        if (currentUser?.password_change_required) {
+          setShowPasswordChangeModal(true)
+        } else {
+          router.push("/dashboard")
+        }
       } else {
         setFormError("Invalid credentials. Please try again.")
       }
@@ -44,6 +53,18 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handlePasswordChangeSuccess = () => {
+    setShowPasswordChangeModal(false)
+    // Update user in store to clear password_change_required
+    const currentUser = useAuthStore.getState().user
+    if (currentUser) {
+      useAuthStore.setState({ 
+        user: { ...currentUser, password_change_required: false } 
+      })
+    }
+    router.push("/dashboard")
   }
 
   return (
@@ -115,6 +136,12 @@ export default function LoginPage() {
         />
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 to-blue-700/30" />
       </div>
+
+      {/* Password Change Modal for first-time login */}
+      <ChangePasswordModal 
+        isOpen={showPasswordChangeModal} 
+        onSuccess={handlePasswordChangeSuccess} 
+      />
     </div>
   )
 }

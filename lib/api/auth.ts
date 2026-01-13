@@ -54,6 +54,18 @@ export const authApi = {
       throw parseApiError(error)
     }
   },
+
+  async changePassword(currentPassword: string, newPassword: string) {
+    try {
+      const response = await apiClient.put("/auth/change-password", {
+        currentPassword,
+        newPassword,
+      })
+      return response.data
+    } catch (error) {
+      throw parseApiError(error)
+    }
+  },
 }
 
 export type { LoginPayload, RegisterPayload }

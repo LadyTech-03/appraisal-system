@@ -396,14 +396,32 @@ export function EndYearReviewForm({
                    </div>
                   <div className="col-span-1 flex items-center justify-center">
                     {formData.targets.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        onClick={() => removeTarget(target.id)}
-                        className="text-xs p-1"
-                      >
-                        Remove
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button className="">
+                            Edit
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Remove Target?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to remove this target?
+                              <br /><br />
+                              <strong>Target:</strong> {target.target || "(empty)"}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => removeTarget(target.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Yes, Remove
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     )}
                   </div>
                 </div>

@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CalendarIcon, Loader2, Trash2 } from "lucide-react"
+import { CalendarIcon, Loader2, Trash2, MoreHorizontal } from "lucide-react"
 import { format } from "date-fns"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -27,6 +27,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 import { useAuthStore } from "@/lib/store"
 
@@ -47,6 +53,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
   const [isLoading, setIsLoading] = useState(false)
   const [isClearingForm, setIsClearingForm] = useState(false)
   const [existingPersonalInfoId, setExistingPersonalInfoId] = useState<string | null>(null)
+  const [deleteTrainingIndex, setDeleteTrainingIndex] = useState<number | null>(null)
   const [formData, setFormData] = useState({
     // Period of Report
     periodFrom: "",
@@ -529,28 +536,45 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                 <div className="space-y-2">
                   {formData.trainingRecords.map((record, index) => (
                     <div key={index} className="">
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-2 border-b border-blue-300 py-1">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-2 border-b border-blue-300 py-1 items-center">
                         <div>
-                          {/* <span className="text-sm flex items-center justify-center font-semibold">Institution</span> */}
                           <p className="text-sm text-center">{record.institution}</p>
                         </div>
                         <div>
-                          {/* <span className="text-sm flex items-center justify-center font-semibold">Date</span> */}
                           <p className="text-sm text-center">{record.date}</p>
                         </div>
                         <div>
-                          {/* <span className="text-sm flex items-center justify-center font-semibold">Programme</span> */}
                           <p className="text-sm text-center">{record.programme}</p>
                         </div>
                         <div className="flex items-center justify-center">
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => removeTrainingRecord(index)}
-                          >
-                            Remove
-                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button className="">
+                                Edit
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Remove Training Record?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to remove this training record?
+                                  <br /><br />
+                                  <strong>Programme:</strong> {record.programme}<br />
+                                  <strong>Institution:</strong> {record.institution}<br />
+                                  <strong>Date:</strong> {record.date}
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => removeTrainingRecord(index)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Yes, Remove
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </div>
                     </div>
