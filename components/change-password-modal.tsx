@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Loader2, Lock, Eye, EyeOff } from "lucide-react"
+import { Loader2, Lock, Eye, EyeOff, Router } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog"
 import { authApi } from "@/lib/api/auth"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 interface ChangePasswordModalProps {
   isOpen: boolean
@@ -29,6 +30,7 @@ export function ChangePasswordModal({ isOpen, onSuccess }: ChangePasswordModalPr
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [error, setError] = useState("")
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -60,6 +62,10 @@ export function ChangePasswordModal({ isOpen, onSuccess }: ChangePasswordModalPr
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const logOut = () => {
+    router.push('/')
   }
 
   return (
@@ -139,6 +145,9 @@ export function ChangePasswordModal({ isOpen, onSuccess }: ChangePasswordModalPr
           )}
 
           <DialogFooter>
+            <Button variant={'outline'} onClick={logOut} type="button" disabled={isSubmitting} className="w-full">
+              Close
+            </Button>
             <Button type="submit" disabled={isSubmitting} className="w-full">
               {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Change Password
