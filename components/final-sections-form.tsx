@@ -164,24 +164,24 @@ export function FinalSectionsForm({
     }
   }
 
-    const handleClearSignatures = () => {
-      if (appraiseeSignatureUrl && !isReviewMode) {
-          setAppraiseeSignatureUrl(null)
-          setFormData(prev => ({
-              ...prev,
-              appraiseeSignatureUrl: null
-          }))
-      }
-      if (appraiserSignatureUrl && isReviewMode) {
-          setAppraiserSignatureUrl(null)
-          setHodSignatureUrl(null)
-          setFormData(prev => ({
-              ...prev,
-              appraiserSignatureUrl: null
-          }))
-      }
-      toast.success("Signatures cleared successfully")
+  const handleClearSignatures = () => {
+    if (appraiseeSignatureUrl && !isReviewMode) {
+      setAppraiseeSignatureUrl(null)
+      setFormData(prev => ({
+        ...prev,
+        appraiseeSignatureUrl: null
+      }))
     }
+    if (appraiserSignatureUrl && isReviewMode) {
+      setAppraiserSignatureUrl(null)
+      setHodSignatureUrl(null)
+      setFormData(prev => ({
+        ...prev,
+        appraiserSignatureUrl: null
+      }))
+    }
+    toast.success("Signatures cleared successfully")
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -206,9 +206,9 @@ export function FinalSectionsForm({
       if (existingFinalSectionsId) {
         savedSections = await updateFinalSections(existingFinalSectionsId, payload)
         toast.success("Final sections updated successfully!")
-        if(isReviewMode){
+        if (isReviewMode) {
           appraisalsApi.updateAppraisalStatus(formData.appraisalId, "reviewed")
-        }else{
+        } else {
           appraisalsApi.updateAppraisalStatus(formData.appraisalId, "submitted")
         }
       } else {
@@ -220,11 +220,11 @@ export function FinalSectionsForm({
 
       // Appraisal is automatically submitted via the service
       toast.success("Appraisal submitted successfully!")
-      
+
       // Redirect
-      if(isReviewMode){
+      if (isReviewMode) {
         router.push("/team-appraisals")
-      }else{
+      } else {
         router.push("/appraisals")
       }
     } catch (error) {
@@ -264,11 +264,11 @@ export function FinalSectionsForm({
 
       // Appraisal is automatically submitted via the service
       toast.success("Appraisal submitted successfully!")
-      
+
       // Redirect with return path
-      if(isReviewMode){
+      if (isReviewMode) {
         router.push(`/appraisal-print/${formData.appraisalId}?returnTo=team-appraisals/${userId}&step=5`)
-      }else{
+      } else {
         router.push(`/appraisal-print/${formData.appraisalId}?returnTo=create-appraisal&step=5`)
       }
     } catch (error) {
@@ -277,7 +277,7 @@ export function FinalSectionsForm({
     } finally {
       setIsLoading(false)
     }
-    
+
   }
 
   const handleClearForm = async () => {
@@ -326,7 +326,7 @@ export function FinalSectionsForm({
               <div className="bg-amber-800 text-white p-2 rounded">
                 <h3 className="font-bold">SECTION 6: Annual Appraisal</h3>
               </div>
-              
+
               <div className="space-y-2">
                 <Label className="font-semibold">
                   Appraiser's Comments on Performance Plan Achievements
@@ -358,7 +358,7 @@ export function FinalSectionsForm({
                         </>
                       ) : (
                         <>
-                          {isReviewMode &&  (
+                          {isReviewMode && (
                             <div className="flex items-center gap-2 text-sm">
                               <span className="text-green-600 font-bold">✓ Signed</span>
                               <Button
@@ -387,7 +387,7 @@ export function FinalSectionsForm({
                   ) : (
                     <div className="space-y-2">
                       <Label htmlFor="appraiser-signature" className="text-sm">
-                        Upload Signature to Profile (PNG)
+                        Upload Signature
                       </Label>
                       <div className="flex gap-2">
                         <Input
@@ -423,7 +423,7 @@ export function FinalSectionsForm({
               <div className="bg-amber-800 text-white p-2 rounded">
                 <h3 className="font-bold">SECTION 7: Career Development</h3>
               </div>
-              
+
               <div className="space-y-2">
                 <Label className="font-semibold underline">
                   Training and Development - Comments and Plan
@@ -449,7 +449,7 @@ export function FinalSectionsForm({
               <div className="bg-amber-800 text-white p-2 rounded">
                 <h3 className="font-bold">SECTION 8: ASSESSMENT DECISION</h3>
               </div>
-              
+
               <div className="space-y-3">
                 <p className="text-sm">
                   Assess the Appraisee's potential to perform the duties of the next grade, taking account of the assessment of performance in <strong>Section 5</strong> above.)
@@ -506,7 +506,7 @@ export function FinalSectionsForm({
               <div className="bg-amber-800 text-white p-2 rounded">
                 <h3 className="font-bold">SECTION 9: Appraisee's Comments</h3>
               </div>
-              
+
               <div className="space-y-2">
                 <Textarea
                   value={formData.appraiseeComments}
@@ -532,7 +532,7 @@ export function FinalSectionsForm({
                         </>
                       ) : (
                         <>
-                          {!isReviewMode &&  (
+                          {!isReviewMode && (
                             <div className="flex items-center gap-2 text-sm">
                               <span className="text-green-600 font-bold">✓ Signed</span>
                               <Button
@@ -561,7 +561,7 @@ export function FinalSectionsForm({
                   ) : (
                     <div className="space-y-2">
                       <Label htmlFor="appraisee-signature" className="text-sm">
-                        Upload Signature to Profile (PNG)
+                        Upload Signature
                       </Label>
                       <div className="flex gap-2">
                         <Input
@@ -598,7 +598,7 @@ export function FinalSectionsForm({
               <div className="bg-amber-800 text-white p-2 rounded">
                 <h3 className="font-bold">SECTION 10: Head of Department's / Division's (HOD) Comments</h3>
               </div>
-              
+
               <div className="space-y-2">
                 <Textarea
                   value={formData.hodComments}
@@ -635,7 +635,7 @@ export function FinalSectionsForm({
                         </>
                       ) : (
                         <>
-                          {isReviewMode &&  (
+                          {isReviewMode && (
                             <div className="flex items-center gap-2 text-sm">
                               <span className="text-green-600 font-bold">✓ Signed</span>
                               <Button
@@ -664,7 +664,7 @@ export function FinalSectionsForm({
                   ) : (
                     <div className="space-y-2">
                       <Label htmlFor="appraiser-signature" className="text-sm">
-                        Upload Signature to Profile (PNG)
+                        Upload Signature
                       </Label>
                       <div className="flex gap-2">
                         <Input
@@ -766,10 +766,10 @@ export function FinalSectionsForm({
               </AlertDialog>
 
               <Button
-              type="button"
-              size="lg"
-              disabled={isLoading || isClearingForm}
-              onClick={handlePreview}
+                type="button"
+                size="lg"
+                disabled={isLoading || isClearingForm}
+                onClick={handlePreview}
               >
                 <Eye className="mr-2 h-4 w-4" />
                 Preview

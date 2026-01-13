@@ -259,13 +259,13 @@ export function AnnualAppraisalForm({
 
     // Calculate overall averages
     const coreAverages = updatedCoreCompetencies.map((c: CompetencyCategory) => c.average)
-    const coreCompetenciesAverage = coreAverages.length > 0 
-      ? coreAverages.reduce((sum: number, avg: number) => sum + avg, 0) / coreAverages.length 
+    const coreCompetenciesAverage = coreAverages.length > 0
+      ? coreAverages.reduce((sum: number, avg: number) => sum + avg, 0) / coreAverages.length
       : 0
 
     const nonCoreAverages = updatedNonCoreCompetencies.map((c: CompetencyCategory) => c.average)
-    const nonCoreCompetenciesAverage = nonCoreAverages.length > 0 
-      ? nonCoreAverages.reduce((sum: number, avg: number) => sum + avg, 0) / nonCoreAverages.length 
+    const nonCoreCompetenciesAverage = nonCoreAverages.length > 0
+      ? nonCoreAverages.reduce((sum: number, avg: number) => sum + avg, 0) / nonCoreAverages.length
       : 0
 
     const overallTotal = (performanceAssessmentScore ?? 0) + coreCompetenciesAverage + nonCoreCompetenciesAverage
@@ -289,7 +289,7 @@ export function AnnualAppraisalForm({
     const loadData = async () => {
       try {
         // Load user profile for signature
-        const [ profile, performanceAssessment ] = await Promise.all([
+        const [profile, performanceAssessment] = await Promise.all([
           authApi.getProfile(),
           getPerformanceAssessment(reviewUserId || '')
         ])
@@ -338,11 +338,11 @@ export function AnnualAppraisalForm({
       [key]: prev[key].map((category: CompetencyCategory) =>
         category.id === categoryId
           ? {
-              ...category,
-              items: category.items.map((item: CompetencyItem) =>
-                item.id === itemId ? { ...item, score } : item
-              )
-            }
+            ...category,
+            items: category.items.map((item: CompetencyItem) =>
+              item.id === itemId ? { ...item, score } : item
+            )
+          }
           : category
       )
     }))
@@ -360,11 +360,11 @@ export function AnnualAppraisalForm({
       [key]: prev[key].map((category: CompetencyCategory) =>
         category.id === categoryId
           ? {
-              ...category,
-              items: category.items.map((item: CompetencyItem) =>
-                item.id === itemId ? { ...item, comments } : item
-              )
-            }
+            ...category,
+            items: category.items.map((item: CompetencyItem) =>
+              item.id === itemId ? { ...item, comments } : item
+            )
+          }
           : category
       )
     }))
@@ -400,11 +400,11 @@ export function AnnualAppraisalForm({
 
   const handleClearSignatures = () => {
     if (appraiserSignatureUrl && isReviewMode) {
-        setAppraiserSignatureUrl(null)
-        setFormData(prev => ({
-            ...prev,
-            appraiserSignatureUrl: null
-        }))
+      setAppraiserSignatureUrl(null)
+      setFormData(prev => ({
+        ...prev,
+        appraiserSignatureUrl: null
+      }))
     }
     toast.success("Signatures cleared successfully")
   }
@@ -596,7 +596,7 @@ export function AnnualAppraisalForm({
           <Card className="p-4 bg-gray-50">
             <div className="space-y-3">
               <h3 className="font-bold text-lg">OVERALL ASSESSMENT</h3>
-              
+
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between items-center border-b pb-2">
                   <span className="font-semibold">PERFORMANCE ASSESSMENT (M)</span>
@@ -625,7 +625,7 @@ export function AnnualAppraisalForm({
           {/* Signatures Section */}
           <div className="space-y-4">
             {/* <h3 className="text-lg font-semibold">Signatures</h3> */}
-            
+
             <div className="gap-6">
               {/* Appraisee Signature */}
               {/* <Card className="p-4">
@@ -677,7 +677,7 @@ export function AnnualAppraisalForm({
                     ) : (
                       <div className="space-y-2">
                         <Label htmlFor="appraisee-signature" className="text-sm">
-                          Upload Signature to Profile (PNG)
+                          Upload Signature
                         </Label>
                         <div className="flex gap-2">
                           <Input
@@ -758,7 +758,7 @@ export function AnnualAppraisalForm({
                     ) : (
                       <div className="space-y-2">
                         <Label htmlFor="appraiser-signature" className="text-sm">
-                          Upload Signature to Profile (PNG)
+                          Upload Signature
                         </Label>
                         <div className="flex gap-2">
                           <Input
@@ -774,7 +774,7 @@ export function AnnualAppraisalForm({
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="space-y-1">
                     <Label htmlFor="appraiser-date" className="text-sm">Date (dd/mm/yyyy)</Label>
                     <Input

@@ -52,7 +52,9 @@ export function ChangePasswordModal({ isOpen, onSuccess }: ChangePasswordModalPr
       toast.success("Password changed successfully! You can now use your new password to log in.")
       onSuccess()
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to change password"
+      console.log(err)
+      //@ts-ignore
+      const errorMessage = err.message || "Failed to change password"
       setError(errorMessage)
       toast.error(errorMessage)
     } finally {
@@ -75,14 +77,14 @@ export function ChangePasswordModal({ isOpen, onSuccess }: ChangePasswordModalPr
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="currentPassword">Temporary Password (OTP)</Label>
+            <Label htmlFor="currentPassword">Temporary Password</Label>
             <div className="relative">
               <Input
                 id="currentPassword"
                 type={showCurrentPassword ? "text" : "password"}
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Enter the OTP you received"
+                placeholder="Enter the temporary password"
                 required
               />
               <Button
