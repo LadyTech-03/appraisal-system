@@ -10,6 +10,14 @@ const nextConfig = {
     unoptimized: true,
   },
   reactStrictMode: false,
+
+  webpack(config) {
+    config.module.rules.push({
+      test: /\.mjs$/,
+      type: "javascript/auto",
+    })
+    return config
+  },
 }
 
 export default nextConfig
