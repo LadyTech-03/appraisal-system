@@ -10,6 +10,8 @@ import { Section5AnnualAppraisal } from "./sections/section-5-annual-appraisal"
 import { Section6AppraiserComments } from "./sections/section-6-appraiser-comments"
 import { Section7CareerDevelopment } from "./sections/section-7-career-development"
 import { Section8AssessmentDecision } from "./sections/section-8-assessment-decision"
+import { Section9AppraiseeComments } from "./sections/section-9-appraisee-comments"
+import { Section10HODComments } from "./sections/section-10-hod-comments"
 
 interface StaffGuideProps {
   category: string
@@ -72,8 +74,18 @@ export function StaffGuide({ category }: StaffGuideProps) {
         <Section7CareerDevelopment content={content.section7} />
       )}
 
-      {/* Section 8: Assessment Decision - Always show for all categories */}
+      {/* Section 8: Assessment Decision */}
       <Section8AssessmentDecision />
+
+      {/* Section 9: Appraisee's Comments */}
+      {content.section9.exampleComment && (
+        <Section9AppraiseeComments content={content.section9} />
+      )}
+
+      {/* Section 10: HOD Comments */}
+      {content.section10.exampleComment && (
+        <Section10HODComments content={content.section10} />
+      )}
     </div>
   )
 }

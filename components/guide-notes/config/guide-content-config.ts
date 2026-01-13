@@ -140,7 +140,13 @@ export const guideContentConfig: Record<string, GuideContent> = {
 •\tIndustry Connection: Pursue a short-term industry attachment with [Specific Company] to deepen knowledge of [Specific Technology/Process].
 •\tProject Supervision: Formal training in "Project Management for Student-Led Initiatives" to enhance supervision skills.`
         },
-        section8: {}
+        section8: {},
+        section9: {
+            exampleComment: `"[e.g., I thank my appraiser for the constructive feedback. I agree with the assessment and am committed to working on the areas identified for development. I am particularly interested in the proposed training on [Training Topic] and look forward to contributing more to [Specific Area] in the coming year.]"`
+        },
+        section10: {
+            exampleComment: `"[e.g., I have reviewed this appraisal and concur with the findings and recommendations. [Staff Name] is a valued member of the department, and we will support the proposed training plan.]"`
+        }
     },
     'headquarters-technical': {
         category: 'headquarters-technical',
@@ -153,7 +159,9 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section5: { coreCompetencies: [], nonCoreCompetencies: [] },
         section6: { exampleComment: "" },
         section7: { examplePlan: "" },
-        section8: {}
+        section8: {},
+        section9: { exampleComment: "" },
+        section10: { exampleComment: "" }
     },
     'accounting': {
         category: 'accounting',
@@ -166,7 +174,9 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section5: { coreCompetencies: [], nonCoreCompetencies: [] },
         section6: { exampleComment: "" },
         section7: { examplePlan: "" },
-        section8: {}
+        section8: {},
+        section9: { exampleComment: "" },
+        section10: { exampleComment: "" }
     },
     'catering': {
         category: 'catering',
@@ -179,7 +189,9 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section5: { coreCompetencies: [], nonCoreCompetencies: [] },
         section6: { exampleComment: "" },
         section7: { examplePlan: "" },
-        section8: {}
+        section8: {},
+        section9: { exampleComment: "" },
+        section10: { exampleComment: "" }
     },
     'corporate-affairs': {
         category: 'corporate-affairs',
@@ -192,7 +204,9 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section5: { coreCompetencies: [], nonCoreCompetencies: [] },
         section6: { exampleComment: "" },
         section7: { examplePlan: "" },
-        section8: {}
+        section8: {},
+        section9: { exampleComment: "" },
+        section10: { exampleComment: "" }
     },
     'general-admin': {
         category: 'general-admin',
@@ -205,7 +219,9 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section5: { coreCompetencies: [], nonCoreCompetencies: [] },
         section6: { exampleComment: "" },
         section7: { examplePlan: "" },
-        section8: {}
+        section8: {},
+        section9: { exampleComment: "" },
+        section10: { exampleComment: "" }
     },
     'human-resource': {
         category: 'human-resource',
@@ -218,7 +234,9 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section5: { coreCompetencies: [], nonCoreCompetencies: [] },
         section6: { exampleComment: "" },
         section7: { examplePlan: "" },
-        section8: {}
+        section8: {},
+        section9: { exampleComment: "" },
+        section10: { exampleComment: "" }
     },
     'procurement': {
         category: 'procurement',
@@ -231,7 +249,9 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section5: { coreCompetencies: [], nonCoreCompetencies: [] },
         section6: { exampleComment: "" },
         section7: { examplePlan: "" },
-        section8: {}
+        section8: {},
+        section9: { exampleComment: "" },
+        section10: { exampleComment: "" }
     },
     'audit': {
         category: 'audit',
@@ -244,7 +264,9 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section5: { coreCompetencies: [], nonCoreCompetencies: [] },
         section6: { exampleComment: "" },
         section7: { examplePlan: "" },
-        section8: {}
+        section8: {},
+        section9: { exampleComment: "" },
+        section10: { exampleComment: "" }
     },
     'security-drivers-laborers': {
         category: 'security-drivers-laborers',
@@ -257,7 +279,9 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section5: { coreCompetencies: [], nonCoreCompetencies: [] },
         section6: { exampleComment: "" },
         section7: { examplePlan: "" },
-        section8: {}
+        section8: {},
+        section9: { exampleComment: "" },
+        section10: { exampleComment: "" }
     },
     'admin-support': {
         category: 'admin-support',
@@ -270,6 +294,8 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section5: { coreCompetencies: [], nonCoreCompetencies: [] },
         section6: { exampleComment: "" },
         section7: { examplePlan: "" },
-        section8: {}
+        section8: {},
+        section9: { exampleComment: "" },
+        section10: { exampleComment: "" }
     },
 }

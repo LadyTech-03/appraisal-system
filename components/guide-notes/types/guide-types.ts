@@ -76,6 +76,14 @@ export interface Section8Content {
     // Static section - same content for all categories
 }
 
+export interface Section9Content {
+    exampleComment: string
+}
+
+export interface Section10Content {
+    exampleComment: string
+}
+
 export interface GuideContent {
     category: string
     categoryLabel: string
@@ -88,5 +96,7 @@ export interface GuideContent {
     section6: Section6Content
     section7: Section7Content
     section8: Section8Content
+    section9: Section9Content
+    section10: Section10Content
     // Future sections can be added here
 }
