@@ -3,6 +3,7 @@
 import { guideContentConfig } from "./config/guide-content-config"
 import { Section1AAppraiseeInfo } from "./sections/section-1a-appraisee-info"
 import { Section1BAppraiserInfo } from "./sections/section-1b-appraiser-info"
+import { Section2PerformancePlanning } from "./sections/section-2-performance-planning"
 
 interface StaffGuideProps {
   category: string
@@ -35,11 +36,12 @@ export function StaffGuide({ category }: StaffGuideProps) {
       {/* Section 1B: Appraiser Information */}
       <Section1BAppraiserInfo />
 
+      {/* Section 2: Performance Planning */}
+      {content.section2.rows.length > 0 && (
+        <Section2PerformancePlanning content={content.section2} />
+      )}
+
       {/* Future sections will be added here as reusable components */}
-      {/* Example:
-      <Section2KeyResultAreas content={content.section2} />
-      <Section3PerformanceIndicators content={content.section3} />
-      */}
     </div>
   )
 }
