@@ -75,6 +75,26 @@ export const guideContentConfig: Record<string, GuideContent> = {
                     remarks: "2"
                 }
             ]
+        },
+        section4: {
+            rows: [
+                {
+                    no: "1",
+                    target: "Teaching & Instructional Effectiveness",
+                    performanceAssessment: "",
+                    weightOfTarget: "",
+                    score: "",
+                    comments: "[e.g., Exceeded expectations. Lesson plans were exemplary. Observations showed exceptional use of active learning and differentiation.]"
+                },
+                {
+                    no: "2",
+                    target: "Industry Alignment, Practice & Student Project Supervision",
+                    performanceAssessment: "",
+                    weightOfTarget: "",
+                    score: "",
+                    comments: "[e.g., All targets met. Student projects were highly innovative and industry-relevant. Strong immersion report submitted.]"
+                }
+            ]
         }
     },
     'headquarters-technical': {
@@ -83,7 +103,8 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section1A: {},
         section1B: {},
         section2: { rows: [] },
-        section3: { targets: [], competencies: [] }
+        section3: { targets: [], competencies: [] },
+        section4: { rows: [] }
     },
     'accounting': {
         category: 'accounting',
@@ -91,7 +112,8 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section1A: {},
         section1B: {},
         section2: { rows: [] },
-        section3: { targets: [], competencies: [] }
+        section3: { targets: [], competencies: [] },
+        section4: { rows: [] }
     },
     'catering': {
         category: 'catering',
@@ -99,7 +121,8 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section1A: {},
         section1B: {},
         section2: { rows: [] },
-        section3: { targets: [], competencies: [] }
+        section3: { targets: [], competencies: [] },
+        section4: { rows: [] }
     },
     'corporate-affairs': {
         category: 'corporate-affairs',
@@ -107,7 +130,8 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section1A: {},
         section1B: {},
         section2: { rows: [] },
-        section3: { targets: [], competencies: [] }
+        section3: { targets: [], competencies: [] },
+        section4: { rows: [] }
     },
     'general-admin': {
         category: 'general-admin',
@@ -115,7 +139,8 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section1A: {},
         section1B: {},
         section2: { rows: [] },
-        section3: { targets: [], competencies: [] }
+        section3: { targets: [], competencies: [] },
+        section4: { rows: [] }
     },
     'human-resource': {
         category: 'human-resource',
@@ -123,7 +148,8 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section1A: {},
         section1B: {},
         section2: { rows: [] },
-        section3: { targets: [], competencies: [] }
+        section3: { targets: [], competencies: [] },
+        section4: { rows: [] }
     },
     'procurement': {
         category: 'procurement',
@@ -131,7 +157,8 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section1A: {},
         section1B: {},
         section2: { rows: [] },
-        section3: { targets: [], competencies: [] }
+        section3: { targets: [], competencies: [] },
+        section4: { rows: [] }
     },
     'audit': {
         category: 'audit',
@@ -139,7 +166,8 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section1A: {},
         section1B: {},
         section2: { rows: [] },
-        section3: { targets: [], competencies: [] }
+        section3: { targets: [], competencies: [] },
+        section4: { rows: [] }
     },
     'security-drivers-laborers': {
         category: 'security-drivers-laborers',
@@ -147,7 +175,8 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section1A: {},
         section1B: {},
         section2: { rows: [] },
-        section3: { targets: [], competencies: [] }
+        section3: { targets: [], competencies: [] },
+        section4: { rows: [] }
     },
     'admin-support': {
         category: 'admin-support',
@@ -155,6 +184,7 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section1A: {},
         section1B: {},
         section2: { rows: [] },
-        section3: { targets: [], competencies: [] }
+        section3: { targets: [], competencies: [] },
+        section4: { rows: [] }
     },
 }

@@ -2,6 +2,7 @@
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Section3Content } from "../types/guide-types"
+import SignatureSection from "../shared/signature-section"
 
 interface Section3MidYearReviewProps {
     content: Section3Content
@@ -86,6 +87,10 @@ export function Section3MidYearReview({ content }: Section3MidYearReviewProps) {
                     </TableBody>
                 </Table>
             </div>
+
+            <SignatureSection 
+                sectionTypeDate={`Mid-Year Date`}
+            />
         </div>
     )
 }
