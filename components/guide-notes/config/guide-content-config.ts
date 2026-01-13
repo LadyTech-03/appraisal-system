@@ -95,6 +95,42 @@ export const guideContentConfig: Record<string, GuideContent> = {
                     comments: "[e.g., All targets met. Student projects were highly innovative and industry-relevant. Strong immersion report submitted.]"
                 }
             ]
+        },
+        section5: {
+            coreCompetencies: [
+                {
+                    no: "1",
+                    competency: "Pedagogical & Technical Expertise: Depth of subject knowledge; skill in designing lessons with active learning & differentiation; technical proficiency.",
+                    weight: "",
+                    score: "",
+                    calculation: "",
+                    comments: "Comment on lesson plan quality, use of varied teaching strategies, and ability to tailor instruction as seen in observations."
+                },
+                {
+                    no: "2",
+                    competency: "Industry Application & Practice: Ability to integrate current industry trends, supervise authentic projects, and facilitate meaningful industry immersion.",
+                    weight: "",
+                    score: "",
+                    calculation: "",
+                    comments: "Comment on the relevance of student projects, quality of industry linkages, and application of practical skills."
+                }
+            ],
+            nonCoreCompetencies: [
+                {
+                    competency: "Commitment to Own Personal Development and Training: Eagerness for self-development, seeking new skills.",
+                    weight: "",
+                    score: "",
+                    calculation: "",
+                    comments: "[e.g., Exceeded training targets and applied learning effectively.]"
+                },
+                {
+                    competency: "Respect and Commitment: Respect for all, commitment to work and organisational development.",
+                    weight: "",
+                    score: "",
+                    calculation: "",
+                    comments: "[e.g., A role model for institutional values.]"
+                }
+            ]
         }
     },
     'headquarters-technical': {
@@ -104,7 +140,8 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section1B: {},
         section2: { rows: [] },
         section3: { targets: [], competencies: [] },
-        section4: { rows: [] }
+        section4: { rows: [] },
+        section5: { coreCompetencies: [], nonCoreCompetencies: [] }
     },
     'accounting': {
         category: 'accounting',
@@ -113,7 +150,8 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section1B: {},
         section2: { rows: [] },
         section3: { targets: [], competencies: [] },
-        section4: { rows: [] }
+        section4: { rows: [] },
+        section5: { coreCompetencies: [], nonCoreCompetencies: [] }
     },
     'catering': {
         category: 'catering',
@@ -122,7 +160,8 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section1B: {},
         section2: { rows: [] },
         section3: { targets: [], competencies: [] },
-        section4: { rows: [] }
+        section4: { rows: [] },
+        section5: { coreCompetencies: [], nonCoreCompetencies: [] }
     },
     'corporate-affairs': {
         category: 'corporate-affairs',
@@ -131,7 +170,8 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section1B: {},
         section2: { rows: [] },
         section3: { targets: [], competencies: [] },
-        section4: { rows: [] }
+        section4: { rows: [] },
+        section5: { coreCompetencies: [], nonCoreCompetencies: [] }
     },
     'general-admin': {
         category: 'general-admin',
@@ -140,7 +180,8 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section1B: {},
         section2: { rows: [] },
         section3: { targets: [], competencies: [] },
-        section4: { rows: [] }
+        section4: { rows: [] },
+        section5: { coreCompetencies: [], nonCoreCompetencies: [] }
     },
     'human-resource': {
         category: 'human-resource',
@@ -149,7 +190,8 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section1B: {},
         section2: { rows: [] },
         section3: { targets: [], competencies: [] },
-        section4: { rows: [] }
+        section4: { rows: [] },
+        section5: { coreCompetencies: [], nonCoreCompetencies: [] }
     },
     'procurement': {
         category: 'procurement',
@@ -158,7 +200,8 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section1B: {},
         section2: { rows: [] },
         section3: { targets: [], competencies: [] },
-        section4: { rows: [] }
+        section4: { rows: [] },
+        section5: { coreCompetencies: [], nonCoreCompetencies: [] }
     },
     'audit': {
         category: 'audit',
@@ -167,7 +210,8 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section1B: {},
         section2: { rows: [] },
         section3: { targets: [], competencies: [] },
-        section4: { rows: [] }
+        section4: { rows: [] },
+        section5: { coreCompetencies: [], nonCoreCompetencies: [] }
     },
     'security-drivers-laborers': {
         category: 'security-drivers-laborers',
@@ -176,7 +220,8 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section1B: {},
         section2: { rows: [] },
         section3: { targets: [], competencies: [] },
-        section4: { rows: [] }
+        section4: { rows: [] },
+        section5: { coreCompetencies: [], nonCoreCompetencies: [] }
     },
     'admin-support': {
         category: 'admin-support',
@@ -185,6 +230,7 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section1B: {},
         section2: { rows: [] },
         section3: { targets: [], competencies: [] },
-        section4: { rows: [] }
+        section4: { rows: [] },
+        section5: { coreCompetencies: [], nonCoreCompetencies: [] }
     },
 }

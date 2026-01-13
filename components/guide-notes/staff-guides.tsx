@@ -6,6 +6,7 @@ import { Section1BAppraiserInfo } from "./sections/section-1b-appraiser-info"
 import { Section2PerformancePlanning } from "./sections/section-2-performance-planning"
 import { Section3MidYearReview } from "./sections/section-3-midyear-review"
 import { Section4EndOfYearReview } from "./sections/section-4-endofyear-review"
+import { Section5AnnualAppraisal } from "./sections/section-5-annual-appraisal"
 
 interface StaffGuideProps {
   category: string
@@ -51,6 +52,11 @@ export function StaffGuide({ category }: StaffGuideProps) {
       {/* Section 4: End-of-Year Review */}
       {content.section4.rows.length > 0 && (
         <Section4EndOfYearReview content={content.section4} />
+      )}
+
+      {/* Section 5: Annual Appraisal */}
+      {(content.section5.coreCompetencies.length > 0 || content.section5.nonCoreCompetencies.length > 0) && (
+        <Section5AnnualAppraisal content={content.section5} />
       )}
 
       {/* Future sections will be added here as reusable components */}

@@ -50,6 +50,20 @@ export interface Section4Content {
     rows: EndOfYearReviewRow[]
 }
 
+export interface CompetencyRow {
+    no?: string
+    competency: string
+    weight: string // (W)
+    score: string // (S) Score on Scale 1-5
+    calculation: string // W × S
+    comments: string
+}
+
+export interface Section5Content {
+    coreCompetencies: CompetencyRow[]
+    nonCoreCompetencies: CompetencyRow[]
+}
+
 export interface GuideContent {
     category: string
     categoryLabel: string
@@ -58,5 +72,6 @@ export interface GuideContent {
     section2: Section2Content
     section3: Section3Content
     section4: Section4Content
+    section5: Section5Content
     // Future sections can be added here
 }
