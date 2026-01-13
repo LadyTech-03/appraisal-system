@@ -64,6 +64,18 @@ export interface Section5Content {
     nonCoreCompetencies: CompetencyRow[]
 }
 
+export interface Section6Content {
+    exampleComment: string
+}
+
+export interface Section7Content {
+    examplePlan: string
+}
+
+export interface Section8Content {
+    // Static section - same content for all categories
+}
+
 export interface GuideContent {
     category: string
     categoryLabel: string
@@ -73,5 +85,8 @@ export interface GuideContent {
     section3: Section3Content
     section4: Section4Content
     section5: Section5Content
+    section6: Section6Content
+    section7: Section7Content
+    section8: Section8Content
     // Future sections can be added here
 }

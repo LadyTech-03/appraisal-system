@@ -131,7 +131,16 @@ export const guideContentConfig: Record<string, GuideContent> = {
                     comments: "[e.g., A role model for institutional values.]"
                 }
             ]
-        }
+        },
+        section6: {
+            exampleComment: `"[Staff Name] has demonstrated exceptional growth in instructional design. Their lesson plan for [Specific Unit] effectively used differentiated group roles and a hands-on simulation, which was confirmed during my lesson observation on [Date]. In Industry Alignment, they excelled by supervising four student teams in developing a functional [Project Type] for a local auto workshop, providing an invaluable real-world experience. Their industry immersion at [Company Name] directly informed updates to our practical assessment criteria."`
+        },
+        section7: {
+            examplePlan: `•\tPedagogical Skill: Attend workshop on "Advanced Differentiation Strategies in TVET" to build on current strengths.
+•\tIndustry Connection: Pursue a short-term industry attachment with [Specific Company] to deepen knowledge of [Specific Technology/Process].
+•\tProject Supervision: Formal training in "Project Management for Student-Led Initiatives" to enhance supervision skills.`
+        },
+        section8: {}
     },
     'headquarters-technical': {
         category: 'headquarters-technical',
@@ -141,7 +150,10 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section2: { rows: [] },
         section3: { targets: [], competencies: [] },
         section4: { rows: [] },
-        section5: { coreCompetencies: [], nonCoreCompetencies: [] }
+        section5: { coreCompetencies: [], nonCoreCompetencies: [] },
+        section6: { exampleComment: "" },
+        section7: { examplePlan: "" },
+        section8: {}
     },
     'accounting': {
         category: 'accounting',
@@ -151,7 +163,10 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section2: { rows: [] },
         section3: { targets: [], competencies: [] },
         section4: { rows: [] },
-        section5: { coreCompetencies: [], nonCoreCompetencies: [] }
+        section5: { coreCompetencies: [], nonCoreCompetencies: [] },
+        section6: { exampleComment: "" },
+        section7: { examplePlan: "" },
+        section8: {}
     },
     'catering': {
         category: 'catering',
@@ -161,7 +176,10 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section2: { rows: [] },
         section3: { targets: [], competencies: [] },
         section4: { rows: [] },
-        section5: { coreCompetencies: [], nonCoreCompetencies: [] }
+        section5: { coreCompetencies: [], nonCoreCompetencies: [] },
+        section6: { exampleComment: "" },
+        section7: { examplePlan: "" },
+        section8: {}
     },
     'corporate-affairs': {
         category: 'corporate-affairs',
@@ -171,7 +189,10 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section2: { rows: [] },
         section3: { targets: [], competencies: [] },
         section4: { rows: [] },
-        section5: { coreCompetencies: [], nonCoreCompetencies: [] }
+        section5: { coreCompetencies: [], nonCoreCompetencies: [] },
+        section6: { exampleComment: "" },
+        section7: { examplePlan: "" },
+        section8: {}
     },
     'general-admin': {
         category: 'general-admin',
@@ -181,7 +202,10 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section2: { rows: [] },
         section3: { targets: [], competencies: [] },
         section4: { rows: [] },
-        section5: { coreCompetencies: [], nonCoreCompetencies: [] }
+        section5: { coreCompetencies: [], nonCoreCompetencies: [] },
+        section6: { exampleComment: "" },
+        section7: { examplePlan: "" },
+        section8: {}
     },
     'human-resource': {
         category: 'human-resource',
@@ -191,7 +215,10 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section2: { rows: [] },
         section3: { targets: [], competencies: [] },
         section4: { rows: [] },
-        section5: { coreCompetencies: [], nonCoreCompetencies: [] }
+        section5: { coreCompetencies: [], nonCoreCompetencies: [] },
+        section6: { exampleComment: "" },
+        section7: { examplePlan: "" },
+        section8: {}
     },
     'procurement': {
         category: 'procurement',
@@ -201,7 +228,10 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section2: { rows: [] },
         section3: { targets: [], competencies: [] },
         section4: { rows: [] },
-        section5: { coreCompetencies: [], nonCoreCompetencies: [] }
+        section5: { coreCompetencies: [], nonCoreCompetencies: [] },
+        section6: { exampleComment: "" },
+        section7: { examplePlan: "" },
+        section8: {}
     },
     'audit': {
         category: 'audit',
@@ -211,7 +241,10 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section2: { rows: [] },
         section3: { targets: [], competencies: [] },
         section4: { rows: [] },
-        section5: { coreCompetencies: [], nonCoreCompetencies: [] }
+        section5: { coreCompetencies: [], nonCoreCompetencies: [] },
+        section6: { exampleComment: "" },
+        section7: { examplePlan: "" },
+        section8: {}
     },
     'security-drivers-laborers': {
         category: 'security-drivers-laborers',
@@ -221,7 +254,10 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section2: { rows: [] },
         section3: { targets: [], competencies: [] },
         section4: { rows: [] },
-        section5: { coreCompetencies: [], nonCoreCompetencies: [] }
+        section5: { coreCompetencies: [], nonCoreCompetencies: [] },
+        section6: { exampleComment: "" },
+        section7: { examplePlan: "" },
+        section8: {}
     },
     'admin-support': {
         category: 'admin-support',
@@ -231,6 +267,9 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section2: { rows: [] },
         section3: { targets: [], competencies: [] },
         section4: { rows: [] },
-        section5: { coreCompetencies: [], nonCoreCompetencies: [] }
+        section5: { coreCompetencies: [], nonCoreCompetencies: [] },
+        section6: { exampleComment: "" },
+        section7: { examplePlan: "" },
+        section8: {}
     },
 }

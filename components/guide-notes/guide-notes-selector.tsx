@@ -50,7 +50,7 @@ function GuideSidePanel({ isOpen, selectedCategory, onCategoryChange, onClose }:
   if (!isOpen) return null
 
   return (
-    <div className="w-[700px] overflow-auto border-l bg-primary/10 flex flex-col h-[100vh]">
+    <div className="w-[700px] overflow-auto border-l bg-primary/10 flex flex-col h-[100vh] mb-20">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b shrink-0">
         <h3 className="font-semibold">Guide Notes</h3>

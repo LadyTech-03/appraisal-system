@@ -7,6 +7,9 @@ import { Section2PerformancePlanning } from "./sections/section-2-performance-pl
 import { Section3MidYearReview } from "./sections/section-3-midyear-review"
 import { Section4EndOfYearReview } from "./sections/section-4-endofyear-review"
 import { Section5AnnualAppraisal } from "./sections/section-5-annual-appraisal"
+import { Section6AppraiserComments } from "./sections/section-6-appraiser-comments"
+import { Section7CareerDevelopment } from "./sections/section-7-career-development"
+import { Section8AssessmentDecision } from "./sections/section-8-assessment-decision"
 
 interface StaffGuideProps {
   category: string
@@ -59,7 +62,18 @@ export function StaffGuide({ category }: StaffGuideProps) {
         <Section5AnnualAppraisal content={content.section5} />
       )}
 
-      {/* Future sections will be added here as reusable components */}
+      {/* Section 6: Appraiser's Comments */}
+      {content.section6.exampleComment && (
+        <Section6AppraiserComments content={content.section6} />
+      )}
+
+      {/* Section 7: Career Development */}
+      {content.section7.examplePlan && (
+        <Section7CareerDevelopment content={content.section7} />
+      )}
+
+      {/* Section 8: Assessment Decision - Always show for all categories */}
+      <Section8AssessmentDecision />
     </div>
   )
 }

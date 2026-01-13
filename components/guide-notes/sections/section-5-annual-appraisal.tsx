@@ -149,6 +149,33 @@ export function Section5AnnualAppraisal({ content }: Section5AnnualAppraisalProp
                     Average of ALL averages for NON-CORE COMPETENCES (O) =
                 </p>
             </div>
+
+            {/* OVERALL ASSESSMENT */}
+            <div className="space-y-2 border-2 border-black/30 p-4 rounded-md bg-muted/10">
+                <h4 className="font-bold text-base uppercase mb-3">OVERALL ASSESSMENT</h4>
+
+                <div className="space-y-2 text-sm">
+                    <div className="flex items-baseline gap-x-2">
+                        <span className="font-semibold min-w-[350px]">PERFORMANCE ASSESSMENT (M) =</span>
+                        <span className="text-muted-foreground">___________</span>
+                    </div>
+
+                    <div className="flex items-baseline gap-x-2">
+                        <span className="font-semibold min-w-[350px]">CORE COMPETENCIES ASSESSMENT (N) =</span>
+                        <span className="text-muted-foreground">___________</span>
+                    </div>
+
+                    <div className="flex items-baseline gap-x-2">
+                        <span className="font-semibold min-w-[350px]">NON-CORE COMPETENCIES ASSESSMENT (O) =</span>
+                        <span className="text-muted-foreground">___________</span>
+                    </div>
+
+                    <div className="flex items-baseline gap-x-2 pt-2 border-t border-black/20">
+                        <span className="font-bold min-w-[350px]">OVERALL TOTAL (T) = M + N + O =</span>
+                        <span className="font-bold">___________</span>
+                    </div>
+                </div>
+            </div>
         </div>
     )
 }
