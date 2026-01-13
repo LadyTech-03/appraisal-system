@@ -128,9 +128,9 @@ export default function CreateAppraisalPage() {
 
   const handleEndYearReviewNext = (data: any) => {
     setAppraisalData((prev: any) => ({ ...prev, endYearReview: data }))
-    if(data.isReviewMode){
+    if (data.isReviewMode) {
       setCurrentStep('annual-appraisal')
-    }else{
+    } else {
       setCurrentStep('final-sections')
     }
   }
@@ -194,30 +194,67 @@ export default function CreateAppraisalPage() {
         <GuideNotesLayout guideState={guideState}>
           <main className="flex-1 p-6 space-y-6 overflow-auto">
 
-          {/* Progress Indicator */}
-          <div className="max-w-full mx-auto flex flex-wrap items-center gap-4 justify-center ">
-            {steps.map((step)=>(
-              <div key={step.id} className={`flex items-center space-x-2 px-4 py-2 rounded-lg ${
-                currentStep === step.id 
-                  ? 'bg-primary text-primary-foreground' 
-                  : appraisalData[step.status] 
-                    ? 'bg-green-100 text-green-700 border border-green-300' 
-                    : 'bg-gray-200 text-gray-600'
-              }`}>
-                <span className="w-6 h-6 rounded-full bg-current flex items-center justify-center text-xs font-bold">
-                  {appraisalData[step.status] ? <Check className="w-4 h-4 text-white" /> : ''}
-                </span>  
-                <span>{step.name}</span>
+            {/* Progress Indicator */}
+            <div className="w-full max-w-4xl mx-auto mb-8 px-4">
+              <div className="relative">
+                {/* Background Line */}
+                <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -translate-y-1/2 rounded-full" />
+
+                {/* Progress Line */}
+                <div
+                  className="absolute top-1/2 left-0 h-1 bg-primary -translate-y-1/2 rounded-full transition-all duration-500 ease-in-out"
+                  style={{
+                    width: `${(steps.findIndex(s => s.id === currentStep) / (steps.length - 1)) * 100}%`
+                  }}
+                />
+
+                {/* Steps */}
+                <div className="relative flex justify-between items-center w-full">
+                  {steps.map((step, index) => {
+                    const currentIndex = steps.findIndex(s => s.id === currentStep)
+                    const isCompleted = index < currentIndex || appraisalData[step.status]
+                    const isActive = step.id === currentStep
+                    const isPending = index > currentIndex
+
+                    return (
+                      <div key={step.id} className="flex flex-col items-center gap-2 group cursor-default">
+                        {/* Step Circle */}
+                        <div
+                          className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all duration-300 bg-background
+                          ${isCompleted
+                              ? 'bg-primary border-primary text-primary-foreground scale-110'
+                              : isActive
+                                ? 'border-primary text-primary scale-125 ring-4 ring-primary/20'
+                                : 'border-gray-300 text-gray-400'
+                            }
+                        `}
+                        >
+                          {isCompleted ? (
+                            <Check className="w-4 h-4" strokeWidth={3} />
+                          ) : (
+                            <span className="text-xs font-bold">{index + 1}</span>
+                          )}
+                        </div>
+
+                        {/* Step Label */}
+                        <span className={`absolute top-10 text-xs font-semibold whitespace-nowrap transition-colors duration-300
+                        ${isActive ? 'text-primary' : isCompleted ? 'text-foreground' : 'text-muted-foreground'}
+                      `}>
+                          {step.name}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
-            ))}
-          </div>
+            </div>
 
             <div className="flex p-6 space-y-6 justify-center">
               {/* Form Content */}
               {currentStep === 'personal-info' ? (
                 isStepAvailable('personal-info') ? (
-                  <AppraiseePersonalInfoForm 
-                    onNext={handlePersonalInfoNext} 
+                  <AppraiseePersonalInfoForm
+                    onNext={handlePersonalInfoNext}
                     onBack={handleBackToPersonalInfo}
                   />
                 ) : (
@@ -230,7 +267,7 @@ export default function CreateAppraisalPage() {
                 )
               ) : currentStep === 'performance-planning' ? (
                 isStepAvailable('performance-planning') ? (
-                  <PerformancePlanningForm 
+                  <PerformancePlanningForm
                     onNext={handlePerformancePlanningNext}
                     onBack={handleBackToPersonalInfo}
                   />
@@ -244,7 +281,7 @@ export default function CreateAppraisalPage() {
                 )
               ) : currentStep === 'mid-year-review' ? (
                 isStepAvailable('mid-year-review') ? (
-                  <MidYearReviewForm 
+                  <MidYearReviewForm
                     onNext={handleMidYearReviewNext}
                     onBack={handleBackToPerformancePlanning}
                   />
@@ -258,7 +295,7 @@ export default function CreateAppraisalPage() {
                 )
               ) : currentStep === 'end-year-review' ? (
                 isStepAvailable('end-year-review') ? (
-                  <EndYearReviewForm 
+                  <EndYearReviewForm
                     onNext={handleEndYearReviewNext}
                     onBack={handleBackToMidYearReview}
                   />
@@ -271,13 +308,13 @@ export default function CreateAppraisalPage() {
                   />
                 )
               ) : currentStep === 'annual-appraisal' ? (
-                <AnnualAppraisalForm 
+                <AnnualAppraisalForm
                   onNext={handleAnnualAppraisalNext}
                   onBack={handleBackToEndYearReview}
                 />
               ) : (
                 isStepAvailable('final-sections') ? (
-                  <FinalSectionsForm 
+                  <FinalSectionsForm
                     onNext={handleFinalSectionsNext}
                     onBack={handleBackToEndYearReview}
                   />

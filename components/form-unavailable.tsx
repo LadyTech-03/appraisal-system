@@ -1,8 +1,7 @@
 "use client"
 
-import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { LockIcon, CalendarIcon, ArrowLeft } from "lucide-react"
+import { CalendarClock, Lock, MoveLeft } from "lucide-react"
 
 interface FormUnavailableProps {
   sectionName: string
@@ -28,50 +27,63 @@ export function FormUnavailable({
     return nameMap[name] || name
   }
 
+  const formattedDate = opensAt ? new Date(opensAt).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }) : null
+
   return (
-    <div className="flex items-center justify-center min-h-[500px] w-full">
-      <Card className="max-w-lg w-full p-8 text-center space-y-6">
-        <div className="flex justify-center">
-          <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center">
-            <LockIcon className="w-8 h-8 text-yellow-600" />
+    <div className="flex flex-col items-center justify-center min-h-[60vh] w-full p-6 animate-in fade-in zoom-in-95 duration-500">
+      <div className="max-w-md w-full text-center space-y-8">
+
+        {/* Icon Container */}
+        <div className="relative mx-auto w-24 h-24">
+          <div className="absolute inset-0 bg-gray-100 rounded-full animate-pulse" />
+          <div className="absolute inset-2 bg-white rounded-full shadow-sm flex items-center justify-center border border-gray-100">
+            <Lock className="w-10 h-10 text-gray-400" strokeWidth={1.5} />
           </div>
+          {opensAt && (
+            <div className="absolute -bottom-2 -right-2 bg-blue-50 text-blue-600 p-2 rounded-full border border-blue-100 shadow-sm">
+              <CalendarClock className="w-5 h-5" />
+            </div>
+          )}
         </div>
 
-        <div className="space-y-2">
-          <h2 className="text-2xl font-bold">Form Not Available</h2>
-          <p className="text-lg font-medium text-muted-foreground">
-            {getSectionDisplayName(sectionName)}
+        {/* Text Content */}
+        <div className="space-y-3">
+          <h2 className="text-2xl font-semibold tracking-tight text-gray-900">
+            {getSectionDisplayName(sectionName)} is Locked
+          </h2>
+          <p className="text-muted-foreground leading-relaxed">
+            {message}
           </p>
         </div>
 
-        <p className="text-muted-foreground">
-          {message}
-        </p>
-
-        {opensAt && (
-          <div className="pt-4 border-t">
-            <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
-              <CalendarIcon className="w-4 h-4" />
-              Available from: {new Date(opensAt).toLocaleDateString('en-GB', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-              })}
-
-            </p>
+        {/* Availability Badge */}
+        {formattedDate && (
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-100 rounded-full text-sm text-gray-600">
+            <CalendarClock className="w-4 h-4" />
+            <span>Opens on <span className="font-medium text-gray-900">{formattedDate}</span></span>
           </div>
         )}
 
+        {/* Action */}
         {onBack && (
-          <Button onClick={onBack} variant="outline" className="mt-4">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Go Back
-          </Button>
+          <div className="pt-4">
+            <Button
+              onClick={onBack}
+              variant="ghost"
+              className="group text-muted-foreground hover:text-foreground hover:bg-transparent"
+            >
+              <MoveLeft className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" />
+              Return to Dashboard
+            </Button>
+          </div>
         )}
-      </Card>
+      </div>
     </div>
   )
 }
