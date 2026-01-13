@@ -145,10 +145,10 @@ export function ChangePasswordModal({ isOpen, onSuccess }: ChangePasswordModalPr
           )}
 
           <DialogFooter>
-            <Button variant={'outline'} onClick={logOut} type="button" disabled={isSubmitting} className="w-full">
+            <Button variant={'outline'} onClick={logOut} type="button" disabled={isSubmitting}>
               Close
             </Button>
-            <Button type="submit" disabled={isSubmitting} className="w-full">
+            <Button type="submit" disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Change Password
             </Button>
