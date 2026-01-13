@@ -54,7 +54,7 @@ export function Topbar() {
         {/* Right side */}
         <div className="flex items-center space-x-2 md:space-x-4">
           {/* Notifications */}
-          <Button variant="ghost" size="sm" className="relative">
+          {/* <Button variant="ghost" size="sm" className="relative">
             <Bell className="h-4 w-4" />
             <Badge
               variant="destructive"
@@ -62,7 +62,7 @@ export function Topbar() {
             >
               3
             </Badge>
-          </Button>
+          </Button> */}
 
           {/* Profile Dropdown */}
           {/* <DropdownMenu>

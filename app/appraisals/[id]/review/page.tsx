@@ -12,6 +12,8 @@ import { MidYearReviewForm } from "@/components/mid-year-review-form"
 import { EndYearReviewForm } from "@/components/end-year-review-form"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Check, Save, Send } from "lucide-react"
+import { GuideNotesLayout, useGuideNotes } from "@/components/guide-notes/guide-notes-selector"
+
 
 export default function AppraisalReviewPage() {
   const router = useRouter()
@@ -22,6 +24,8 @@ export default function AppraisalReviewPage() {
   const [appraisalData, setAppraisalData] = useState<any>(null)
   const [appraiserData, setAppraiserData] = useState<any>({})
   const [isLoading, setIsLoading] = useState(true)
+  const guideState = useGuideNotes()
+  
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -133,6 +137,7 @@ export default function AppraisalReviewPage() {
         <Topbar />
 
         <main className="flex-1 p-6 space-y-6">
+        <GuideNotesLayout guideState={guideState}>
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -278,6 +283,7 @@ export default function AppraisalReviewPage() {
               />
             </div>
           )}
+        </GuideNotesLayout>
         </main>
       </div>
     </div>

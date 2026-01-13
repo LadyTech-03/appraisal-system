@@ -135,12 +135,12 @@ export function GuideNotesLayout({ children, guideState }: GuideNotesLayoutProps
       {/* Floating Help Button - only visible when panel is closed */}
       {!isOpen && (
         <Button
-          variant="outline"
+        title="Guide Notes"
           size="icon"
           className="fixed bottom-6 right-6 h-12 w-12 rounded-full shadow-lg bg-primary text-white hover:bg-primary/90 z-50"
           onClick={openGuide}
         >
-          <HelpCircle className="h-6 w-6" />
+          <HelpCircle className="size-6" />
         </Button>
       )}
     </div>
