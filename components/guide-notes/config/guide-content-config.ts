@@ -45,6 +45,36 @@ export const guideContentConfig: Record<string, GuideContent> = {
                     resourcesRequired: "Training budget, Access to certification bodies, Platform for knowledge sharing."
                 }
             ]
+        },
+        section3: {
+            targets: [
+                {
+                    no: "1",
+                    item: "Teaching & Instructional Effectiveness",
+                    progressReview: "[e.g., Lesson plans for Semester 1 submitted, showing good use of group work. First observation rated 4/5 for active learning.]",
+                    remarks: "[e.g., Focus on incorporating more technology in H2.]"
+                },
+                {
+                    no: "2",
+                    item: "Industry Alignment, Practice & Student Project Supervision",
+                    progressReview: "[e.g., 2-day industry visit completed. Student projects initiated; proposals approved. One guest speaker hosted.]",
+                    remarks: "[e.g., Plan second industry immersion for Q4. Monitor project progress closely.]"
+                }
+            ],
+            competencies: [
+                {
+                    no: "1",
+                    item: "Pedagogical & Technical Expertise",
+                    progressReview: "[e.g., Strong lesson planning. Technical skills up-to-date.]",
+                    remarks: "1"
+                },
+                {
+                    no: "2",
+                    item: "Industry Application & Practice",
+                    progressReview: "[e.g., Making good progress in building industry links.]",
+                    remarks: "2"
+                }
+            ]
         }
     },
     'headquarters-technical': {
@@ -52,69 +82,79 @@ export const guideContentConfig: Record<string, GuideContent> = {
         categoryLabel: 'Headquarters & Regional Office Technical Staff',
         section1A: {},
         section1B: {},
-        section2: { rows: [] } // TODO: Add content
+        section2: { rows: [] },
+        section3: { targets: [], competencies: [] }
     },
     'accounting': {
         category: 'accounting',
         categoryLabel: 'Accounting Staff',
         section1A: {},
         section1B: {},
-        section2: { rows: [] } // TODO: Add content
+        section2: { rows: [] },
+        section3: { targets: [], competencies: [] }
     },
     'catering': {
         category: 'catering',
         categoryLabel: 'Catering Staff',
         section1A: {},
         section1B: {},
-        section2: { rows: [] } // TODO: Add content
+        section2: { rows: [] },
+        section3: { targets: [], competencies: [] }
     },
     'corporate-affairs': {
         category: 'corporate-affairs',
         categoryLabel: 'Corporate Affairs Staff',
         section1A: {},
         section1B: {},
-        section2: { rows: [] } // TODO: Add content
+        section2: { rows: [] },
+        section3: { targets: [], competencies: [] }
     },
     'general-admin': {
         category: 'general-admin',
         categoryLabel: 'General Administrative Staff',
         section1A: {},
         section1B: {},
-        section2: { rows: [] } // TODO: Add content
+        section2: { rows: [] },
+        section3: { targets: [], competencies: [] }
     },
     'human-resource': {
         category: 'human-resource',
         categoryLabel: 'Human Resource Staff',
         section1A: {},
         section1B: {},
-        section2: { rows: [] } // TODO: Add content
+        section2: { rows: [] },
+        section3: { targets: [], competencies: [] }
     },
     'procurement': {
         category: 'procurement',
         categoryLabel: 'Procurement Staff',
         section1A: {},
         section1B: {},
-        section2: { rows: [] } // TODO: Add content
+        section2: { rows: [] },
+        section3: { targets: [], competencies: [] }
     },
     'audit': {
         category: 'audit',
         categoryLabel: 'Audit Staff',
         section1A: {},
         section1B: {},
-        section2: { rows: [] } // TODO: Add content
+        section2: { rows: [] },
+        section3: { targets: [], competencies: [] }
     },
     'security-drivers-laborers': {
         category: 'security-drivers-laborers',
         categoryLabel: 'Security, Drivers, Janitors & General Labourers',
         section1A: {},
         section1B: {},
-        section2: { rows: [] } // TODO: Add content
+        section2: { rows: [] },
+        section3: { targets: [], competencies: [] }
     },
     'admin-support': {
         category: 'admin-support',
         categoryLabel: 'Administrative Support Staff',
         section1A: {},
         section1B: {},
-        section2: { rows: [] } // TODO: Add content
+        section2: { rows: [] },
+        section3: { targets: [], competencies: [] }
     },
 }
