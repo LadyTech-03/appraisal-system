@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Settings, User, Download, Upload, Trash2 } from "lucide-react"
+import { usersApi } from '@/lib/api/users';
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -65,12 +66,14 @@ export default function SettingsPage() {
     }
   }
 
-  const handleClearData = () => {
+  const handleClearData = async () => {
     if (confirm("Are you sure you want to clear all data? This action cannot be undone.")) {
       try {
+        const result = await usersApi.resetDatabase();
         localStorage.removeItem("app-storage")
         localStorage.removeItem("auth-storage")
-        setMessage({ type: "success", text: "All data cleared. Please refresh the page." })
+        setMessage({ type: "success", text: "All data cleared." })
+        router.replace("/login")
       } catch (error) {
         setMessage({ type: "error", text: "Failed to clear data. Please try again." })
       }
@@ -183,7 +186,8 @@ export default function SettingsPage() {
                 <div className="space-y-3 pt-6 border-t border-destructive/20">
                   <h3 className="font-semibold text-destructive">Danger Zone</h3>
                   <p className="text-sm text-muted-foreground">
-                    Permanently delete all system data. This action cannot be undone.
+                    {/* Permanently delete all system data. This action cannot be undone. */}
+                    Clear the system data.
                   </p>
                   <Button onClick={handleClearData} variant="destructive">
                     <Trash2 className="h-4 w-4 mr-2" />

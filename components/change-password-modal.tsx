@@ -69,7 +69,7 @@ export function ChangePasswordModal({ isOpen, onSuccess }: ChangePasswordModalPr
 
   const handleLogout = () => {
     logout()
-    router.push("/login")
+    router.replace("/login")
   }
 
   return (

@@ -98,4 +98,13 @@ export const usersApi = {
       throw parseApiError(error)
     }
   },
+
+  async resetDatabase(){
+    try {
+      const response = await apiClient.post("/admin/database/reset");
+      return response.data?.data;
+    } catch (error) {
+      throw parseApiError(error);
+    }
+  }
 }
