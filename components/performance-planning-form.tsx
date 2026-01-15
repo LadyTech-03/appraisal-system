@@ -32,7 +32,7 @@ import {
 import { usersApi } from "@/lib/api/users"
 import { authApi } from "@/lib/api/auth"
 
-import { removeBackground } from "@imgly/background-removal"
+// import { removeBackground } from "@imgly/background-removal"
 
 interface KeyResultArea {
   id: string
@@ -215,39 +215,29 @@ export function PerformancePlanningForm({
   //   }
   // }
 
-const handleSignatureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-  const file = event.target.files?.[0]
-  const isAppraisee = !isReviewMode
-  if (file) {
-    setIsUploadingSignature(true)
-    try {
-      toast.info("Uploading signature")
-      
-      // Convert to data URL
-      const reader = new FileReader()
-      const imageUrl = await new Promise<string>((resolve, reject) => {
-        reader.onload = () => resolve(reader.result as string)
-        reader.onerror = reject
-        reader.readAsDataURL(file)
-      })
-      
-      const blob = await removeBackground(imageUrl)
-      const processedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".png", { type: "image/png" })
-      const result = await usersApi.uploadSignature(processedFile)
-      if (isAppraisee) {
-        setAppraiseeSignatureUrl(result.signatureUrl)
-      } else {
-        setAppraiserSignatureUrl(result.signatureUrl)
-      }
-      toast.success("Signature uploaded successfully")
-    } catch (error) {
-      console.error("Signature processing error:", error)
-      toast.error("Failed to upload signature")
-    } finally {
-      setIsUploadingSignature(false)
+    const handleSignatureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    const isAppraisee = !isReviewMode
+    if (file && file.type === "image/png") {
+        setIsUploadingSignature(true)
+        try {
+            const result = await usersApi.uploadSignature(file)
+            if (isAppraisee) {
+                setAppraiseeSignatureUrl(result.signatureUrl)
+            } else {
+                setAppraiserSignatureUrl(result.signatureUrl)
+            }
+            toast.success("Signature uploaded successfully")
+        } catch (error) {
+            toast.error("Failed to upload signature")
+        } finally {
+            setIsUploadingSignature(false)
+        }
+    } else if (file) {
+        toast.error("Please upload a PNG image")
     }
   }
-}
+
 
   const handleSign = () => {
     if (appraiseeSignatureUrl && !isReviewMode) {

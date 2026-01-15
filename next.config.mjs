@@ -5,26 +5,17 @@ const nextConfig = {
   images: { unoptimized: true },
   reactStrictMode: false,
 
-  webpack(config, { dev, isServer }) {
-    // 1) REMOVE the "javascript/auto" override for onnxruntime-web.
-    // It breaks ORT runtime URL handling (import.meta.url -> url.replace crash).
+  // webpack(config) {
+  //   // ONLY the problematic ORT bundles that Terser chokes on.
+  //   // Do NOT apply to all .mjs in onnxruntime-web, or you can break runtime URL handling.
+  //   config.module.rules.push({
+  //     test: /(ort\.node\.min|ort\.webgpu\.bundle\.min)\.mjs$/,
+  //     include: /node_modules[\\/](onnxruntime-web)[\\/]/,
+  //     type: "javascript/auto",
+  //   });
 
-    // 2) Fix the Vercel build error by telling Terser to ignore ORT .mjs outputs.
-    if (!dev && !isServer && config.optimization?.minimizer) {
-      for (const plugin of config.optimization.minimizer) {
-        if (plugin?.constructor?.name === "TerserPlugin" && plugin.options) {
-          const prevExclude = plugin.options.exclude;
-          plugin.options.exclude = Array.isArray(prevExclude)
-            ? [...prevExclude, /ort\..*\.mjs$/]
-            : prevExclude
-              ? [prevExclude, /ort\..*\.mjs$/]
-              : [/ort\..*\.mjs$/];
-        }
-      }
-    }
-
-    return config;
-  },
+  //   return config;
+  // },
 };
 
 export default nextConfig;
