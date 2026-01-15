@@ -16,6 +16,7 @@ import {
 import { authApi } from "@/lib/api/auth"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { useAuthStore } from "@/lib/store"
 
 interface ChangePasswordModalProps {
   isOpen: boolean
@@ -31,6 +32,8 @@ export function ChangePasswordModal({ isOpen, onSuccess }: ChangePasswordModalPr
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter();
+  const { logout } = useAuthStore()
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -64,8 +67,9 @@ export function ChangePasswordModal({ isOpen, onSuccess }: ChangePasswordModalPr
     }
   }
 
-  const logOut = () => {
-    router.push('/')
+  const handleLogout = () => {
+    logout()
+    router.push("/login")
   }
 
   return (
@@ -145,7 +149,7 @@ export function ChangePasswordModal({ isOpen, onSuccess }: ChangePasswordModalPr
           )}
 
           <DialogFooter>
-            <Button variant={'outline'} onClick={logOut} type="button" disabled={isSubmitting}>
+            <Button variant={'outline'} onClick={handleLogout} type="button" disabled={isSubmitting}>
               Close
             </Button>
             <Button type="submit" disabled={isSubmitting}>
