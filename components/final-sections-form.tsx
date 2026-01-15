@@ -262,14 +262,16 @@ export function FinalSectionsForm({
         setExistingFinalSectionsId(savedSections.id)
       }
 
+      console.log(savedSections, 'savedSections')
+
       // Appraisal is automatically submitted via the service
-      toast.success("Appraisal submitted successfully!")
+      // toast.success("Appraisal submitted successfully!")
 
       // Redirect with return path
       if (isReviewMode) {
-        router.push(`/appraisal-print/${formData.appraisalId}?returnTo=team-appraisals/${userId}&step=5`)
+        router.push(`/appraisal-print/${savedSections.appraisal_id}?returnTo=team-appraisals/${userId}&step=5`)
       } else {
-        router.push(`/appraisal-print/${formData.appraisalId}?returnTo=create-appraisal&step=5`)
+        router.push(`/appraisal-print/${savedSections.appraisal_id}?returnTo=create-appraisal&step=5`)
       }
     } catch (error) {
       console.error("Error saving final sections:", error)
