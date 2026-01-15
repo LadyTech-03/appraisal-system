@@ -385,7 +385,7 @@ export function MidYearReviewForm({
   }
 
   return (
-    <Card className="max-w-6xl mx-auto">
+    <Card className="max-w-6xl w-full mx-auto">
       <CardHeader className="">
         <CardTitle className="text-xl font-bold bg-amber-800 text-white rounded-lg p-2">
           SECTION 3: Mid-Year Review Form
