@@ -209,7 +209,7 @@ function SidebarContent() {
       {!isCollapsed && user && (
         <div className="p-2 border-t border-sidebar-border">
           <div 
-            className="flex items-center space-x-3 p-3 rounded-lg hover:bg-sidebar-accent cursor-pointer transition-colors group"
+            className="flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors group"
             onClick={() => {
               const dropdown = document.getElementById('user-dropdown')
               if (dropdown) {
@@ -218,7 +218,7 @@ function SidebarContent() {
             }}
           >
             <div className="w-10 h-10 bg-sidebar-primary rounded-full flex items-center justify-center text-sidebar-primary-foreground font-semibold">
-              {user.first_name}
+              {user.first_name[0]}
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sidebar-foreground truncate text-sm">{user.first_name} {user.surname}</p>
@@ -230,17 +230,10 @@ function SidebarContent() {
           </div>
           
           {/* Dropdown Menu */}
-          <div id="user-dropdown" className="hidden mt-2 bg-sidebar-accent rounded-lg overflow-hidden shadow-lg">
-            <div className="p-3 border-b border-sidebar-border">
-              <p className="text-xs text-sidebar-foreground/60">Signed in as</p>
-              <p className="text-sm font-medium text-sidebar-foreground truncate">{user.email}</p>
-              <Badge variant="outline" className="text-xs mt-1">
-                {user.employee_id}
-              </Badge>
-            </div>
+          <div id="user-dropdown" className="hidden mt-2 bg-primary/40 rounded-lg overflow-hidden shadow-lg">
             <Button
-              variant="ghost"
-              className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 rounded-none"
+              variant="destructive"
+              className="w-full justify-start"
               onClick={handleLogout}
             >
               <LogOut className="h-4 w-4 mr-3" />
@@ -254,7 +247,7 @@ function SidebarContent() {
       {isCollapsed && (
         <div className="p-2 border-t border-sidebar-border">
           <Button
-            variant="ghost"
+            variant="outline"
             className="w-full justify-center text-destructive hover:text-destructive p-2"
             onClick={handleLogout}
           >

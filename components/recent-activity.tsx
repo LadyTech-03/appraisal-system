@@ -1,18 +1,26 @@
 "use client"
 
 import { useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { useAppStore, useAuthStore } from "@/lib/store"
 import { formatDistanceToNow } from "date-fns"
-import { FileText, Clock, CheckCircle, AlertCircle, Eye } from "lucide-react"
+import { ArrowRight, FileText } from "lucide-react"
 import { parseApiError } from "@/lib/api/api"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 export function RecentActivity() {
   const { user } = useAuthStore()
   const { users, fetchDashboardOverview, dashboardOverview } = useAppStore()
+  const router = useRouter()
 
   useEffect(() => {
     const fetchRecentActivity = async () => {
@@ -29,88 +37,77 @@ export function RecentActivity() {
     fetchRecentActivity()
   }, [user, fetchDashboardOverview])
 
-  // Get recent appraisals related to the user
   const recentAppraisals = dashboardOverview?.recentAppraisals || []
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "draft":
-        return <Clock className="h-4 w-4 text-orange-500" />
-      case "submitted":
-        return <FileText className="h-4 w-4 text-blue-500" />
-      case "reviewed":
-        return <AlertCircle className="h-4 w-4 text-purple-500" />
-      case "closed":
-        return <CheckCircle className="h-4 w-4 text-green-500" />
-      default:
-        return <FileText className="h-4 w-4 text-gray-500" />
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "draft":
-        return "bg-orange-100 text-orange-800"
-      case "submitted":
-        return "bg-blue-100 text-blue-800"
-      case "reviewed":
-        return "bg-purple-100 text-purple-800"
-      case "closed":
-        return "bg-green-100 text-green-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
-  }
-
   return (
-    <Card className="glass-card">
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>Recent Activities</span>
-          {/* <Button variant="outline" size="sm">
-            View All
-          </Button> */}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {recentAppraisals.length === 0 ? (
-          <div className="text-center py-8">
-            <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No recent activity</p>
-            <p className="text-sm text-muted-foreground">Your appraisal activities will appear here</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {recentAppraisals.map((appraisal) => {
-              console.log(appraisal)
-              console.log(user, 'this is the user')
-              const employee = appraisal.employeeInfo
-              const appraiser = users.find((u) => u.id === appraisal.appraiserId)
-              const isMyAppraisal = appraisal.employee_id === user?.id
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100/60">
+      <div className="flex items-center justify-between mb-4 px-1">
+        <h3 className="text-sm font-bold text-slate-800">Recent Activity</h3>
+        {/* <Button
+          variant="link"
+          className="text-blue-600 text-xs font-medium p-0 h-auto hover:no-underline hover:opacity-80"
+          onClick={() => router.push('/appraisals')}
+        >
+          View All
+        </Button> */}
+      </div>
 
-              return (
-                <div
-                  key={appraisal.id}
-                  className="flex items-center space-x-4 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-                >
-                  <div className="flex-shrink-0">{getStatusIcon(appraisal.status)}</div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground">
-                      {isMyAppraisal ? "My Appraisal" : `${employee?.first_name} ${employee?.surname}'s Appraisal`}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Updated {formatDistanceToNow(new Date(appraisal.updatedAt), { addSuffix: true })}
-                    </p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge className={`text-xs ${getStatusColor(appraisal.status)}`}>{appraisal.status}</Badge>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      {recentAppraisals.length === 0 ? (
+        <div className="text-center py-10 border border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+          <FileText className="h-10 w-10 mx-auto text-slate-300 mb-3" />
+          <p className="text-sm font-medium text-slate-500">No recent activity found</p>
+        </div>
+      ) : (
+        <div className="border rounded-xl overflow-hidden border-slate-100">
+          <Table>
+            <TableHeader className="bg-slate-50/50">
+              <TableRow className="hover:bg-transparent border-slate-100">
+                <TableHead className="w-[40%] text-xs font-semibold text-slate-500 uppercase tracking-wider h-10">Appraisal</TableHead>
+                <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider h-10">Last Updated</TableHead>
+                <TableHead className="text-xs font-semibold text-slate-500 uppercase tracking-wider h-10">Status</TableHead>
+                <TableHead className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wider h-10"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {recentAppraisals.map((appraisal) => {
+                const employee = appraisal.employeeInfo
+                const isMyAppraisal = appraisal.employee_id === user?.id
+                const title = isMyAppraisal
+                  ? "My Appraisal"
+                  : `${employee?.first_name || ''} ${employee?.surname || ''}'s Appraisal`.trim()
+
+                return (
+                  <TableRow
+                    key={appraisal.id}
+                    className="hover:bg-slate-50/50 border-slate-100 transition-colors cursor-pointer group"
+                    onClick={() => router.push(`/appraisal-print/${appraisal.id}?returnTo=dashboard`)}
+                  >
+                    <TableCell className="font-medium text-slate-700 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+                          <FileText className="h-4 w-4" />
+                        </div>
+                        <span>{title}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-slate-500 text-sm py-3">
+                      {formatDistanceToNow(new Date(appraisal.updatedAt), { addSuffix: true })}
+                    </TableCell>
+                    <TableCell className="py-3">
+                      <span className="text-sm font-medium text-slate-600 capitalize">
+                        {appraisal.status}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right py-3">
+                      <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-blue-600 transition-colors ml-auto" />
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </div>
   )
 }

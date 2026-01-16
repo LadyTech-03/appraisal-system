@@ -38,7 +38,7 @@ export default function DashboardPage() {
     }
 
     fetchDashboardStats()
-  
+
   }, [isAuthenticated, router])
 
   if (!isAuthenticated || !user) {
@@ -71,81 +71,116 @@ export default function DashboardPage() {
       {/* Main content area - Scrollable */}
       <main className="col-start-1 md:col-start-2 overflow-y-auto p-4 md:p-6">
         <div className="space-y-6">
-          {/* Hero Section */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-blue-700 to-blue-800 p-6 md:p-8 text-white">
-            <div className="relative z-10">
-              {/* Header Section */}
-              <div className="mb-8">
-                <h1 className="text-3xl md:text-4xl font-bold mb-3">
-                  {getGreeting()}, {user?.first_name}!
-                </h1>
-                <p className="text-blue-100 text-lg mb-6">Welcome to your dashboard</p>
-              </div>
+          {/* Premium Hero Section */}
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1e3a8a] to-blue-900 shadow-2xl">
+            {/* Background Effects */}
+            <div className="absolute inset-0 bg-grid-white/[0.1] bg-[size:32px_32px]" />
+            <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-white/10 blur-3xl opacity-50 animate-pulse" />
+            <div className="absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-white/10 blur-3xl opacity-50" />
 
-              {/* User Info Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                {user.division && (
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                    <div className="text-blue-200 text-sm font-medium mb-1">Division</div>
-                    <div className="text-white font-semibold">{user.division}</div>
+            <div className="relative z-10 p-8 md:p-10">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+
+                {/* Left Column: Greeting & Status */}
+                <div className="lg:col-span-7 space-y-6">
+                  <div>
+                    <div className="inline-flex items-center rounded-full border border-white/30 bg-white/20 px-3 py-1 text-xs font-medium text-white mb-4 backdrop-blur-md shadow-sm">
+                      <span className="flex h-2 w-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span>
+                      Active Session
+                    </div>
+                    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-2">
+                      {getGreeting()}, <span className="text-blue-100">{user?.first_name}</span>
+                    </h1>
+                    <p className="text-blue-100 text-lg max-w-xl leading-relaxed font-medium">
+                      Welcome back to your comprehensive performance appraisal dashboard. Track your progress and manage evaluations with precision.
+                    </p>
                   </div>
-                )}
-                {user.unit && (
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                    <div className="text-blue-200 text-sm font-medium mb-1">Unit</div>
-                    <div className="text-white font-semibold">{user.unit}</div>
-                  </div>
-                )}
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                  <div className="text-blue-200 text-sm font-medium mb-1">Role</div>
-                  <div className="text-white font-semibold">
-                    {user.role}
+
+                  {/* Primary Actions */}
+                  <div className="flex flex-wrap gap-4 pt-2">
+                    <Button
+                      size="lg"
+                      className="bg-white text-blue-700 hover:bg-blue-50 shadow-lg shadow-blue-900/20 border-0 font-bold px-8 h-12 rounded-xl transition-all duration-300 hover:scale-[1.02]"
+                      onClick={() => router.push("/appraisals")}
+                    >
+                      Go to Appraisals
+                    </Button>
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="border-white/40 bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm px-8 h-12 rounded-xl transition-all duration-300 font-semibold"
+                      onClick={() => router.push("/create-appraisal")}
+                    >
+                      Start New
+                    </Button>
                   </div>
                 </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                  <div className="text-blue-200 text-sm font-medium mb-1">Staff ID</div>
-                  <div className="text-white font-semibold">{user.employee_id}</div>
-                </div>
-              </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button
-                  size="lg"
-                  className="bg-white text-blue-700 hover:bg-blue-50 font-semibold px-8 py-3 rounded-lg shadow-lg"
-                  onClick={() => router.push("/appraisals")}
-                >
-                  View Appraisals
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white/30 text-white hover:bg-white/20 bg-transparent font-semibold px-8 py-3 rounded-lg"
-                  onClick={() => router.push("/create-appraisal")}
-                >
-                  Start New Appraisal
-                </Button>
+                {/* Right Column: Key User Details Card */}
+                <div className="lg:col-span-5 relative">
+                  <div className="absolute inset-0 bg-black/20 rounded-2xl blur-xl" />
+                  <div className="relative bg-black/20 backdrop-blur-md border border-white/10 rounded-2xl p-6 lg:p-8 space-y-6 shadow-xl">
+
+                    <div className="flex items-center justify-between border-b border-white/20 pb-4">
+                      <div>
+                        <p className="text-blue-100 text-sm font-bold uppercase tracking-wider">Employee Profile</p>
+                        <p className="text-white font-bold text-lg">{user?.role}</p>
+                      </div>
+                      <div className="h-10 w-10 rounded-full bg-white text-blue-700 flex items-center justify-center font-bold text-sm shadow-md">
+                        {user?.first_name?.[0]}{user?.surname?.[0]}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-1">
+                        <p className="text-blue-200 text-xs font-semibold uppercase">Division</p>
+                        <p className="text-white font-medium truncate" title={user?.division || "N/A"}>
+                          {user?.division || "N/A"}
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-blue-200 text-xs font-semibold uppercase">Unit</p>
+                        <p className="text-white font-medium truncate" title={user?.unit || "N/A"}>
+                          {user?.unit || "N/A"}
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-blue-200 text-xs font-semibold uppercase">Staff ID</p>
+                        <div className="inline-flex items-center bg-blue-900/30 rounded px-2 py-1 text-white text-sm font-mono border border-blue-500/30">
+                          {user?.employee_id || "..."}
+                        </div>
+                      </div>
+                      {/* <div className="space-y-1">
+                        <p className="text-blue-200 text-xs font-semibold uppercase">Status</p>
+                        <div className="flex items-center text-emerald-300 text-sm font-medium">
+                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-2" />
+                           Active
+                        </div>
+                      </div> */}
+                    </div>
+
+                  </div>
+                </div>
+
               </div>
             </div>
-
-            {/* Background decoration */}
-            <div className="absolute top-0 right-0 w-72 h-72 bg-white/5 rounded-full -translate-y-36 translate-x-36"></div>
-            <div className="absolute bottom-0 left-0 w-56 h-56 bg-white/5 rounded-full translate-y-28 -translate-x-28"></div>
-            <div className="absolute top-1/2 right-1/4 w-32 h-32 bg-white/3 rounded-full"></div>
           </div>
 
-          {/* Stats Cards */}
-          <DashboardStats dashboardOverview={dashboardOverview || {}} />
+
+          {/* Stats & Actions Row */}
+          <div className="flex flex-col xl:flex-row gap-6">
+            <div className="flex-1 min-w-0">
+              <DashboardStats dashboardOverview={dashboardOverview || {}} />
+            </div>
+            <div className="shrink-0 xl:w-auto">
+              <QuickActions />
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 gap-6" >
             {/* Recent Activity */}
             <div>
               <RecentActivity />
-            </div>
-
-            {/* Quick Actions - Takes 1 column */}
-            <div className="xl:col-span-1">
-              <QuickActions />
             </div>
           </div>
         </div>

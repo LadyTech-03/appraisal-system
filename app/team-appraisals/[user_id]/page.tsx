@@ -8,7 +8,7 @@ import { Topbar } from "@/components/topbar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, User, Loader2 } from "lucide-react"
+import { ArrowLeft, User, Loader2, Check } from "lucide-react"
 import { getPersonalInfoByUserId, PersonalInfo } from "@/lib/api/personalInfo"
 import { PerformancePlanningForm } from "@/components/performance-planning-form"
 import { MidYearReviewForm } from "@/components/mid-year-review-form"
@@ -19,6 +19,15 @@ import { AppraiseePersonalInfoForm } from "@/components/appraisee-personal-info-
 import { GuideNotesLayout, useGuideNotes } from "@/components/guide-notes/guide-notes-selector"
 
 type Step = 'personal-info' | 'performance-planning' | 'mid-year-review' | 'end-year-review' | 'annual-appraisal' | 'final-sections'
+
+const steps = [
+  { id: 'personal-info', name: 'Personal Information', status: 'personalInfo' },
+  { id: 'performance-planning', name: 'Performance Planning', status: 'performancePlanning' },
+  { id: 'mid-year-review', name: 'Mid Year Review', status: 'midYearReview' },
+  { id: 'end-year-review', name: 'End Year Review', status: 'endYearReview' },
+  { id: 'annual-appraisal', name: 'Annual Appraisal', status: 'annualAppraisal' },
+  { id: 'final-sections', name: 'Final Sections', status: 'finalSections' },
+]
 
 export default function TeamMemberAppraisalPage() {
   const router = useRouter()
@@ -199,20 +208,57 @@ export default function TeamMemberAppraisalPage() {
 
         <GuideNotesLayout guideState={guideState}>
         <main className="flex-1 p-6 space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push("/team-appraisals")}
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Team Appraisals
-              </Button>
-              <div>
-                <h1 className="text-2xl font-bold text-primary">Review Appraisal - {getStepTitle()}</h1>
-                <p className="text-muted-foreground">{getStepDescription()}</p>
+          {/* Progress Indicator */}
+          <div className="w-full max-w-4xl mx-auto mb-12 px-4">
+            <div className="relative">
+              {/* Background Line */}
+              <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -translate-y-1/2 rounded-full" />
+
+              {/* Progress Line */}
+              <div
+                className="absolute top-1/2 left-0 h-1 bg-primary -translate-y-1/2 rounded-full transition-all duration-500 ease-in-out"
+                style={{
+                  width: `${(steps.findIndex(s => s.id === currentStep) / (steps.length - 1)) * 100}%`
+                }}
+              />
+
+              {/* Steps */}
+              <div className="relative flex justify-between items-center w-full">
+                {steps.map((step, index) => {
+                  const currentIndex = steps.findIndex(s => s.id === currentStep)
+                  const isCompleted = index < currentIndex || appraisalData[step.status]
+                  const isActive = step.id === currentStep
+                  const isPending = index > currentIndex
+
+                  return (
+                    <div key={step.id} className="flex flex-col items-center gap-2 group cursor-default">
+                      {/* Step Circle */}
+                      <div
+                        className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all duration-300 bg-background
+                        ${isCompleted
+                            ? 'bg-primary border-primary text-primary-foreground scale-110'
+                            : isActive
+                              ? 'border-primary text-primary scale-125 ring-4 ring-primary/20'
+                              : 'border-gray-300 text-gray-400'
+                          }
+                      `}
+                      >
+                        {isCompleted ? (
+                          <Check className="w-4 h-4" strokeWidth={3} />
+                        ) : (
+                          <span className="text-xs font-bold">{index + 1}</span>
+                        )}
+                      </div>
+
+                      {/* Step Label */}
+                      <span className={`absolute top-10 text-xs font-semibold whitespace-nowrap transition-colors duration-300
+                      ${isActive ? 'text-primary' : isCompleted ? 'text-foreground' : 'text-muted-foreground'}
+                    `}>
+                        {step.name}
+                      </span>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </div>
