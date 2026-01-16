@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Settings, User, Download, Upload, Trash2 } from "lucide-react"
+import { Settings, User, Download, Upload, Trash2, Loader2 } from "lucide-react"
 import { usersApi } from '@/lib/api/users';
 
 export default function SettingsPage() {
@@ -21,6 +21,7 @@ export default function SettingsPage() {
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
   const [importText, setImportText] = useState("")
   const allowedRoles = ["Director-General", "System Administrator"]
+  const [clearing, setClearing] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -69,6 +70,7 @@ export default function SettingsPage() {
   const handleClearData = async () => {
     if (confirm("Are you sure you want to clear all data? This action cannot be undone.")) {
       try {
+        setClearing(true);
         const result = await usersApi.resetDatabase();
         localStorage.removeItem("app-storage")
         localStorage.removeItem("auth-storage")
@@ -76,6 +78,8 @@ export default function SettingsPage() {
         router.replace("/login")
       } catch (error) {
         setMessage({ type: "error", text: "Failed to clear data. Please try again." })
+      } finally {
+        setClearing(false);
       }
     }
   }
@@ -190,8 +194,17 @@ export default function SettingsPage() {
                     Clear the system data.
                   </p>
                   <Button onClick={handleClearData} variant="destructive">
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Clear All Data
+                    {clearing ? (
+                      <span className="flex items-center">
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Clearing...
+                      </span>
+                    ) : (
+                      <span className="flex items-center">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Clear All Data
+                      </span>
+                    )}
                   </Button>
                 </div>
               )}

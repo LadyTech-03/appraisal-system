@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { StaffGuide } from "@/components/guide-notes/staff-guides"
+import { GeneralGuideNotes } from "./general-guide-notes"
 
 const staffCategories = [
   { value: "teaching", label: "Teaching Staff" },
@@ -38,8 +39,8 @@ function GuideSidePanel({ isOpen, selectedCategory, onCategoryChange, onClose }:
   const renderGuide = () => {
     if (!selectedCategory) {
       return (
-        <div className="flex items-center justify-center h-full text-muted-foreground p-8 text-center">
-          <p>Select your staff category above to view guide notes.</p>
+        <div className="w-[500px]">
+          <GeneralGuideNotes />
         </div>
       )
     }
@@ -63,9 +64,10 @@ function GuideSidePanel({ isOpen, selectedCategory, onCategoryChange, onClose }:
       <div className="p-4 border-b shrink-0">
         <Select value={selectedCategory} onValueChange={onCategoryChange}>
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select category..." />
+            <SelectValue placeholder="Select category" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="general">General Guide Notes</SelectItem>
             {staffCategories.map((category) => (
               <SelectItem key={category.value} value={category.value}>
                 {category.label}
@@ -95,7 +97,7 @@ interface GuideNotesContextType {
 
 export function useGuideNotes() {
   const [isOpen, setIsOpen] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("general")
 
   return {
     isOpen,
@@ -135,7 +137,7 @@ export function GuideNotesLayout({ children, guideState }: GuideNotesLayoutProps
       {/* Floating Help Button - only visible when panel is closed */}
       {!isOpen && (
         <Button
-        title="Guide Notes"
+          title="Guide Notes"
           size="icon"
           className="fixed bottom-6 right-6 h-12 w-12 rounded-full shadow-lg bg-primary text-white hover:bg-primary/90 z-50"
           onClick={openGuide}
@@ -145,9 +147,4 @@ export function GuideNotesLayout({ children, guideState }: GuideNotesLayoutProps
       )}
     </div>
   )
-}
-
-// Keep the old export for backward compatibility but we'll replace usage
-export function GuideNotesSelector() {
-  return null // This is now handled by GuideNotesLayout
 }

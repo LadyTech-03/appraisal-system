@@ -205,7 +205,7 @@ export function FinalSectionsForm({
       let savedSections
       if (existingFinalSectionsId) {
         savedSections = await updateFinalSections(existingFinalSectionsId, payload)
-        toast.success("Final sections updated successfully!")
+        toast.success("Section updated successfully!")
         if (isReviewMode) {
           appraisalsApi.updateAppraisalStatus(formData.appraisalId, "reviewed")
         } else {

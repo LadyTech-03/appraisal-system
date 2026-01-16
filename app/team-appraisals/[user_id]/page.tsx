@@ -16,6 +16,7 @@ import { EndYearReviewForm } from "@/components/end-year-review-form"
 import { AnnualAppraisalForm } from "@/components/annual-appraisal-form"
 import { FinalSectionsForm } from "@/components/final-sections-form"
 import { AppraiseePersonalInfoForm } from "@/components/appraisee-personal-info-form"
+import { GuideNotesLayout, useGuideNotes } from "@/components/guide-notes/guide-notes-selector"
 
 type Step = 'personal-info' | 'performance-planning' | 'mid-year-review' | 'end-year-review' | 'annual-appraisal' | 'final-sections'
 
@@ -23,6 +24,7 @@ export default function TeamMemberAppraisalPage() {
   const router = useRouter()
   const params = useParams()
   const searchParams = useSearchParams()
+  const guideState = useGuideNotes()
   const user_id = params?.user_id as string
   const { user, isAuthenticated, token } = useAuthStore()
   const [isLoading, setIsLoading] = useState(true)
@@ -195,6 +197,7 @@ export default function TeamMemberAppraisalPage() {
       <div className="flex-1 flex flex-col">
         <Topbar />
 
+        <GuideNotesLayout guideState={guideState}>
         <main className="flex-1 p-6 space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between">
@@ -212,10 +215,6 @@ export default function TeamMemberAppraisalPage() {
                 <p className="text-muted-foreground">{getStepDescription()}</p>
               </div>
             </div>
-            <Badge variant="secondary" className="flex items-center gap-2">
-              <User className="h-3 w-3" />
-              Review Mode
-            </Badge>
           </div>
 
           {/* Team Member Info */}
@@ -226,45 +225,6 @@ export default function TeamMemberAppraisalPage() {
             </div>
           ) : personalInfo ? (
             <>
-              {/* <Card className="glass-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <User className="h-5 w-5 text-primary" />
-                    <span>Appraisee Information</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Name</p>
-                      <p className="font-semibold">{personalInfo.user_name}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Job Title</p>
-                      <p className="font-semibold">{personalInfo.present_job_title}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Employee ID</p>
-                      <p className="font-semibold">{personalInfo.employee_id}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Division</p>
-                      <p className="font-semibold">{personalInfo.division}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Appraisal Period</p>
-                      <p className="font-semibold">
-                        {new Date(personalInfo.period_from).toLocaleDateString()} - {new Date(personalInfo.period_to).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Grade/Salary</p>
-                      <p className="font-semibold">{personalInfo.grade_salary}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card> */}
-
               {/* Form Content */}
               {
               currentStep === 'personal-info' ? (
@@ -319,6 +279,7 @@ export default function TeamMemberAppraisalPage() {
             </Card>
           )}
         </main>
+        </GuideNotesLayout>
       </div>
     </div>
   )

@@ -12,6 +12,8 @@ import { Section7CareerDevelopment } from "./sections/section-7-career-developme
 import { Section8AssessmentDecision } from "./sections/section-8-assessment-decision"
 import { Section9AppraiseeComments } from "./sections/section-9-appraisee-comments"
 import { Section10HODComments } from "./sections/section-10-hod-comments"
+import { GeneralGuideNotes } from "./general-guide-notes"
+
 
 interface StaffGuideProps {
   category: string
@@ -22,9 +24,7 @@ export function StaffGuide({ category }: StaffGuideProps) {
 
   if (!content) {
     return (
-      <div className="flex items-center justify-center h-full text-muted-foreground p-8 text-center">
-        <p>Guide not found for this category.</p>
-      </div>
+      <GeneralGuideNotes />
     )
   }
 
