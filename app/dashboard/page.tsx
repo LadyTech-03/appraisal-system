@@ -12,12 +12,15 @@ import { QuickActions } from "@/components/quick-actions"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { appraisalsApi } from "@/lib/api/appraisals"
+import { fi } from "date-fns/locale"
 
 export default function DashboardPage() {
   const router = useRouter()
   const { user, isAuthenticated } = useAuthStore()
 
   const [dashboardOverview, setDashboardOverview] = useState(null)
+    const [hasStartedAppraisal, setHasStartedAppraisal] = useState(false)
+  
 
 
   useEffect(() => {
@@ -31,9 +34,13 @@ export default function DashboardPage() {
       try {
         const response = await appraisalsApi.getDashboardOverview()
         setDashboardOverview(response)
-        console.log(response)
+        console.log(response, "Dashboard Overview Data")
+        // Check if user has started an appraisal
+        setHasStartedAppraisal(response.appraisalsInProgress > 0)
       } catch (error) {
         // console.error(error)
+      } finally {
+        // setIsLoading(false)
       }
     }
 
@@ -92,8 +99,9 @@ export default function DashboardPage() {
                       {getGreeting()}, <span className="text-blue-100">{user?.first_name}</span>
                     </h1>
                     <p className="text-blue-100 text-lg max-w-xl leading-relaxed font-medium">
-                      Welcome back to your comprehensive performance appraisal dashboard. Track your progress and manage evaluations with precision.
+                      Welcome back.
                     </p>
+                    <br></br>
                   </div>
 
                   {/* Primary Actions */}
@@ -103,15 +111,15 @@ export default function DashboardPage() {
                       className="bg-white text-blue-700 hover:bg-blue-50 shadow-lg shadow-blue-900/20 border-0 font-bold px-8 h-12 rounded-xl transition-all duration-300 hover:scale-[1.02]"
                       onClick={() => router.push("/appraisals")}
                     >
-                      Go to Appraisals
+                      My Appraisals
                     </Button>
                     <Button
                       size="lg"
                       variant="outline"
-                      className="border-white/40 bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm px-8 h-12 rounded-xl transition-all duration-300 font-semibold"
+                      className="border-white/40 bg-white/10 hover:text-white text-white hover:bg-white/20 backdrop-blur-sm px-8 h-12 rounded-xl transition-all duration-300 font-semibold"
                       onClick={() => router.push("/create-appraisal")}
                     >
-                      Start New
+                      {hasStartedAppraisal ? "Continue Appraisal" : "Start Appraisal"}
                     </Button>
                   </div>
                 </div>

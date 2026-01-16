@@ -57,7 +57,6 @@ export default function AppraisalsPage() {
     const fetchAppraisals = async () => {
       try {
         const data = await appraisalsApi.getSubmittedAppraisals()
-        console.log(data,'kkkdkdk')
         setAppraisals(data?.appraisals || [])
       } catch (error) {
         console.error("Error fetching appraisals:", error)

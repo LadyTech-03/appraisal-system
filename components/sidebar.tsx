@@ -49,7 +49,7 @@ const menuItems: MenuItem[] = [
   },
   {
     icon: Target,
-    label: "Create Appraisal",
+    label: "Start Appraisal",
     href: "/create-appraisal",
   },
   {
@@ -168,7 +168,7 @@ function SidebarContent() {
           const is_active = pathname === item.href
           
           // Dynamically change label for Create Appraisal
-          const displayLabel = item.label === "Create Appraisal" && hasStartedAppraisal 
+          const displayLabel = item.label === "Start Appraisal" && hasStartedAppraisal 
             ? "Continue Appraisal" 
             : item.label
 
