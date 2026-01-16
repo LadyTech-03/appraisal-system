@@ -34,7 +34,7 @@ export default function DashboardPage() {
       try {
         const response = await appraisalsApi.getDashboardOverview()
         setDashboardOverview(response)
-        console.log(response, "Dashboard Overview Data")
+        // console.log(response, "Dashboard Overview Data")
         // Check if user has started an appraisal
         setHasStartedAppraisal(response.appraisalsInProgress > 0)
       } catch (error) {

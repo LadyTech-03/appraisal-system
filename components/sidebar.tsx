@@ -115,7 +115,7 @@ function SidebarContent() {
 
   const handleLogout = () => {
     logout()
-    router.push("/login")
+    router.replace("/login")
   }
 
   const filteredMenuItems = menuItems.filter((item) => !item.roles || item.roles.includes(user?.role || ""))
@@ -218,7 +218,7 @@ function SidebarContent() {
             }}
           >
             <div className="w-10 h-10 bg-sidebar-primary rounded-full flex items-center justify-center text-sidebar-primary-foreground font-semibold">
-              {user.first_name.charAt(0).toUpperCase()}{user.surname.charAt(0).toUpperCase()}
+              {/* {user.first_name.charAt(0).toUpperCase()}{user.surname.charAt(0).toUpperCase()} */}
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sidebar-foreground truncate text-sm">{user.first_name} {user.surname}</p>
