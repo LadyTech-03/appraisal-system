@@ -81,7 +81,10 @@ export interface Section9Content {
 }
 
 export interface Section10Content {
-    exampleComment: string
+    section10Title?: string
+    section10Description?: string
+    signatureLabel?: string
+    exampleComment?: string
 }
 
 export interface GuideContent {

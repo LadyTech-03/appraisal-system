@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
-    "@imgly/background-removal": "^1.7.0",
+    "@mediapipe/selfie_segmentation": "^0.1.1675465747",
     "@radix-ui/react-accordion": "latest",
     "@radix-ui/react-alert-dialog": "latest",
     "@radix-ui/react-aspect-ratio": "latest",

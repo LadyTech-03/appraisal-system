@@ -240,6 +240,9 @@ export const guideContentConfig: Record<string, GuideContent> = {
             exampleComment: `"[e.g., I thank my appraiser for the constructive feedback. I agree with the assessment and am committed to working on the areas identified for development. I am particularly interested in the proposed training on [Training Topic] and look forward to contributing more to [Specific Area] in the coming year.]"`
         },
         section10: {
+            section10Title: "Director General’s Comments",
+            section10Description: "[The DG provides final endorsement, comments on the staff's potential, and confirms institutional support for the development plan.]",
+            signatureLabel: "DG'S SIGNATURE",
             exampleComment: `"[e.g., I have reviewed this appraisal and concur with the findings and recommendations. [Staff Name] is a valued member of the department, and we will support the proposed training plan.]"`
         }
     },
@@ -432,6 +435,9 @@ export const guideContentConfig: Record<string, GuideContent> = {
             exampleComment: `"[e.g., I thank my appraiser for the constructive feedback. I agree with the assessment and am committed to working on the areas identified for development. I am particularly interested in the proposed training on [Training Topic] and look forward to contributing more to [Specific Area] in the coming year.]"`
         },
         section10: {
+            section10Title: "Regional Director’s Comments",
+            section10Description: "[The Regional Director provides final endorsement, comments on the staff's potential, and confirms institutional support for the development plan.]",
+            signatureLabel: "RD'S SIGNATURE",
             exampleComment: `"[e.g., I have reviewed this appraisal and concur with the findings and recommendations. [Staff Name] is a valued member of the department, and we will support the proposed training plan.]"`
         }
     },
@@ -443,19 +449,22 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section2: {
             rows: [
                 {
-                    keyResultArea: "1. Teaching & Instructional Effectiveness",
-                    targets: `- Develop and submit detailed lesson plans for [Course Code] that explicitly incorporate at least [Number] active learning strategies (e.g., think-pair-share, project-based learning, peer teaching) and show differentiation for varied learner abilities by [Date].
-- Successfully demonstrate these strategies during the scheduled lesson observation, achieving a rating of at least [3/5] on the "Use of Active Learning" criterion.
-- Utilize [Specific Technology/Tool, e.g., LMS quizzes, simulation software] to enhance engagement and provide timely feedback.`,
-                    resourcesRequired: "Lesson plan template, Observation feedback form, Access to LMS & educational technology, Teaching aids."
+                    keyResultArea: "1. Administrative Operations & Facilities Management",
+                    targets: `- Ensure [95%] availability and functionality of key facilities (workshops, labs, offices).
+- Oversee completion of [3] maintenance/renovation projects within budget and timeline.
+- Achieve [85%] satisfaction rate from staff on administrative support services.
+- Implement [1] digital administrative system to improve efficiency.
+`,
+                    resourcesRequired: "Maintenance schedules, Budget plans, Service contracts, IT support"
                 },
                 {
-                    keyResultArea: "2. Industry Alignment, Practice & Student Project Supervision",
-                    targets: `- Participate in a minimum of [Number] days of formal industry immersion (e.g., internship, shadowing, industry workshop) and submit a reflective report on insights gained by [Date].
-- Supervise [Number] student hands-on projects (e.g., capstone projects, prototypes, service commissions) ensuring they solve real-world industry problems.
-- Integrate a minimum of [Number] industry case studies, guest speakers, or live briefs from [Industry Partner] into course [Course Code].
-- Ensure 100% of supervised student projects are assessed against industry-standard rubrics that include criteria for practicality, innovation, and safety.`,
-                    resourcesRequired: "Industry partnership contacts, Budget for industry visits, Project materials budget, Industry-standard assessment rubrics, Workshop/Lab access."
+                    keyResultArea: "2. Financial Management & Procurement",
+                    targets: `- Manage administrative budget with less than [5%] overspend.
+- Ensure [100%] compliance with procurement regulations (PPA).
+- Process all procurement requests within [10] working days.
+- Achieve cost savings of [%] through efficient procurement practices.
+`,
+                    resourcesRequired: "Procurement guidelines, Budget reports, Vendor database, Price analysis tools"
                 },
                 {
                     keyResultArea: "3. Student Mentorship, Support & Assessment",
@@ -615,6 +624,9 @@ export const guideContentConfig: Record<string, GuideContent> = {
             exampleComment: `"[e.g., I thank my appraiser for the constructive feedback. I agree with the assessment and am committed to working on the areas identified for development. I am particularly interested in the proposed training on [Training Topic] and look forward to contributing more to [Specific Area] in the coming year.]"`
         },
         section10: {
+            section10Title: "Regional Director’s Comments",
+            section10Description: "[The RD provides final endorsement, comments on the staff's potential, and confirms institutional support for the development plan.]",
+            signatureLabel: "RD'S SIGNATURE",
             exampleComment: `"[e.g., I have reviewed this appraisal and concur with the findings and recommendations. [Staff Name] is a valued member of the department, and we will support the proposed training plan.]"`
         }
     },
@@ -798,7 +810,10 @@ export const guideContentConfig: Record<string, GuideContent> = {
             exampleComment: `"[e.g., I thank my appraiser for the constructive feedback. I agree with the assessment and am committed to working on the areas identified for development. I am particularly interested in the proposed training on [Training Topic] and look forward to contributing more to [Specific Area] in the coming year.]"`
         },
         section10: {
-            exampleComment: `"[e.g., I have reviewed this appraisal and concur with the findings and recommendations. [Staff Name] is a valued member of the department, and we will support the proposed training plan.]"`
+            section10Title: "Principal's Comments",
+            section10Description: "•	[The Principal provides final endorsement, comments on the staff's potential, and confirms institutional support for the development plan.]",
+            signatureLabel: "HOD'S SIGNATURE",
+            exampleComment: `"•	[e.g., I have reviewed this appraisal and concur with the findings and recommendations. [Staff Name] is a valued member of the department, and we will support the proposed training plan.]"`
         }
     },
     'headquarters-technical': {
@@ -981,6 +996,9 @@ export const guideContentConfig: Record<string, GuideContent> = {
             exampleComment: `"[e.g., I thank my appraiser for the constructive feedback. I agree with the assessment and am committed to working on the areas identified for development. I am particularly interested in the proposed training on [Training Topic] and look forward to contributing more to [Specific Area] in the coming year.]"`
         },
         section10: {
+            section10Title: "DG/DDG/RD’s Comments",
+            section10Description: "[The DG/DDG/RD provides final endorsement, comments on the staff's potential, and confirms institutional support for the development plan.]",
+            signatureLabel: "DG/DDG/RD'S SIGNATURE",
             exampleComment: `"[e.g., I have reviewed this appraisal and concur with the findings and recommendations. [Staff Name] is a valued member of the department, and we will support the proposed training plan.]"`
         }
     },
