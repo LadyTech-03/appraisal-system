@@ -65,7 +65,7 @@ export function EndYearReviewForm({
 
   const [formData, setFormData] = useState({
     targets: initialData?.targets || [
-      { id: "1", target: "", performanceAssessment: "", weightOfTarget: 5, score: 0, comments: "" }
+      { id: "1", target: "", performanceAssessment: "", weightOfTarget: 0.6, score: 0, comments: "" }
     ] as TargetEvaluation[],
     appraiseeSignatureUrl: initialData?.appraiseeSignatureUrl || null as string | null,
     appraiserSignatureUrl: initialData?.appraiserSignatureUrl || null as string | null,
@@ -119,6 +119,7 @@ export function EndYearReviewForm({
         }
         if (reviews && reviews.length > 0) {
           const latestReview = reviews[0]
+          console.log(latestReview, 'this is the latest review')
           setFormData({
             targets: latestReview.targets.map((item: any, index: number) => ({
               ...item,
@@ -146,7 +147,7 @@ export function EndYearReviewForm({
         ...prev,
         targets: [
           ...prev.targets,
-          { id: newId, target: "", performanceAssessment: "", weightOfTarget: 5, score: 0, comments: "" }
+          { id: newId, target: "", performanceAssessment: "", weightOfTarget: 0.6, score: 0, comments: "" }
         ]
       }))
     }
@@ -264,7 +265,7 @@ export function EndYearReviewForm({
       }
       setFormData({
         targets: [
-          { id: "1", target: "", performanceAssessment: "", weightOfTarget: 5, score: 0, comments: "" }
+          { id: "1", target: "", performanceAssessment: "", weightOfTarget: 0.6, score: 0, comments: "" }
         ],
         appraiseeSignatureUrl: null,
         appraiserSignatureUrl: null,

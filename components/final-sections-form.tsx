@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Eye, Loader2, Trash2 } from "lucide-react"
+import { Eye, Info, Loader2, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import {
   AlertDialog,
@@ -598,7 +598,46 @@ export function FinalSectionsForm({
           <Card className={`p-4 ${!isReviewMode ? 'opacity-70' : ''}`}>
             <div className="space-y-4">
               <div className="bg-amber-800 text-white p-2 rounded">
-                <h3 className="font-bold">SECTION 10: Head of Department's / Division's (HOD) Comments</h3>
+                <h3 className="font-bold">SECTION 10: Head of Department's Comments</h3>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 p-3 rounded-md text-sm text-blue-800 flex items-start gap-2">
+                <Info className="h-5 w-5 shrink-0" />
+                <p>This section will be completed by your Head of Department.</p>
+              </div>
+
+              <div className="space-y-3 pt-2">
+                <Label className="font-semibold">Select your position</Label>
+                <RadioGroup
+                  defaultValue="hod"
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                  disabled={!isReviewMode}
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="dg" id="dg" />
+                    <Label htmlFor="dg" className="font-normal cursor-pointer">Director-General (DG)</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="ddgms" id="ddgms" />
+                    <Label htmlFor="ddgms" className="font-normal cursor-pointer">Deputy Director-General, MS</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="ddgo" id="ddgo" />
+                    <Label htmlFor="ddgo" className="font-normal cursor-pointer">Deputy Director-General, Ops</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="hod" id="hod" />
+                    <Label htmlFor="hod" className="font-normal cursor-pointer">Head of Division</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="rd" id="rd" />
+                    <Label htmlFor="rd" className="font-normal cursor-pointer">Regional Director</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="principal" id="principal" />
+                    <Label htmlFor="principal" className="font-normal cursor-pointer">Principal</Label>
+                  </div>
+                </RadioGroup>
               </div>
 
               <div className="space-y-2">
@@ -614,7 +653,7 @@ export function FinalSectionsForm({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
                 <div className="space-y-2">
-                  <Label className="font-semibold">HOD'S NAME</Label>
+                  <Label className="font-semibold">NAME</Label>
                   <Input
                     type="text"
                     value={formData.hodName}
@@ -625,7 +664,7 @@ export function FinalSectionsForm({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="font-semibold">HOD'S SIGNATURE</Label>
+                  <Label className="font-semibold">SIGNATURE</Label>
                   {hodSignatureUrl ? (
                     <div className="space-y-2">
                       {!formData.hodSignatureUrl ? (

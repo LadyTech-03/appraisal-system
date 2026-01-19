@@ -16,7 +16,7 @@ import { usersApi } from '@/lib/api/users';
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { user } = useAuthStore()
+  const { user, logout } = useAuthStore()
   const { exportData, importData } = useAppStore()
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
   const [importText, setImportText] = useState("")
@@ -66,8 +66,7 @@ export default function SettingsPage() {
       try {
         setClearing(true);
         const result = await usersApi.resetDatabase();
-        localStorage.removeItem("app-storage")
-        localStorage.removeItem("auth-storage")
+        logout()
         setMessage({ type: "success", text: "All data cleared." })
         router.replace("/login")
       } catch (error) {
