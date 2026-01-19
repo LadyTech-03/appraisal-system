@@ -524,9 +524,9 @@ export function EndYearReviewForm({
                                 <Image
                                   src={formData.appraiseeSignatureUrl}
                                   alt="Appraisee Signature"
-                                  width={100}
-                                  height={50}
-                                  className="max-h-12 max-w-full object-contain"
+                                  width={120}
+                                  height={120}
+                                  className="max-h-20 max-w-full object-contain"
                                 />
                               </Card>
                             </div>
@@ -601,9 +601,9 @@ export function EndYearReviewForm({
                                 <Image
                                   src={formData.appraiserSignatureUrl}
                                   alt="Appraisee Signature"
-                                  width={100}
-                                  height={50}
-                                  className="max-h-12 max-w-full object-contain"
+                                  width={120}
+                                  height={120}
+                                  className="max-h-20 max-w-full object-contain"
                                 />
                               </Card>
                             </div>

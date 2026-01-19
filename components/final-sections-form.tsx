@@ -378,8 +378,8 @@ export function FinalSectionsForm({
                             <Image
                               src={formData.appraiserSignatureUrl}
                               alt="Appraiser Signature"
-                              width={100}
-                              height={50}
+                              width={120}
+                              height={120}
                               className="max-h-20 max-w-full object-contain"
                             />
                           </div>
@@ -552,8 +552,8 @@ export function FinalSectionsForm({
                             <Image
                               src={formData.appraiseeSignatureUrl}
                               alt="Appraisee Signature"
-                              width={100}
-                              height={50}
+                              width={120}
+                              height={120}
                               className="max-h-20 max-w-full object-contain"
                             />
                           </div>
@@ -694,8 +694,8 @@ export function FinalSectionsForm({
                             <Image
                               src={formData.hodSignatureUrl}
                               alt="HOD Signature"
-                              width={100}
-                              height={50}
+                              width={120}
+                              height={120}
                               className="max-h-20 max-w-full object-contain"
                             />
                           </div>
