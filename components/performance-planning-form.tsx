@@ -32,7 +32,7 @@ import {
 import { usersApi } from "@/lib/api/users"
 import { authApi } from "@/lib/api/auth"
 
-// import { removeBackground } from "@imgly/background-removal"
+import { removeBackground } from "@imgly/background-removal"
 
 interface KeyResultArea {
   id: string
