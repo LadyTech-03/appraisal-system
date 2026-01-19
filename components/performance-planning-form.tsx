@@ -188,55 +188,55 @@ export function PerformancePlanningForm({
     }))
   }
 
-  const handleSignatureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    const isAppraisee = !isReviewMode
-
-    if (file) {
-      setIsUploadingSignature(true)
-      try {
-        toast.info("Uploading signature")
-        const blob = await removeBackground(file)
-        const processedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".png", { type: "image/png" })
-
-        const result = await usersApi.uploadSignature(processedFile)
-        if (isAppraisee) {
-          setAppraiseeSignatureUrl(result.signatureUrl)
-        } else {
-          setAppraiserSignatureUrl(result.signatureUrl)
-        }
-        toast.success("Signature uploaded successfully")
-      } catch (error) {
-        console.error("Signature processing error:", error)
-        toast.error("Failed to upload signature")
-      } finally {
-        setIsUploadingSignature(false)
-      }
-    }
-  }
-
-  //   const handleSignatureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  // const handleSignatureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
   //   const file = event.target.files?.[0]
   //   const isAppraisee = !isReviewMode
-  //   if (file && file.type === "image/png") {
-  //       setIsUploadingSignature(true)
-  //       try {
-  //           const result = await usersApi.uploadSignature(file)
-  //           if (isAppraisee) {
-  //               setAppraiseeSignatureUrl(result.signatureUrl)
-  //           } else {
-  //               setAppraiserSignatureUrl(result.signatureUrl)
-  //           }
-  //           toast.success("Signature uploaded successfully")
-  //       } catch (error) {
-  //           toast.error("Failed to upload signature")
-  //       } finally {
-  //           setIsUploadingSignature(false)
+
+  //   if (file) {
+  //     setIsUploadingSignature(true)
+  //     try {
+  //       toast.info("Uploading signature")
+  //       const blob = await removeBackground(file)
+  //       const processedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".png", { type: "image/png" })
+
+  //       const result = await usersApi.uploadSignature(processedFile)
+  //       if (isAppraisee) {
+  //         setAppraiseeSignatureUrl(result.signatureUrl)
+  //       } else {
+  //         setAppraiserSignatureUrl(result.signatureUrl)
   //       }
-  //   } else if (file) {
-  //       toast.error("Please upload a PNG image")
+  //       toast.success("Signature uploaded successfully")
+  //     } catch (error) {
+  //       console.error("Signature processing error:", error)
+  //       toast.error("Failed to upload signature")
+  //     } finally {
+  //       setIsUploadingSignature(false)
+  //     }
   //   }
   // }
+
+    const handleSignatureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    const isAppraisee = !isReviewMode
+    if (file && file.type === "image/png") {
+        setIsUploadingSignature(true)
+        try {
+            const result = await usersApi.uploadSignature(file)
+            if (isAppraisee) {
+                setAppraiseeSignatureUrl(result.signatureUrl)
+            } else {
+                setAppraiserSignatureUrl(result.signatureUrl)
+            }
+            toast.success("Signature uploaded successfully")
+        } catch (error) {
+            toast.error("Failed to upload signature")
+        } finally {
+            setIsUploadingSignature(false)
+        }
+    } else if (file) {
+        toast.error("Please upload a PNG image")
+    }
+  }
 
 
   const handleSign = () => {

@@ -39,6 +39,7 @@ export default function LoginPage() {
       const result = await login(formData.emailOrEmployeeId, formData.password)
       if (result) {
         // Check if user needs to change password
+        console.log("User logged in successfully:", result)
         const currentUser = useAuthStore.getState().user
         if (currentUser?.password_change_required) {
           setShowPasswordChangeModal(true)
