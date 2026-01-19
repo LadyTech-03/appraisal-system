@@ -12,12 +12,14 @@ const nextConfig = {
   reactStrictMode: false,
 
   // Prevent server processing of these packages
-  // serverExternalPackages: ['@imgly/background-removal', 'onnxruntime-web'],
+  // experimental: {
+  //   serverComponentsExternalPackages: ['@imgly/background-removal', 'onnxruntime-web'],
+  // },
 
   // webpack(config, { isServer }) {
   //   if (!isServer) {
   //     // Force client to use the browser bundle
-  //     config.resolve.alias['onnxruntime-web$'] = path.join(__dirname, 'node_modules/onnxruntime-web/dist/ort.bundle.min.mjs');
+  //     config.resolve.alias['onnxruntime-web$'] = path.join(__dirname, 'node_modules/onnxruntime-web/dist/ort.min.mjs');
   //     config.resolve.alias['onnxruntime-web/dist/ort.node.min.mjs'] = false; // Explicitly ignore node bundle
   //   }
 
