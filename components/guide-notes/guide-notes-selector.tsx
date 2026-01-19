@@ -15,17 +15,20 @@ import { StaffGuide } from "@/components/guide-notes/staff-guides"
 import { GeneralGuideNotes } from "./general-guide-notes"
 
 const staffCategories = [
-  { value: "teaching", label: "Teaching Staff" },
-  { value: "headquarters-technical", label: "HQ & Regional Technical Staff" },
-  { value: "accounting", label: "Accounting Staff" },
-  { value: "catering", label: "Catering Staff" },
-  { value: "corporate-affairs", label: "Corporate Affairs Staff" },
-  { value: "general-admin", label: "General Administrative Staff" },
-  { value: "human-resource", label: "Human Resource Staff" },
-  { value: "procurement", label: "Procurement Staff" },
-  { value: "audit", label: "Audit Staff" },
-  { value: "security-drivers-laborers", label: "Security, Drivers & Labourers" },
-  { value: "admin-support", label: "Administrative Support Staff" },
+  { value: "principal-of-tvet", label: "PRINCIPALS OF TVET INSTITUTES" },
+  { value: "vice-principal-academic", label: "VICE PRINCIPAL, ACADEMIC" },
+  { value: "vice-principal-administration", label: "VICE PRINCIPAL, ADMINISTRATION" },
+  { value: "teaching", label: "TEMPLATE FOR TEACHING STAFF" },
+  { value: "headquarters-technical", label: "HEADQUARTERS & REGIONAL OFFICE TECHNICAL STAFF" },
+  { value: "accounting", label: "ACCOUNTING STAFF" },
+  { value: "catering", label: "CATERING STAFF" },
+  { value: "corporate-affairs", label: "CORPORATE AFFAIRS STAFF" },
+  { value: "general-admin", label: "GENERAL ADMINISTRATIVE STAFF" },
+  { value: "human-resource", label: "HUMAN RESOURCE STAFF" },
+  { value: "procurement", label: "PROCUREMENT STAFF" },
+  { value: "audit", label: "AUDIT STAFF" },
+  { value: "security-drivers-laborers", label: "SECURITY, DRIVERS & LABOURERS STAFF" },
+  { value: "admin-support", label: "ADMINISTRATIVE SUPPORT STAFF" },
 ]
 
 interface GuideSidePanelProps {
