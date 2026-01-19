@@ -251,40 +251,49 @@ export const guideContentConfig: Record<string, GuideContent> = {
         section2: {
             rows: [
                 {
-                    keyResultArea: "1. Teaching & Instructional Effectiveness",
-                    targets: `- Develop and submit detailed lesson plans for [Course Code] that explicitly incorporate at least [Number] active learning strategies (e.g., think-pair-share, project-based learning, peer teaching) and show differentiation for varied learner abilities by [Date].
-- Successfully demonstrate these strategies during the scheduled lesson observation, achieving a rating of at least [3/5] on the "Use of Active Learning" criterion.
-- Utilize [Specific Technology/Tool, e.g., LMS quizzes, simulation software] to enhance engagement and provide timely feedback.`,
-                    resourcesRequired: "Lesson plan template, Observation feedback form, Access to LMS & educational technology, Teaching aids."
+                    keyResultArea: "1. Curriculum Delivery & Academic Standards",
+                    targets: `- Ensure [100%] of programmes are delivered as per approved curriculum and schedule.
+- Achieve student satisfaction rate of at least [85%] on teaching quality through end-of-semester surveys.
+- Implement [3] innovative teaching/learning initiatives (e.g., digital learning, project-based learning).
+- Review and update [2] course curricula with industry input.
+`,
+                    resourcesRequired: "Curriculum documents, LMS, Teaching resources, Survey tools"
                 },
                 {
-                    keyResultArea: "2. Industry Alignment, Practice & Student Project Supervision",
-                    targets: `- Participate in a minimum of [Number] days of formal industry immersion (e.g., internship, shadowing, industry workshop) and submit a reflective report on insights gained by [Date].
-- Supervise [Number] student hands-on projects (e.g., capstone projects, prototypes, service commissions) ensuring they solve real-world industry problems.
-- Integrate a minimum of [Number] industry case studies, guest speakers, or live briefs from [Industry Partner] into course [Course Code].
-- Ensure 100% of supervised student projects are assessed against industry-standard rubrics that include criteria for practicality, innovation, and safety.`,
-                    resourcesRequired: "Industry partnership contacts, Budget for industry visits, Project materials budget, Industry-standard assessment rubrics, Workshop/Lab access."
+                    keyResultArea: "2. Student Performance & Assessment",
+                    targets: `- Attain overall student pass rate of [85%] in internal and external assessments.
+- Reduce student dropout rate by [5%] compared to previous year.
+- Ensure timely and accurate processing of all student results and transcripts within [5] working days after exams.
+- Implement [2] interventions for academically at-risk students.
+`,
+                    resourcesRequired: "Assessment tools, Student tracking system, Exam schedules, Tutorial support"
                 },
                 {
-                    keyResultArea: "3. Student Mentorship, Support & Assessment",
-                    targets: `- Conduct academic advising for all assigned students ([Number]) each semester, documenting key outcomes.
-- Provide written, constructive feedback on assignments within [5] working days of submission.
-- Proactively identify and support at least [Number] at-risk students per semester through individualized learning plans.`,
-                    resourcesRequired: "Student records system, Collaboration with Guidance & Counselling, Learning plan templates."
+                    keyResultArea: "3. Teaching Staff Development & Supervision",
+                    targets: `- Conduct at least [10] classroom/workshop observations per semester and provide constructive feedback.
+- Ensure [100%] of teaching staff participate in relevant CPD programmes (minimum [20] hours annually).
+- Facilitate the development of at least [5] new teaching aids or instructional materials.
+- Mentor [3] new or junior teaching staff.
+`,
+                    resourcesRequired: "Observation forms, Training calendar, Resource budget, Mentorship guidelines."
                 },
                 {
-                    keyResultArea: "4. Institutional Contribution & Service",
-                    targets: `- Actively serve on the [e.g., Examinations Committee / Safety Committee] and contribute to [2] key decisions/initiatives.
-- Participate in the planning/execution of at least [2] institutional events (e.g., Open Day, Career Fair).
-- Mentor [Number] new junior staff members or teaching assistants.`,
-                    resourcesRequired: "Clear committee roles, Budgetary support, Mentorship guidelines."
+                    keyResultArea: "4. Academic Quality Assurance & Accreditation",
+                    targets: `- Conduct internal academic audits for [100%] departments annually with follow-up action plans.
+- Ensure full compliance with CTVET/accreditation body requirements for all programmes.
+- Implement [100%] of corrective actions from quality audit reports within stipulated timelines.
+- Prepare institution for [1] accreditation/reaccreditation process.
+`,
+                    resourcesRequired: "QA manuals, Audit checklists, Accreditation guidelines, Documentation system."
                 },
                 {
-                    keyResultArea: "5. Professional Development & Technical Competence",
-                    targets: `- Attend at least [3] relevant professional development workshops (pedagogical or technical).
-- Obtain/update certification in [Specific Technical Skill, e.g., CNC Programming].
-- Present a workshop or seminar on [a new skill learned] to colleagues.`,
-                    resourcesRequired: "Training budget, Access to certification bodies, Platform for knowledge sharing."
+                    keyResultArea: "5. Academic Partnerships & Industry Integration",
+                    targets: `Coordinate at least [4] industry-led workshops or guest lectures per semester.
+- Ensure [90%] of final year students participate in industry attachments/internships.
+- Establish [2] new academic collaborations (MOUs, articulationagreements).
+- Develop [1] joint research project with industry partner.
+ `,
+                    resourcesRequired: "Industry contacts, MOU templates, Internship logs, Research funding"
                 }
             ]
         },
