@@ -25,9 +25,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <Suspense fallback={null}>
-          <AuthGuard>
+          {/* <AuthGuard> */}
             {children}
-          </AuthGuard>
+          {/* </AuthGuard> */}
           <Analytics />
           <Toaster position="top-center" richColors />
         </Suspense>

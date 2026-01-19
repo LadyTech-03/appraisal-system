@@ -40,8 +40,8 @@ export function QuickActions() {
     {
       title: "Settings",
       icon: Settings,
-      onClick: () => router.push("/admin"),
-      show: isAdmin,
+      onClick: () => router.push("/settings"),
+      show: true,
     },
   ].filter((action) => action.show)
 
