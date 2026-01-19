@@ -15,7 +15,7 @@ interface GuestGuardProps {
  */
 export function GuestGuard({ children }: GuestGuardProps) {
     const router = useRouter()
-    const { isAuthenticated, hasHydrated, bootstrap, token } = useAuthStore()
+    const { isAuthenticated, hasHydrated, bootstrap, token, user } = useAuthStore()
 
     useEffect(() => {
         // Wait for store to hydrate before checking
@@ -25,18 +25,18 @@ export function GuestGuard({ children }: GuestGuardProps) {
         if (token && !isAuthenticated) {
             bootstrap().then(() => {
                 // After bootstrap, check if authenticated
-                const { isAuthenticated: isAuth } = useAuthStore.getState()
-                if (isAuth) {
+                const { isAuthenticated: isAuth, user: bootstrappedUser } = useAuthStore.getState()
+                if (isAuth && !bootstrappedUser?.password_change_required) {
                     router.push("/dashboard")
                 }
             }).catch(() => {
                 // Token was invalid, stay on auth page
             })
-        } else if (isAuthenticated) {
-            // Already authenticated, redirect to dashboard
+        } else if (isAuthenticated && !user?.password_change_required) {
+            // Already authenticated and no password change required, redirect to dashboard
             router.push("/dashboard")
         }
-    }, [hasHydrated, isAuthenticated, token, bootstrap, router])
+    }, [hasHydrated, isAuthenticated, token, bootstrap, router, user])
 
     // Show loading while hydrating or if we have a token being verified
     if (!hasHydrated || (token && !isAuthenticated)) {
@@ -47,8 +47,8 @@ export function GuestGuard({ children }: GuestGuardProps) {
         )
     }
 
-    // If authenticated after hydration, don't render children (will redirect)
-    if (isAuthenticated) {
+    // If authenticated after hydration, don't render children unless password change is required
+    if (isAuthenticated && !user?.password_change_required) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-blue-100">
                 <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-foreground"></div>
@@ -56,6 +56,6 @@ export function GuestGuard({ children }: GuestGuardProps) {
         )
     }
 
-    // User is not authenticated, allow access to auth pages
+    // User is not authenticated OR needs password change, allow access to auth pages
     return <>{children}</>
 }

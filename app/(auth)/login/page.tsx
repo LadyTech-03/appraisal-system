@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -29,6 +29,13 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [showPasswordChangeModal, setShowPasswordChangeModal] = useState(false)
 
+  // Check if user needs to change password on mount/update
+  // useEffect(() => {
+  //   if (user?.password_change_required) {
+  //     setShowPasswordChangeModal(true)
+  //   }
+  // }, [user])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -37,10 +44,11 @@ export default function LoginPage() {
 
     try {
       const result = await login(formData.emailOrEmployeeId, formData.password)
+      console.log("User logged in successfully:", result)
       if (result) {
         // Check if user needs to change password
-        console.log("User logged in successfully:", result)
         const currentUser = useAuthStore.getState().user
+        console.log("Current user:", currentUser)
         if (currentUser?.password_change_required) {
           setShowPasswordChangeModal(true)
         } else {
@@ -61,8 +69,8 @@ export default function LoginPage() {
     // Update user in store to clear password_change_required
     const currentUser = useAuthStore.getState().user
     if (currentUser) {
-      useAuthStore.setState({ 
-        user: { ...currentUser, password_change_required: false } 
+      useAuthStore.setState({
+        user: { ...currentUser, password_change_required: false }
       })
     }
     router.push("/dashboard")
@@ -139,9 +147,9 @@ export default function LoginPage() {
       </div>
 
       {/* Password Change Modal for first-time login */}
-      <ChangePasswordModal 
-        isOpen={showPasswordChangeModal} 
-        onSuccess={handlePasswordChangeSuccess} 
+      <ChangePasswordModal
+        isOpen={showPasswordChangeModal}
+        onSuccess={handlePasswordChangeSuccess}
       />
     </div>
   )
