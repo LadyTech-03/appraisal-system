@@ -1926,6 +1926,9 @@ export const guideContentConfig: Record<string, GuideContent> = {
             exampleComment: `"[e.g., I thank my appraiser for the constructive feedback. I agree with the assessment and am committed to working on the areas identified for development. I am particularly interested in the proposed training on [Training Topic] and look forward to contributing more to [Specific Area] in the coming year.]"`
         },
         section10: {
+            section10Title: "Principal/ Regional Director /Head of Division's (HOD) Comments",
+            section10Description: "[The Principal/ Regional Director/ HOD provides final endorsement, comments on the staff's potential, and confirms institutional support for the development plan.]",
+            signatureLabel: "Principal/ Regional Director/ HOD'S SIGNATURE",
             exampleComment: `"[e.g., I have reviewed this appraisal and concur with the findings and recommendations. [Staff Name] is a valued member of the department, and we will support the proposed training plan.]"`
         }
     },
@@ -2109,6 +2112,9 @@ export const guideContentConfig: Record<string, GuideContent> = {
             exampleComment: `"[e.g., I thank my appraiser for the constructive feedback. I agree with the assessment and am committed to working on the areas identified for development. I am particularly interested in the proposed training on [Training Topic] and look forward to contributing more to [Specific Area] in the coming year.]"`
         },
         section10: {
+            section10Title: "Principal/ Regional Director /Head of Division's (HOD) Comments",
+            section10Description: "[The Principal/ Regional Director/ HOD provides final endorsement, comments on the staff's potential, and confirms institutional support for the development plan.]",
+            signatureLabel: "Principal/ Regional Director/ HOD'S SIGNATURE",
             exampleComment: `"[e.g., I have reviewed this appraisal and concur with the findings and recommendations. [Staff Name] is a valued member of the department, and we will support the proposed training plan.]"`
         }
     },
@@ -2292,6 +2298,9 @@ export const guideContentConfig: Record<string, GuideContent> = {
             exampleComment: `"[e.g., I thank my appraiser for the constructive feedback. I agree with the assessment and am committed to working on the areas identified for development. I am particularly interested in the proposed training on [Training Topic] and look forward to contributing more to [Specific Area] in the coming year.]"`
         },
         section10: {
+            section10Title: "Principal/ Regional Director /Head of Division's (HOD) Comments",
+            section10Description: "[The Principal/ Regional Director/ HOD provides final endorsement, comments on the staff's potential, and confirms institutional support for the development plan.]",
+            signatureLabel: "Principal/ Regional Director/ HOD'S SIGNATURE",
             exampleComment: `"[e.g., I have reviewed this appraisal and concur with the findings and recommendations. [Staff Name] is a valued member of the department, and we will support the proposed training plan.]"`
         }
     },
@@ -2475,6 +2484,9 @@ export const guideContentConfig: Record<string, GuideContent> = {
             exampleComment: `"[e.g., I thank my appraiser for the constructive feedback. I agree with the assessment and am committed to working on the areas identified for development. I am particularly interested in the proposed training on [Training Topic] and look forward to contributing more to [Specific Area] in the coming year.]"`
         },
         section10: {
+            section10Title: "Principal/ Regional Director /Head of Division's (HOD) Comments",
+            section10Description: "[The Principal/ Regional Director/ HOD provides final endorsement, comments on the staff's potential, and confirms institutional support for the development plan.]",
+            signatureLabel: "Principal/ Regional Director/ HOD'S SIGNATURE",
             exampleComment: `"[e.g., I have reviewed this appraisal and concur with the findings and recommendations. [Staff Name] is a valued member of the department, and we will support the proposed training plan.]"`
         }
     },
@@ -2658,6 +2670,9 @@ export const guideContentConfig: Record<string, GuideContent> = {
             exampleComment: `"[e.g., I thank my appraiser for the constructive feedback. I agree with the assessment and am committed to working on the areas identified for development. I am particularly interested in the proposed training on [Training Topic] and look forward to contributing more to [Specific Area] in the coming year.]"`
         },
         section10: {
+            section10Title: "Principal/ Regional Director /Head of Division's (HOD) Comments",
+            section10Description: "[The Principal/ Regional Director/ HOD provides final endorsement, comments on the staff's potential, and confirms institutional support for the development plan.]",
+            signatureLabel: "Principal/ Regional Director/ HOD'S SIGNATURE",
             exampleComment: `"[e.g., I have reviewed this appraisal and concur with the findings and recommendations. [Staff Name] is a valued member of the department, and we will support the proposed training plan.]"`
         }
     },
