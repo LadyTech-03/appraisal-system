@@ -16,20 +16,14 @@ import { usersApi } from '@/lib/api/users';
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuthStore()
+  const { user } = useAuthStore()
   const { exportData, importData } = useAppStore()
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
   const [importText, setImportText] = useState("")
   const allowedRoles = ["Director-General", "System Administrator"]
   const [clearing, setClearing] = useState(false);
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login")
-    }
-  }, [isAuthenticated, router])
-
-  if (!isAuthenticated || !user) {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-foreground"></div>

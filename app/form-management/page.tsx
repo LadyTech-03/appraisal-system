@@ -20,17 +20,12 @@ const ADMIN_ROLES = ["Director-General", "System Administrator"]
 
 export default function FormManagementPage() {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuthStore()
+  const { user } = useAuthStore()
   const [periods, setPeriods] = useState<AppraisalPeriod[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login")
-      return
-    }
-
     if (user && !ADMIN_ROLES.includes(user.role))  {
       toast.error("Access denied. Admin privileges required.")
       router.push("/dashboard")
@@ -38,7 +33,7 @@ export default function FormManagementPage() {
     }
 
     fetchPeriods()
-  }, [isAuthenticated, user, router])
+  }, [user, router])
 
   const fetchPeriods = async () => {
     try {
@@ -115,7 +110,7 @@ export default function FormManagementPage() {
     return descMap[name] || ""
   }
 
-  if (!isAuthenticated || !user) {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />

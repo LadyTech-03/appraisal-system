@@ -15,6 +15,7 @@ export default function HomePage() {
     if (!hasHydrated) return
 
     if (isAuthenticated && token) {
+      console.log("Authenticated and token")
       router.replace("/dashboard")
     } else {
       router.replace("/appraisals")

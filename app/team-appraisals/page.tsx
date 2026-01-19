@@ -31,19 +31,12 @@ import { formatDistanceToNow } from "date-fns"
 
 export default function TeamAppraisalsPage() {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuthStore()
+  const { user } = useAuthStore()
   const [teamAppraisals, setTeamAppraisals] = useState<PersonalInfo[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [completingId, setCompletingId] = useState<string | null>(null)
   const [showCompleteDialog, setShowCompleteDialog] = useState(false)
   const [selectedAppraisal, setSelectedAppraisal] = useState<PersonalInfo | null>(null)
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login")
-      return
-    }
-  }, [isAuthenticated, user, router])
 
   // Fetch team appraisals
   useEffect(() => {
@@ -122,7 +115,7 @@ export default function TeamAppraisalsPage() {
     }
   }
 
-  if (!isAuthenticated || !user) {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-foreground"></div>

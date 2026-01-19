@@ -20,7 +20,10 @@ interface DashboardOverview {
 export function DashboardStats({ dashboardOverview }: { dashboardOverview: DashboardOverview | { [key: string]: any } }) {
   const { user } = useAuthStore()
   const isLoading = !dashboardOverview
-  const pendingReviewAppraisals = dashboardOverview?.appraisalsInProgress + dashboardOverview?.appraisalsSubmitted + dashboardOverview?.appraisalsCompleted
+  const pendingReviewAppraisals =
+  (dashboardOverview?.appraisalsInProgress ?? 0) +
+  (dashboardOverview?.appraisalsSubmitted ?? 0) +
+  (dashboardOverview?.appraisalsCompleted ?? 0)
 
   const isAdmin = user?.role === "Director-General" || user?.role === "System Administrator"
 

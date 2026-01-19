@@ -30,7 +30,7 @@ const steps = [
 export default function CreateAppraisalPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user, isAuthenticated } = useAuthStore()
+  const { user } = useAuthStore()
   const guideState = useGuideNotes()
   const [currentStep, setCurrentStep] = useState<'personal-info' | 'performance-planning' | 'mid-year-review' | 'end-year-review' | 'annual-appraisal' | 'final-sections'>('personal-info')
   const [appraisalData, setAppraisalData] = useState<any>({
@@ -43,13 +43,6 @@ export default function CreateAppraisalPage() {
   })
   const [availability, setAvailability] = useState<{ [key: string]: AppraisalPeriod }>({})
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(true)
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login")
-      return
-    }
-  }, [isAuthenticated, router])
 
   // Fetch availability on mount
   useEffect(() => {
@@ -70,10 +63,10 @@ export default function CreateAppraisalPage() {
       }
     }
 
-    if (isAuthenticated) {
+    if (user) {
       fetchAvailability()
     }
-  }, [isAuthenticated])
+  }, [user])
 
   // Check for step parameter in URL
   useEffect(() => {
@@ -93,7 +86,7 @@ export default function CreateAppraisalPage() {
     }
   }, [searchParams])
 
-  if (!isAuthenticated || !user) {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

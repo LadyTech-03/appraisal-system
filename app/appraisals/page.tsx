@@ -44,16 +44,11 @@ interface Appraisal {
 
 export default function AppraisalsPage() {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuthStore()
+  const { user } = useAuthStore()
   const [appraisals, setAppraisals] = useState<Appraisal[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login")
-      return
-    }
-
     const fetchAppraisals = async () => {
       try {
         const data = await appraisalsApi.getSubmittedAppraisals()
@@ -67,9 +62,9 @@ export default function AppraisalsPage() {
     }
 
     fetchAppraisals()
-  }, [isAuthenticated, router])
+  }, [user, router])
 
-  if (!isAuthenticated || !user) {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-foreground"></div>

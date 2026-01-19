@@ -8,6 +8,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import "./globals.css"
 import { Toaster } from "sonner"
+import { AuthGuard } from "@/components/auth-guard"
 
 // export const metadata: Metadata = {
 //   title: "Appraisal Platform - Performance Management System",
@@ -24,7 +25,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <Suspense fallback={null}>
-          {children}
+          <AuthGuard>
+            {children}
+          </AuthGuard>
           <Analytics />
           <Toaster position="top-center" richColors />
         </Suspense>

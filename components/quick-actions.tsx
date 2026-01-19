@@ -14,7 +14,7 @@ export function QuickActions() {
 
   const actions = [
     {
-      title: "Start Appraisal",
+      title: "Create Appraisal",
       icon: Plus,
       onClick: () => router.push("/create-appraisal"),
       show: true,

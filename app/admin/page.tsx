@@ -10,23 +10,18 @@ import { Shield, ArrowLeft } from "lucide-react"
 
 export default function AdminPage() {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuthStore()
+  const { user } = useAuthStore()
   const allowedRoles = ["Director-General", "System Administrator"]
   const canViewAdmin = user?.role ? allowedRoles.includes(user.role) : false
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login")
-      return
-    }
-
     if (!canViewAdmin) {
       router.push("/dashboard")
       return
     }
-  }, [isAuthenticated, user, router])
+  }, [user, router])
 
-  if (!isAuthenticated || !canViewAdmin) {
+  if (!canViewAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-foreground"></div>

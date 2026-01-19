@@ -35,7 +35,7 @@ export default function TeamMemberAppraisalPage() {
   const searchParams = useSearchParams()
   const guideState = useGuideNotes()
   const user_id = params?.user_id as string
-  const { user, isAuthenticated, token } = useAuthStore()
+  const { user } = useAuthStore()
   const [isLoading, setIsLoading] = useState(true)
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo | null>(null)
   const [currentStep, setCurrentStep] = useState<Step>('personal-info')
@@ -47,15 +47,6 @@ export default function TeamMemberAppraisalPage() {
     annualAppraisal: null,
     finalSections: null
   })
-
-  useEffect(() => {
-    if (!isAuthenticated && !token) {
-        if (!useAuthStore.getState().isAuthenticated) {
-            console.log("User is not authenticated")
-          router.push("/login")
-        }
-    }
-  }, [isAuthenticated, token, router])
 
 
     // Check for step parameter in URL
@@ -97,12 +88,12 @@ export default function TeamMemberAppraisalPage() {
       }
     }
 
-    if (isAuthenticated) {
+    if (user) {
       fetchPersonalInfo()
     }
-  }, [user_id, isAuthenticated])
+  }, [user_id, user])
 
-  if (!isAuthenticated || !user) {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-foreground"></div>

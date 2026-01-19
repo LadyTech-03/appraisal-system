@@ -49,7 +49,7 @@ const menuItems: MenuItem[] = [
   },
   {
     icon: Target,
-    label: "Start Appraisal",
+    label: "Create Appraisal",
     href: "/create-appraisal",
   },
   {
@@ -168,7 +168,7 @@ function SidebarContent() {
           const is_active = pathname === item.href
           
           // Dynamically change label for Create Appraisal
-          const displayLabel = item.label === "Start Appraisal" && hasStartedAppraisal 
+          const displayLabel = item.label === "Create Appraisal" && hasStartedAppraisal 
             ? "Continue Appraisal" 
             : item.label
 
@@ -218,7 +218,7 @@ function SidebarContent() {
             }}
           >
             <div className="w-10 h-10 bg-sidebar-primary rounded-full flex items-center justify-center text-sidebar-primary-foreground font-semibold">
-             {user ? (user.first_name.charAt(0).toUpperCase() + user.surname.charAt(0).toUpperCase()) : ''}
+             {/* {user ? (user.first_name.charAt(0).toUpperCase() + user.surname.charAt(0).toUpperCase()) : ''} */}
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-medium text-sidebar-foreground truncate text-sm">{user.first_name} {user.surname}</p>
@@ -267,9 +267,7 @@ export function Sidebar() {
       <div className="md:hidden">
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="sm" className="fixed top-4 left-4 z-50">
               <Menu className="h-5 w-5" />
-            </Button>
           </SheetTrigger>
           <SheetContent side="left" className="p-0 w-64">
             <SidebarContent />

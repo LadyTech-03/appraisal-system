@@ -15,16 +15,11 @@ interface AppraisalViewProps {
 
 export default function AppraisalPrintView({ appraisalId }: AppraisalViewProps) {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuthStore()
+  const { user } = useAuthStore()
   const [appraisal, setAppraisal] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login")
-      return
-    }
-
     const fetchAppraisal = async () => {
       try {
         setIsLoading(true)
@@ -41,7 +36,7 @@ export default function AppraisalPrintView({ appraisalId }: AppraisalViewProps) 
     }
 
     fetchAppraisal()
-  }, [appraisalId, isAuthenticated, router])
+  }, [appraisalId, router])
 
   const handlePrint = () => {
     window.print()

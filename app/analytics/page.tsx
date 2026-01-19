@@ -25,25 +25,21 @@ import { TrendingUp, Users, Target, Award, BarChart3 } from "lucide-react"
 
 export default function AnalyticsPage() {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuthStore()
+  const { user } = useAuthStore()
   const { appraisals, users, orgHierarchy } = useAppStore()
   const allowedRoles = ["Director-General", "System Administrator"]
   const canViewAnalytics = user?.role ? allowedRoles.includes(user.role) : false
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login")
-      return
-    }
 
     // Check if user has permission to view analytics
     if (!canViewAnalytics) {
       router.push("/dashboard")
       return
     }
-  }, [isAuthenticated, user, router])
+  }, [user, router])
 
-  if (!isAuthenticated || !user) {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-blue-100">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-foreground"></div>

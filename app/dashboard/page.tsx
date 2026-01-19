@@ -16,20 +16,16 @@ import { fi } from "date-fns/locale"
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuthStore()
+  const { user } = useAuthStore()
 
   const [dashboardOverview, setDashboardOverview] = useState(null)
-    const [hasStartedAppraisal, setHasStartedAppraisal] = useState(false)
-  
+  const [hasStartedAppraisal, setHasStartedAppraisal] = useState(false)
+
 
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login")
-    }
-
     const fetchDashboardStats = async () => {
-      if (!user) return
+      if (!user) return 
 
       try {
         const response = await appraisalsApi.getDashboardOverview()
@@ -46,15 +42,7 @@ export default function DashboardPage() {
 
     fetchDashboardStats()
 
-  }, [isAuthenticated, router])
-
-  if (!isAuthenticated || !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-blue-100">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-foreground"></div>
-      </div>
-    )
-  }
+  }, [])
 
   const getGreeting = () => {
     const hour = new Date().getHours()
@@ -119,7 +107,7 @@ export default function DashboardPage() {
                       className="border-white/40 bg-white/10 hover:text-white text-white hover:bg-white/20 backdrop-blur-sm px-8 h-12 rounded-xl transition-all duration-300 font-semibold"
                       onClick={() => router.push("/create-appraisal")}
                     >
-                      {hasStartedAppraisal ? "Continue Appraisal" : "Start Appraisal"}
+                      {hasStartedAppraisal ? "Continue Appraisal" : "Create Appraisal"}
                     </Button>
                   </div>
                 </div>

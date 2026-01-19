@@ -47,18 +47,12 @@ interface Appraisal {
 
 export default function HistoryPage() {
   const router = useRouter()
-  const { user, isAuthenticated } = useAuthStore()
+  const { user} = useAuthStore()
   const [appraisals, setAppraisals] = useState<Appraisal[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [dateRangeFilter, setDateRangeFilter] = useState("all")
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login")
-    }
-  }, [isAuthenticated, router])
 
   useEffect(() => {
     const fetchAppraisals = async () => {
@@ -76,12 +70,12 @@ export default function HistoryPage() {
       }
     }
 
-    if (isAuthenticated) {
+    if (user) {
       fetchAppraisals()
     }
-  }, [isAuthenticated])
+  }, [user])
 
-  if (!isAuthenticated || !user) {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-foreground"></div>
