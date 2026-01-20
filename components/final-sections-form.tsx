@@ -75,10 +75,26 @@ export function FinalSectionsForm({
     hodDate: initialData?.hodDate || ""
   })
 
+  // Track selected HOD position for dynamic heading
+  const [hodPosition, setHodPosition] = useState<string>("hod")
+
   // Check if appraiser has completed sections 6, 7, and 8
   const isAppraiserSectionsComplete = formData.appraiserComments &&
     formData.careerDevelopmentComments &&
     formData.assessmentDecision
+
+  // Dynamic heading based on selected position
+  const getSectionHeading = () => {
+    const positionMap: Record<string, string> = {
+      'dg': "Director-General's",
+      'ddgms': "Deputy Director-General, MS's",
+      'ddgo': "Deputy Director-General, Ops's",
+      'hod': "Head of Division's",
+      'rd': "Regional Director's",
+      'principal': "Principal's"
+    }
+    return positionMap[hodPosition] || "Head of Department's"
+  }
 
   // Load draft and user profile on mount
   useEffect(() => {
@@ -673,145 +689,147 @@ export function FinalSectionsForm({
 
           {/* Section 10: HOD Comments */}
           {isReviewMode && (
-          <Card className={`p-4 ${!isReviewMode ? 'opacity-70' : ''}`}>
-            <div className="space-y-4">
-              <div className="bg-amber-800 text-white p-2 rounded">
-                <h3 className="font-bold">SECTION 10: Head of Department's Comments</h3>
-              </div>
+            <Card className={`p-4 ${!isReviewMode ? 'opacity-70' : ''}`}>
+              <div className="space-y-4">
+                <div className="bg-amber-800 text-white p-2 rounded">
+                  <h3 className="font-bold">SECTION 10: {getSectionHeading()} Comments</h3>
+                </div>
 
-              <div className="bg-blue-50 border border-blue-200 p-3 rounded-md text-sm text-blue-800 flex items-start gap-2">
-                <Info className="h-5 w-5 shrink-0" />
-                <p>This section will be completed by your Head of Department.</p>
-              </div>
+                <div className="bg-blue-50 border border-blue-200 p-3 rounded-md text-sm text-blue-800 flex items-start gap-2">
+                  <Info className="h-5 w-5 shrink-0" />
+                  <p>This section will be completed by your Head of Department.</p>
+                </div>
 
-              <div className="space-y-3 pt-2">
-                <Label className="font-semibold">Select your position</Label>
-                <RadioGroup
-                  defaultValue="hod"
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                  disabled={!isReviewMode}
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="dg" id="dg" />
-                    <Label htmlFor="dg" className="font-normal cursor-pointer">Director-General (DG)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="ddgms" id="ddgms" />
-                    <Label htmlFor="ddgms" className="font-normal cursor-pointer">Deputy Director-General, MS</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="ddgo" id="ddgo" />
-                    <Label htmlFor="ddgo" className="font-normal cursor-pointer">Deputy Director-General, Ops</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="hod" id="hod" />
-                    <Label htmlFor="hod" className="font-normal cursor-pointer">Head of Division</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="rd" id="rd" />
-                    <Label htmlFor="rd" className="font-normal cursor-pointer">Regional Director</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="principal" id="principal" />
-                    <Label htmlFor="principal" className="font-normal cursor-pointer">Principal</Label>
-                  </div>
-                </RadioGroup>
-              </div>
+                <div className="space-y-3 pt-2">
+                  <Label className="font-semibold">Select your position</Label>
+                  <RadioGroup
+                    value={hodPosition}
+                    onValueChange={(value) => setHodPosition(value)}
+                    defaultValue="hod"
+                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                    disabled={!isReviewMode}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="dg" id="dg" />
+                      <Label htmlFor="dg" className="font-normal cursor-pointer">Director-General (DG)</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="ddgms" id="ddgms" />
+                      <Label htmlFor="ddgms" className="font-normal cursor-pointer">Deputy Director-General, MS</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="ddgo" id="ddgo" />
+                      <Label htmlFor="ddgo" className="font-normal cursor-pointer">Deputy Director-General, Ops</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="hod" id="hod" />
+                      <Label htmlFor="hod" className="font-normal cursor-pointer">Head of Division</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="rd" id="rd" />
+                      <Label htmlFor="rd" className="font-normal cursor-pointer">Regional Director</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="principal" id="principal" />
+                      <Label htmlFor="principal" className="font-normal cursor-pointer">Principal</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
 
-              <div className="space-y-2">
-                <Textarea
-                  value={formData.hodComments}
-                  onChange={(e) => setFormData(prev => ({ ...prev, hodComments: e.target.value }))}
-                  placeholder="Enter HOD comments..."
-                  className="min-h-32 resize-none"
-                  rows={7}
-                  disabled={!isReviewMode}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
                 <div className="space-y-2">
-                  <Label className="font-semibold">NAME</Label>
-                  <Input
-                    type="text"
-                    value={formData.hodName}
-                    onChange={(e) => setFormData(prev => ({ ...prev, hodName: e.target.value }))}
-                    placeholder="Enter HOD name"
-                    className="h-12"
+                  <Textarea
+                    value={formData.hodComments}
+                    onChange={(e) => setFormData(prev => ({ ...prev, hodComments: e.target.value }))}
+                    placeholder="Enter HOD comments..."
+                    className="min-h-32 resize-none"
+                    rows={7}
                     disabled={!isReviewMode}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label className="font-semibold">SIGNATURE</Label>
-                  {hodSignatureUrl ? (
-                    <div className="space-y-2">
-                      {!formData.hodSignatureUrl ? (
-                        <>
-                          {/* <p className="text-sm text-muted-foreground">You have a signature on file</p> */}
-                          <Button type="button" onClick={handleSign} variant="default" size="sm">
-                            Sign
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          {isReviewMode && (
-                            <div className="flex items-center gap-2 text-sm">
-                              <span className="text-green-600 font-bold">✓ Signed</span>
-                              <Button
-                                type="button"
-                                onClick={handleClearSignatures}
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 text-xs text-red-500"
-                              >
-                                Remove
-                              </Button>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                  <div className="space-y-2">
+                    <Label className="font-semibold">NAME</Label>
+                    <Input
+                      type="text"
+                      value={formData.hodName}
+                      onChange={(e) => setFormData(prev => ({ ...prev, hodName: e.target.value }))}
+                      placeholder="Enter HOD name"
+                      className="h-12"
+                      disabled={!isReviewMode}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-semibold">SIGNATURE</Label>
+                    {hodSignatureUrl ? (
+                      <div className="space-y-2">
+                        {!formData.hodSignatureUrl ? (
+                          <>
+                            {/* <p className="text-sm text-muted-foreground">You have a signature on file</p> */}
+                            <Button type="button" onClick={handleSign} variant="default" size="sm">
+                              Sign
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            {isReviewMode && (
+                              <div className="flex items-center gap-2 text-sm">
+                                <span className="text-green-600 font-bold">✓ Signed</span>
+                                <Button
+                                  type="button"
+                                  onClick={handleClearSignatures}
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 text-xs text-red-500"
+                                >
+                                  Remove
+                                </Button>
+                              </div>
+                            )}
+                            <div className="">
+                              <Image
+                                src={formData.hodSignatureUrl}
+                                alt="HOD Signature"
+                                width={120}
+                                height={120}
+                                className="max-h-20 max-w-full object-contain"
+                              />
                             </div>
-                          )}
-                          <div className="">
-                            <Image
-                              src={formData.hodSignatureUrl}
-                              alt="HOD Signature"
-                              width={120}
-                              height={120}
-                              className="max-h-20 max-w-full object-contain"
-                            />
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <Label htmlFor="appraiser-signature" className="text-sm">
-                        Upload Signature
-                      </Label>
-                      <div className="flex gap-2">
-                        <Input
-                          id="appraiser-signature"
-                          type="file"
-                          accept=".png"
-                          onChange={handleSignatureUpload}
-                          disabled={isUploadingSignature || !isReviewMode}
-                          className="h-8 text-xs"
-                        />
-                        {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}
+                          </>
+                        )}
                       </div>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="space-y-2">
+                        <Label htmlFor="appraiser-signature" className="text-sm">
+                          Upload Signature
+                        </Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="appraiser-signature"
+                            type="file"
+                            accept=".png"
+                            onChange={handleSignatureUpload}
+                            disabled={isUploadingSignature || !isReviewMode}
+                            className="h-8 text-xs"
+                          />
+                          {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-semibold">DATE (dd/mm/yyyy)</Label>
+                    <Input
+                      type="date"
+                      value={formData.hodDate}
+                      onChange={(e) => setFormData(prev => ({ ...prev, hodDate: e.target.value }))}
+                      className="h-12"
+                      disabled={!isReviewMode}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label className="font-semibold">DATE (dd/mm/yyyy)</Label>
-                  <Input
-                    type="date"
-                    value={formData.hodDate}
-                    onChange={(e) => setFormData(prev => ({ ...prev, hodDate: e.target.value }))}
-                    className="h-12"
-                    disabled={!isReviewMode}
-                  />
-                </div>
-              </div>
 
-              {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
                 <div className="space-y-2">
                   <Label className="font-semibold">NAME AND HOD'S SIGNATURE</Label>
                   <Input
@@ -832,8 +850,8 @@ export function FinalSectionsForm({
                   />
                 </div>
               </div> */}
-            </div>
-          </Card>
+              </div>
+            </Card>
 
           )}
 
