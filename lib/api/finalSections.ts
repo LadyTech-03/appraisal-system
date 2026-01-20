@@ -9,6 +9,7 @@ export interface FinalSectionsData {
     appraiseeComments?: string
     appraiseeSignatureUrl?: string
     appraiseeDate?: string
+    appraiseeAgreementDecision?: string
     hodComments?: string
     hodName?: string
     hodSignatureUrl?: string
@@ -26,6 +27,7 @@ export interface FinalSections extends FinalSectionsData {
     appraisee_comments?: string
     appraisee_signature_url?: string
     appraisee_date?: string
+    appraisee_agreement_decision?: string
     appraisal_id?: string
     created_at: string
     updated_at: string
