@@ -58,7 +58,7 @@ export function Section5AnnualAppraisal({ content }: Section5AnnualAppraisalProp
                                     <TableCell className="text-center text-muted-foreground py-3 whitespace-normal" style={{ width: '10%' }}>
                                         {row.calculation}
                                     </TableCell>
-                                    <TableCell className="text-muted-foreground py-3 whitespace-normal text-xs italic" style={{ width: '40%' }}>
+                                    <TableCell className="text-muted-foreground py-3 whitespace-normal" style={{ width: '40%' }}>
                                         {row.comments}
                                     </TableCell>
                                 </TableRow>

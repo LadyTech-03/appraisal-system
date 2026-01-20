@@ -70,6 +70,7 @@ export interface Section6Content {
 
 export interface Section7Content {
     examplePlan: string
+    instructions?: string
 }
 
 export interface Section8Content {

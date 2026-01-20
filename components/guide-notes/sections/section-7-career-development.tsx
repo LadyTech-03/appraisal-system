@@ -18,7 +18,7 @@ export function Section7CareerDevelopment({ content }: Section7CareerDevelopment
                     Training and Development - Comments and Plan
                 </p>
                 <p className="text-xs text-muted-foreground italic mt-1">
-                    (The plan should now be informed by the enhanced appraisal)
+                    {(content.instructions)}
                 </p>
             </div>
 

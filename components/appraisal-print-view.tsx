@@ -86,7 +86,7 @@ export default function AppraisalPrintView({ appraisalId }: AppraisalViewProps) 
       <div className="max-w-[250mm] mx-auto p-8 print:p-0">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <div className="w-32 h-32 relative">
+          <div className="size-32 relative">
             <Image
               src="/logos/coat-of-arms.png"
               alt="Coat of Arms"
@@ -98,6 +98,7 @@ export default function AppraisalPrintView({ appraisalId }: AppraisalViewProps) 
             <h1 className="text-2xl font-bold text-orange-700 uppercase">
               Public Services Performance Management
             </h1>
+            <p className="font-bold">GHANA TVET SERVICE</p>
             <p className="text-base mt-1">
               (STAFF PERFORMANCE PLANNING, REVIEW AND APPRAISAL FORM)
             </p>
@@ -105,9 +106,9 @@ export default function AppraisalPrintView({ appraisalId }: AppraisalViewProps) 
               STRICTLY CONFIDENTIAL
             </p>
           </div>
-          <div className="w-32 h-32 relative">
+          <div className="size-26 relative">
             <Image
-              src="/logos/pas.jpeg"
+              src="/logos/logo.png"
               alt="PAS Logo"
               fill
               className="object-contain"
