@@ -75,6 +75,11 @@ export function FinalSectionsForm({
     hodDate: initialData?.hodDate || ""
   })
 
+  // Check if appraiser has completed sections 6, 7, and 8
+  const isAppraiserSectionsComplete = formData.appraiserComments &&
+    formData.careerDevelopmentComments &&
+    formData.assessmentDecision
+
   // Load draft and user profile on mount
   useEffect(() => {
     const loadData = async () => {
@@ -94,13 +99,17 @@ export function FinalSectionsForm({
         if (isReviewMode && reviewUserId) {
           finalSections = await getFinalSectionsByUserId(reviewUserId)
           console.log(finalSections, 'first log')
-          setAppraiseeSignatureUrl(finalSections[0].appraisee_signature_url || null)
-          setUserId(finalSections[0].user_id || null)
+          if (finalSections && finalSections.length > 0) {
+            setAppraiseeSignatureUrl(finalSections[0].appraisee_signature_url || null)
+            setUserId(finalSections[0].user_id || null)
+          }
         } else {
           finalSections = await getMyFinalSections()
           console.log(finalSections, 'second log')
-          setAppraiserSignatureUrl(finalSections[0].appraiser_signature_url || null)
-          setHodSignatureUrl(finalSections[0].hod_signature_url || null)
+          if (finalSections && finalSections.length > 0) {
+            setAppraiserSignatureUrl(finalSections[0].appraiser_signature_url || null)
+            setHodSignatureUrl(finalSections[0].hod_signature_url || null)
+          }
         }
         if (finalSections && finalSections.length > 0) {
           const latestSection = finalSections[0]
@@ -190,6 +199,7 @@ export function FinalSectionsForm({
     setIsLoading(true)
     try {
       const payload: FinalSectionsData = {
+        userId: isReviewMode && reviewUserId ? reviewUserId : undefined, // Pass appraisee's ID in review mode
         appraiserComments: formData.appraiserComments || undefined,
         appraiserSignatureUrl: formData.appraiserSignatureUrl || undefined,
         appraiserDate: formData.appraiserDate || undefined,
@@ -243,6 +253,7 @@ export function FinalSectionsForm({
     setIsLoading(true)
     try {
       const payload: FinalSectionsData = {
+        userId: isReviewMode && reviewUserId ? reviewUserId : undefined, // Pass appraisee's ID in review mode
         appraiserComments: formData.appraiserComments || undefined,
         appraiserSignatureUrl: formData.appraiserSignatureUrl || undefined,
         appraiserDate: formData.appraiserDate || undefined,
@@ -514,124 +525,154 @@ export function FinalSectionsForm({
                 <h3 className="font-bold">SECTION 9: Appraisee's Comments</h3>
               </div>
 
-              {/* Agreement Question - Only shown when NOT in review mode */}
-              {!isReviewMode && (
-                <div className="space-y-3 pb-4 border-b">
-                  <Label className="font-semibold text-base">
-                    Do you agree with your appraiser's comments and decisions? <span className="text-red-500">*</span>
-                  </Label>
-                  <RadioGroup
-                    value={formData.appraiseeAgreementDecision}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, appraiseeAgreementDecision: value }))}
-                    className="space-y-2"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="yes" id="agree-yes" />
-                      <Label htmlFor="agree-yes" className="font-normal cursor-pointer">
-                        Yes, I agree
-                      </Label>
+              {/* Show waiting message if appraiser hasn't completed their sections (only for appraisees) */}
+              {!isReviewMode && !isAppraiserSectionsComplete ? (
+                <div className="bg-blue-50 border border-blue-200 p-6 rounded-md text-center space-y-4">
+                  <div className="flex flex-col items-center gap-3">
+                    <Info className="h-12 w-12 text-blue-600" />
+                    <div>
+                      <h4 className="font-semibold text-lg">Waiting for Appraiser Review</h4>
+                      <p className="text-sm mt-2">
+                        Your appraiser needs to complete Sections 6, 7, and 8 before you can provide your comments and agreement decision.
+                      </p>
+                      <p className="text-sm mt-1">
+                        You will be notified once your appraiser has completed their review.
+                      </p>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="no" id="agree-no" />
-                      <Label htmlFor="agree-no" className="font-normal cursor-pointer">
-                        No, I disagree
-                      </Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-              )}
-
-              {/* Comments and Signature - Only show in review mode OR after agreement decision is made */}
-              {(isReviewMode || formData.appraiseeAgreementDecision) && (
-                <>
-                  <div className="space-y-2">
-                    <Textarea
-                      value={formData.appraiseeComments}
-                      onChange={(e) => setFormData(prev => ({ ...prev, appraiseeComments: e.target.value }))}
-                      placeholder="Enter your comments..."
-                      className="min-h-24 resize-none"
-                      rows={6}
-                      disabled={isReviewMode}
-                    />
+                    <Button
+                      type="button"
+                      variant="link"
+                      onClick={() => router.push('/appraisals')}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      Click here to see your appraisals
+                    </Button>
                   </div>
+                </div>
+              ) : (
+                <>
+                  {/* Agreement Question - Only shown when NOT in review mode */}
+                  {!isReviewMode && (
+                    <div className="space-y-3 pb-4 border-b">
+                      <Label className="font-semibold text-base">
+                        Do you agree with your appraiser's comments and decisions? <span className="text-red-500">*</span>
+                      </Label>
+                      <RadioGroup
+                        value={formData.appraiseeAgreementDecision}
+                        onValueChange={(value) => setFormData(prev => ({ ...prev, appraiseeAgreementDecision: value }))}
+                        className="space-y-2"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="yes" id="agree-yes" />
+                          <Label htmlFor="agree-yes" className="font-normal cursor-pointer">
+                            Yes, I agree
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="no" id="agree-no" />
+                          <Label htmlFor="agree-no" className="font-normal cursor-pointer">
+                            No, I disagree
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+                  )}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-                    <div className="space-y-2">
-                      <Label className="font-semibold">APPRAISEE'S SIGNATURE</Label>
-                      {appraiseeSignatureUrl ? (
+
+                  {/* Comments and Signature - Only show in review mode OR after agreement decision is made */}
+                  {(isReviewMode || formData.appraiseeAgreementDecision) && (
+                    <>
+                      <div className="space-y-2">
+                        <Textarea
+                          value={formData.appraiseeComments}
+                          onChange={(e) => setFormData(prev => ({ ...prev, appraiseeComments: e.target.value }))}
+                          placeholder="Enter your comments..."
+                          className="min-h-24 resize-none"
+                          rows={6}
+                          disabled={isReviewMode}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
                         <div className="space-y-2">
-                          {!formData.appraiseeSignatureUrl ? (
-                            <>
-                              <p className="text-sm text-muted-foreground">You have a signature on file</p>
-                              <Button type="button" onClick={handleSign} variant="default" size="sm">
-                                Sign
-                              </Button>
-                            </>
-                          ) : (
-                            <>
-                              {!isReviewMode && (
-                                <div className="flex items-center gap-2 text-sm">
-                                  <span className="text-green-600 font-bold">✓ Signed</span>
-                                  <Button
-                                    type="button"
-                                    onClick={handleClearSignatures}
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 text-xs text-red-500"
-                                  >
-                                    Remove
+                          <Label className="font-semibold">APPRAISEE'S SIGNATURE</Label>
+                          {appraiseeSignatureUrl ? (
+                            <div className="space-y-2">
+                              {!formData.appraiseeSignatureUrl ? (
+                                <>
+                                  <p className="text-sm text-muted-foreground">You have a signature on file</p>
+                                  <Button type="button" onClick={handleSign} variant="default" size="sm">
+                                    Sign
                                   </Button>
-                                </div>
+                                </>
+                              ) : (
+                                <>
+                                  {!isReviewMode && (
+                                    <div className="flex items-center gap-2 text-sm">
+                                      <span className="text-green-600 font-bold">✓ Signed</span>
+                                      <Button
+                                        type="button"
+                                        onClick={handleClearSignatures}
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-6 text-xs text-red-500"
+                                      >
+                                        Remove
+                                      </Button>
+                                    </div>
+                                  )}
+                                  <div className="">
+                                    <Image
+                                      src={formData.appraiseeSignatureUrl}
+                                      alt="Appraisee Signature"
+                                      width={120}
+                                      height={120}
+                                      className="max-h-20 max-w-full object-contain"
+                                    />
+                                  </div>
+                                </>
                               )}
-                              <div className="">
-                                <Image
-                                  src={formData.appraiseeSignatureUrl}
-                                  alt="Appraisee Signature"
-                                  width={120}
-                                  height={120}
-                                  className="max-h-20 max-w-full object-contain"
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              <Label htmlFor="appraisee-signature" className="text-sm">
+                                Upload Signature
+                              </Label>
+                              <div className="flex gap-2">
+                                <Input
+                                  id="appraisee-signature"
+                                  type="file"
+                                  accept=".png"
+                                  onChange={handleSignatureUpload}
+                                  disabled={isUploadingSignature}
+                                  className="h-8 text-xs"
                                 />
+                                {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}
                               </div>
-                            </>
+                            </div>
                           )}
                         </div>
-                      ) : (
                         <div className="space-y-2">
-                          <Label htmlFor="appraisee-signature" className="text-sm">
-                            Upload Signature
-                          </Label>
-                          <div className="flex gap-2">
-                            <Input
-                              id="appraisee-signature"
-                              type="file"
-                              accept=".png"
-                              onChange={handleSignatureUpload}
-                              disabled={isUploadingSignature}
-                              className="h-8 text-xs"
-                            />
-                            {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}
-                          </div>
+                          <Label className="font-semibold">DATE (dd/mm/yyyy)</Label>
+                          <Input
+                            type="date"
+                            value={formData.appraiseeDate}
+                            onChange={(e) => setFormData(prev => ({ ...prev, appraiseeDate: e.target.value }))}
+                            className="h-12"
+                            required
+                            disabled={isReviewMode}
+                          />
                         </div>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="font-semibold">DATE (dd/mm/yyyy)</Label>
-                      <Input
-                        type="date"
-                        value={formData.appraiseeDate}
-                        onChange={(e) => setFormData(prev => ({ ...prev, appraiseeDate: e.target.value }))}
-                        className="h-12"
-                        required
-                        disabled={isReviewMode}
-                      />
-                    </div>
-                  </div>
+                      </div>
+                    </>
+                  )}
                 </>
               )}
             </div>
           </Card>
 
           {/* Section 10: HOD Comments */}
+          {isReviewMode && (
           <Card className={`p-4 ${!isReviewMode ? 'opacity-70' : ''}`}>
             <div className="space-y-4">
               <div className="bg-amber-800 text-white p-2 rounded">
@@ -794,6 +835,8 @@ export function FinalSectionsForm({
             </div>
           </Card>
 
+          )}
+
           {/* Navigation Buttons */}
           <div className="flex justify-between pt-6 border-t">
             <Button
@@ -857,7 +900,7 @@ export function FinalSectionsForm({
                 type="submit"
                 size="lg"
                 className="px-8"
-                disabled={isLoading || isClearingForm || !formData.appraiseeDate}
+                disabled={isLoading || isClearingForm}
               >
                 {isLoading ? (
                   <>
@@ -865,7 +908,9 @@ export function FinalSectionsForm({
                     {existingFinalSectionsId ? "Updating..." : "Saving..."}
                   </>
                 ) : (
-                  "Submit Appraisal"
+                  <>
+                    {isReviewMode ? "Submit Appraisal" : "Done"}
+                  </>
                 )}
               </Button>
             </div>

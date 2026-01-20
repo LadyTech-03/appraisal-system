@@ -1,6 +1,7 @@
 import apiClient from "./api"
 
 export interface FinalSectionsData {
+    userId?: string  // For review mode: the appraisee's user_id
     appraiserComments?: string
     appraiserSignatureUrl?: string
     appraiserDate?: string
