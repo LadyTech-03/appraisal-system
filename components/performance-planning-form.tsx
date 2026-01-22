@@ -51,13 +51,15 @@ export function PerformancePlanningForm({
   onBack,
   isReviewMode = false,
   initialData,
-  reviewUserId
+  reviewUserId,
+  isLocked = false
 }: {
   onNext: (data: any) => void
   onBack: () => void
   isReviewMode?: boolean
   initialData?: any
   reviewUserId?: string
+  isLocked?: boolean
 }) {
   const [isLoading, setIsLoading] = useState(false)
   const [isClearingForm, setIsClearingForm] = useState(false)
@@ -344,6 +346,12 @@ export function PerformancePlanningForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (isLocked) {
+      onNext({
+        ...formData,
+      })
+      return
+    }
     setIsLoading(true)
     try {
       const payload: PerformancePlanningData = {
@@ -372,6 +380,7 @@ export function PerformancePlanningForm({
   }
 
   const handleClearForm = async () => {
+    if (isLocked) return;
     setIsClearingForm(true)
     try {
       if (existingPerformancePlanningId) {
@@ -433,6 +442,16 @@ export function PerformancePlanningForm({
       </CardHeader>
       <CardContent className="px-6">
         <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Locked Banner */}
+          {isLocked && (
+            <div className="mb-4 p-4 bg-amber-100 border border-amber-300 rounded-lg flex items-center gap-3">
+              <div className="text-amber-600 text-4xl">🔒</div>
+              <div>
+                <p className="font-semibold text-amber-800">This form is locked</p>
+                <p className="text-sm text-amber-700">Both appraisee and appraiser have completed this form. This section can no longer be edited.</p>
+              </div>
+            </div>
+          )}
           {/* Key Result Areas Table */}
           <div className="">
             {/* Table Header */}
@@ -461,6 +480,7 @@ export function PerformancePlanningForm({
                       placeholder=""
                       className="min-h-10 resize-none"
                       required
+                      disabled={isLocked}
                     />
                   </div>
                   <div className="col-span-4 space-y-2">
@@ -470,6 +490,7 @@ export function PerformancePlanningForm({
                       placeholder=""
                       className="min-h-10 resize-none"
                       required
+                      disabled={isLocked}
                     />
                   </div>
                   <div className="col-span-3 space-y-2">
@@ -478,13 +499,14 @@ export function PerformancePlanningForm({
                       onChange={(e) => updateKeyResultArea(area.id, "resourcesRequired", e.target.value)}
                       placeholder=""
                       className="min-h-10 resize-none"
+                      disabled={isLocked}
                     />
                   </div>
                   <div className="col-span-1 flex items-start justify-center">
                     {formData.keyResultAreas.length > 1 && (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button className="">
+                          <Button disabled={isLocked} className="">
                             Edit
                           </Button>
                         </AlertDialogTrigger>
@@ -519,7 +541,7 @@ export function PerformancePlanningForm({
               type="button"
               onClick={addKeyResultArea}
               className="col-span-2 flex items-center gap-2 mt-4 w-full"
-              disabled={formData.keyResultAreas.length >= 10}
+              disabled={formData.keyResultAreas.length >= 10 || isLocked}
             >
               <Plus className="h-4 w-4" />
               Add Targets
@@ -546,12 +568,13 @@ export function PerformancePlanningForm({
                         placeholder="Enter key competency"
                         className="min-h-10 resize-none"
                         required
+                        disabled={isLocked}
                       />
                     </div>
                     {formData.keyCompetencies.length > 1 && (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button className="">
+                          <Button disabled={isLocked} className="">
                             Edit
                           </Button>
                         </AlertDialogTrigger>
@@ -584,6 +607,7 @@ export function PerformancePlanningForm({
                 type="button"
                 onClick={addKeyCompetency}
                 className="col-span-12 flex items-center gap-2 mt-4"
+                disabled={formData.keyCompetencies.length >= 10 || isLocked}
               >
                 <Plus className="h-4 w-4" />
                 Add Competency
@@ -597,9 +621,9 @@ export function PerformancePlanningForm({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Appraisee Signature */}
-              <Card className={`p-4 ${isReviewMode ? 'opacity-50' : ''}`}>
+              <Card className={`p-4 ${(isReviewMode || isLocked) ? 'opacity-70' : ''}`}>
                 <CardHeader className="p-0 pb-4">
-                  <CardTitle className={`${!isReviewMode ? 'bg-amber-800' : 'bg-gray-600'} text-white p-2 rounded text-sm font-medium text-center`}>
+                  <CardTitle className={`${(!isReviewMode && !isLocked) ? 'bg-amber-800' : 'bg-gray-600'} text-white p-2 rounded text-sm font-medium text-center`}>
                     APPRAISEE'S SIGNATURE
                   </CardTitle>
                 </CardHeader>
@@ -610,13 +634,13 @@ export function PerformancePlanningForm({
                         {!formData.appraiseeSignatureUrl ? (
                           <>
                             {/* <p className="text-sm text-muted-foreground">You have a signature on file</p> */}
-                            <Button type="button" onClick={handleSign} variant="default" size="sm">
+                            <Button disabled={isLocked} type="button" onClick={handleSign} variant="default" size="sm">
                               Sign
                             </Button>
                           </>
                         ) : (
                           <>
-                            {!isReviewMode && (
+                            {(!isReviewMode && !isLocked) && (
                               <div className="flex items-center gap-2 text-sm">
                                 <span className="text-green-600 font-bold">✓ Signed</span>
                                 <Button type="button" onClick={handleClearSignatures} variant="ghost" size="sm" className="h-6 text-xs text-red-500">
@@ -648,7 +672,7 @@ export function PerformancePlanningForm({
                             type="file"
                             accept="image/*"
                             onChange={handleSignatureUpload}
-                            disabled={isUploadingSignature}
+                            disabled={isUploadingSignature || isLocked}
                             className="h-8 text-xs"
                           />
                           {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -664,9 +688,9 @@ export function PerformancePlanningForm({
               </Card>
 
               {/* Appraiser Signature */}
-              <Card className={`p-4 ${!isReviewMode ? 'opacity-70' : ''}`}>
+              <Card className={`p-4 ${(!isReviewMode || isLocked) ? 'opacity-70' : ''}`}>
                 <CardHeader className="p-0 pb-4">
-                  <CardTitle className={`${isReviewMode ? 'bg-amber-800' : 'bg-gray-600'} text-white p-2 rounded text-sm font-medium text-center`}>
+                  <CardTitle className={`${(isReviewMode && !isLocked) ? 'bg-amber-800' : 'bg-gray-600'} text-white p-2 rounded text-sm font-medium text-center`}>
                     APPRAISER'S SIGNATURE
                   </CardTitle>
                 </CardHeader>
@@ -677,16 +701,16 @@ export function PerformancePlanningForm({
                         {!formData.appraiserSignatureUrl ? (
                           <>
                             {/* <p className="text-sm text-muted-foreground">You have a signature on file</p> */}
-                            <Button type="button" onClick={handleSign} variant="default" size="sm">
+                            <Button disabled={isLocked} type="button" onClick={handleSign} variant="default" size="sm">
                               Sign
                             </Button>
                           </>
                         ) : (
                           <>
-                            {isReviewMode && (
+                            {(isReviewMode && !isLocked) && (
                               <div className="flex items-center gap-2 text-sm">
                                 <span className="text-green-600 font-bold">✓ Signed</span>
-                                <Button type="button" onClick={handleClearSignatures} variant="ghost" size="sm" className="h-6 text-xs text-red-500">
+                                <Button disabled={isLocked} type="button" onClick={handleClearSignatures} variant="ghost" size="sm" className="h-6 text-xs text-red-500">
                                   Remove
                                 </Button>
                               </div>
@@ -715,7 +739,7 @@ export function PerformancePlanningForm({
                             type="file"
                             accept="image/*"
                             onChange={handleSignatureUpload}
-                            disabled={isUploadingSignature || !isReviewMode}
+                            disabled={isUploadingSignature || !isReviewMode || isLocked}
                             className="h-8 text-xs"
                           />
                           {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -748,7 +772,7 @@ export function PerformancePlanningForm({
             <div className="flex gap-2">
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button type="button" variant="outline" size="lg" disabled={isLoading || isClearingForm}>
+                  <Button type="button" variant="outline" size="lg" disabled={isLoading || isClearingForm || isLocked}>
                     {isClearingForm ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Clearing...</> : <><Trash2 className="mr-2 h-4 w-4" /> Clear Form</>}
                   </Button>
                 </AlertDialogTrigger>
@@ -780,7 +804,9 @@ export function PerformancePlanningForm({
                     {existingPerformancePlanningId ? "Updating..." : "Saving..."}
                   </>
                 ) : (
-                  "Continue to Next Section"
+                  <>
+                    {isLocked ? "Continue to Next Section" : "Continue to Next Section"}
+                  </>
                 )}
               </Button>
             </div>

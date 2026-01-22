@@ -209,13 +209,15 @@ export function AnnualAppraisalForm({
   onBack,
   isReviewMode = false,
   initialData,
-  reviewUserId
+  reviewUserId,
+  isLocked = false
 }: {
   onNext: (data: any) => void
   onBack: () => void
   isReviewMode?: boolean
   initialData?: any
   reviewUserId?: string
+  isLocked?: boolean
 }) {
   const [isLoading, setIsLoading] = useState(false)
   const [isClearingForm, setIsClearingForm] = useState(false)
@@ -411,6 +413,12 @@ export function AnnualAppraisalForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (isLocked) {
+      onNext({
+        ...formData,
+      })
+      return
+    }
     setIsLoading(true)
     try {
       const payload: AnnualAppraisalData = {
@@ -445,6 +453,7 @@ export function AnnualAppraisalForm({
   }
 
   const handleClearForm = async () => {
+    if (isLocked) return;
     setIsClearingForm(true)
     try {
       if (existingAppraisalId) {
@@ -487,6 +496,7 @@ export function AnnualAppraisalForm({
             <Select
               value={item.score.toString()}
               onValueChange={(value) => updateCompetencyScore(type, category.id, item.id, parseInt(value) || 0)}
+              disabled={isLocked}
             >
               <SelectTrigger className="h-10 w-full text-sm text-center">
                 <SelectValue placeholder="0" />
@@ -511,6 +521,7 @@ export function AnnualAppraisalForm({
               placeholder="Comments..."
               className="min-h-8 resize-none text-sm"
               rows={1}
+              disabled={isLocked}
             />
           </div>
         </div>
@@ -538,6 +549,16 @@ export function AnnualAppraisalForm({
       </CardHeader>
       <CardContent className="px-6">
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Locked Banner */}
+          {isLocked && (
+            <div className="mb-4 p-4 bg-amber-100 border border-amber-300 rounded-lg flex items-center gap-3">
+              <div className="text-amber-600 text-4xl">🔒</div>
+              <div>
+                <p className="font-semibold text-amber-800">This form is locked</p>
+                <p className="text-sm text-amber-700">Both appraisee and appraiser have provided their decisions and comments. This section can no longer be edited.</p>
+              </div>
+            </div>
+          )}
           {/* Core Competencies */}
           <Card className="p-4">
             <div className="space-y-4">
@@ -709,9 +730,9 @@ export function AnnualAppraisalForm({
               </Card> */}
 
               {/* Appraiser Signature - Disabled for now */}
-              <Card className="p-4">
+              <Card className={`p-4 ${(isLocked) ? 'opacity-70' : ''}`}>
                 <CardHeader className="p-0 pb-4">
-                  <CardTitle className="bg-amber-800 text-white p-2 rounded text-sm font-medium text-center">
+                  <CardTitle className={`${(isReviewMode && !isLocked) ? 'bg-amber-800' : 'bg-gray-600'} text-white p-2 rounded text-sm font-medium text-center`}>
                     APPRAISER'S SIGNATURE
                   </CardTitle>
                 </CardHeader>
@@ -722,12 +743,13 @@ export function AnnualAppraisalForm({
                         {!formData.appraiserSignatureUrl ? (
                           <>
                             <p className="text-sm text-muted-foreground">You have a signature on file</p>
-                            <Button type="button" onClick={handleSign} variant="default" size="sm">
+                            <Button disabled={isLocked} type="button" onClick={handleSign} variant="default" size="sm">
                               Sign
                             </Button>
                           </>
                         ) : (
                           <>
+                          {(isReviewMode && !isLocked) && (
                             <div className="flex items-center gap-2 text-sm">
                               <span className="text-green-600 font-bold">✓ Signed</span>
                               <Button
@@ -740,6 +762,7 @@ export function AnnualAppraisalForm({
                                 Remove
                               </Button>
                             </div>
+                            )}
                             <div className="space-y-1">
                               <Label className="text-sm">Signature:</Label>
                               <Card className="p-2 border-none shadow-none">
@@ -766,7 +789,7 @@ export function AnnualAppraisalForm({
                             type="file"
                             accept=".png"
                             onChange={handleSignatureUpload}
-                            disabled={isUploadingSignature}
+                            disabled={isUploadingSignature || isLocked}
                             className="h-8 text-xs"
                           />
                           {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -784,6 +807,7 @@ export function AnnualAppraisalForm({
                       onChange={(e) => setFormData(prev => ({ ...prev, appraiserDate: e.target.value }))}
                       className="h-8 text-xs"
                       required
+                      disabled={isLocked}
                     />
                   </div>
                 </CardContent>

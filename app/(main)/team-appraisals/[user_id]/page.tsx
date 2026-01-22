@@ -60,7 +60,33 @@ export default function TeamMemberAppraisalPage() {
   })
   const [savedStep, setSavedStep] = useState<string | null>(null)
   const [showResumeDialog, setShowResumeDialog] = useState(false)
+  const [gettingLockStatus, setGettingLockStatus ] = useState(false)
+  const [lockStatus, setLockStatus] = useState<{
+    personalInfo?: { locked: boolean; lockedAt?: string };
+    performancePlanning?: { locked: boolean; lockedAt?: string };
+    midYearReview?: { locked: boolean; lockedAt?: string };
+    endYearReview?: { locked: boolean; lockedAt?: string };
+    finalSections?: { locked: boolean; lockedAt?: string };
+    annualAppraisal?: { locked: boolean; lockedAt?: string };
+  } | null>(null)
 
+  useEffect(()=>{
+    const getLockStatus = async () => {
+      // Also fetch lock status
+        try {
+          setGettingLockStatus(true)
+          const locks = await appraisalsApi.getFormLockStatus(user_id)
+          setLockStatus(locks)
+          console.log(locks, 'lock status')
+        } catch (lockError) {
+          console.log('Could not fetch lock status:', lockError)
+        } finally {
+          setGettingLockStatus(false);
+        }
+    }
+
+    getLockStatus()
+  },[user])
 
 
   // Check for step parameter in URL
@@ -93,7 +119,6 @@ export default function TeamMemberAppraisalPage() {
           role: 'manager',
           employeeId: user_id
         })
-        console.log(currentAppraisal, 'Manager current appraisal for employee')
         if (currentAppraisal && currentAppraisal.currentStep) {
           setSavedStep(currentAppraisal.currentStep)
           setShowResumeDialog(true)
@@ -106,7 +131,7 @@ export default function TeamMemberAppraisalPage() {
       }
     }
 
-    if (user && user_id) {
+    if (user && user_id && !gettingLockStatus) {
       checkCurrentAppraisal()
     }
   }, [user, user_id, searchParams])
@@ -361,6 +386,7 @@ export default function TeamMemberAppraisalPage() {
                           onBack={() => router.push("/team-appraisals")}
                           isReviewMode={true}
                           reviewUserId={user_id}
+                          isLocked={lockStatus?.personalInfo?.locked || false}
                         />
                       ) : currentStep === 'performance-planning' ? (
                         <PerformancePlanningForm
@@ -368,6 +394,7 @@ export default function TeamMemberAppraisalPage() {
                           onBack={handleBackToPersonalInfo}
                           isReviewMode={true}
                           reviewUserId={user_id}
+                          isLocked={lockStatus?.performancePlanning?.locked || false}
                         />
                       ) : currentStep === 'mid-year-review' ? (
                         <MidYearReviewForm
@@ -375,6 +402,7 @@ export default function TeamMemberAppraisalPage() {
                           onBack={handleBackToPerformancePlanning}
                           isReviewMode={true}
                           reviewUserId={user_id}
+                          isLocked={lockStatus?.midYearReview?.locked || false}
                         />
                       ) : currentStep === 'end-year-review' ? (
                         <EndYearReviewForm
@@ -382,6 +410,7 @@ export default function TeamMemberAppraisalPage() {
                           onBack={handleBackToMidYearReview}
                           isReviewMode={true}
                           reviewUserId={user_id}
+                          isLocked={lockStatus?.endYearReview?.locked || false}
                         />
                       ) : currentStep === 'annual-appraisal' ? (
                         <AnnualAppraisalForm
@@ -389,6 +418,7 @@ export default function TeamMemberAppraisalPage() {
                           onBack={handleBackToEndYearReview}
                           isReviewMode={true}
                           reviewUserId={user_id}
+                          isLocked={lockStatus?.annualAppraisal?.locked || false}
                         />
                       ) : (
                         <FinalSectionsForm
@@ -396,6 +426,7 @@ export default function TeamMemberAppraisalPage() {
                           onBack={handleBackToAnnualAppraisal}
                           isReviewMode={true}
                           reviewUserId={user_id}
+                          isLocked={lockStatus?.finalSections?.locked || false}
                         />
                       )}
                   </>

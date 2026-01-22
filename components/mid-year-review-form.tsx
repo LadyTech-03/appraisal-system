@@ -44,13 +44,15 @@ export function MidYearReviewForm({
   onBack,
   isReviewMode = false,
   initialData,
-  reviewUserId
+  reviewUserId,
+  isLocked = false,
 }: {
   onNext: (data: any) => void
   onBack: () => void
   isReviewMode?: boolean
   initialData?: any
   reviewUserId?: string
+  isLocked?: boolean
 }) {
   const [isLoading, setIsLoading] = useState(false)
   const [isClearingForm, setIsClearingForm] = useState(false)
@@ -216,6 +218,12 @@ export function MidYearReviewForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (isLocked) {
+      onNext({
+        ...formData,
+      })
+      return
+    }
     setIsLoading(true)
     try {
       const payload: MidYearReviewData = {
@@ -246,6 +254,8 @@ export function MidYearReviewForm({
   }
 
   const handleClearForm = async () => {
+    if(isLocked) return;
+
     setIsClearingForm(true)
     try {
       if (existingMidYearReviewId) {
@@ -314,6 +324,7 @@ export function MidYearReviewForm({
                   placeholder={`Enter ${isTargets ? 'target' : 'competency'}`}
                   className="min-h-10 resize-none text-sm"
                   required
+                  disabled={isLocked}
                 />
               </div>
               <div className="col-span-4">
@@ -322,7 +333,7 @@ export function MidYearReviewForm({
                   onChange={(e) => updateReviewItem(type, item.id, "progressReview", e.target.value)}
                   placeholder={isReviewMode ? "" : "By appraiser"}
                   className="min-h-10 resize-none text-sm"
-                  disabled={!isReviewMode}
+                  disabled={!isReviewMode || isLocked}
                 // required
                 />
               </div>
@@ -332,14 +343,14 @@ export function MidYearReviewForm({
                   onChange={(e) => updateReviewItem(type, item.id, "remarks", e.target.value)}
                   placeholder={isReviewMode ? "" : "By appraiser"}
                   className="min-h-10 resize-none text-sm"
-                  disabled={!isReviewMode}
+                  disabled={!isReviewMode || isLocked}
                 />
               </div>
               <div className="col-span-1 flex items-center justify-center">
                 {items.length > 1 && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button className="">
+                      <Button disabled={isLocked} className="">
                         Edit
                       </Button>
                     </AlertDialogTrigger>
@@ -375,6 +386,7 @@ export function MidYearReviewForm({
             onClick={() => addReviewItem(type)}
             size="sm"
             className="flex items-center gap-2"
+            disabled={isLocked}
           >
             <Plus className="h-4 w-4" />
             Add {isTargets ? 'Target' : 'Competency'}
@@ -391,7 +403,7 @@ export function MidYearReviewForm({
           SECTION 3: Mid-Year Review Form
         </CardTitle>
         <div className="space-y-1 mt-2">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-center text-muted-foreground">
             This is to be completed in July by the Appraiser and Appraisee
           </p>
           <p className="text-sm text-center text-muted-foreground">
@@ -401,6 +413,16 @@ export function MidYearReviewForm({
       </CardHeader>
       <CardContent className="px-6">
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Locked Banner */}
+          {isLocked && (
+            <div className="mb-4 p-4 bg-amber-100 border border-amber-300 rounded-lg flex items-center gap-3">
+              <div className="text-amber-600 text-4xl">🔒</div>
+              <div>
+                <p className="font-semibold text-amber-800">This form is locked</p>
+                <p className="text-sm text-amber-700">Both appraisee and appraiser have completed this form. This section can no longer be edited.</p>
+              </div>
+            </div>
+          )}
           {/* Mid-Year Review Title */}
           <div className="text-center">
             <h2 className="text-lg font-bold">MID-YEAR REVIEW</h2>
@@ -422,9 +444,9 @@ export function MidYearReviewForm({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Appraisee Signature */}
-              <Card className={`p-4 ${isReviewMode ? 'opacity-50' : ''}`}>
+              <Card className={`p-4 ${(isReviewMode || isLocked) ? 'opacity-70' : ''}`}>
                 <CardHeader className="p-0 pb-4">
-                  <CardTitle className={`${!isReviewMode ? 'bg-amber-800' : 'bg-gray-600'} text-white p-2 rounded text-sm font-medium text-center`}>
+                  <CardTitle className={`${(!isReviewMode && !isLocked) ? 'bg-amber-800' : 'bg-gray-600'} text-white p-2 rounded text-sm font-medium text-center`}>
                     APPRAISEE'S SIGNATURE
                   </CardTitle>
                 </CardHeader>
@@ -435,13 +457,13 @@ export function MidYearReviewForm({
                         {!formData.appraiseeSignatureUrl ? (
                           <>
                             {/* <p className="text-sm text-muted-foreground">You have a signature on file</p> */}
-                            <Button type="button" onClick={handleSign} variant="default" size="sm">
+                            <Button disabled={isLocked} type="button" onClick={handleSign} variant="default" size="sm">
                               Sign
                             </Button>
                           </>
                         ) : (
                           <>
-                            {!isReviewMode && (
+                            {(!isReviewMode && !isLocked) && (
                               <div className="flex items-center gap-2 text-sm">
                                 <span className="text-green-600 font-bold">✓ Signed</span>
                                 <Button type="button" onClick={handleClearSignatures} variant="ghost" size="sm" className="h-6 text-xs text-red-500">
@@ -473,7 +495,7 @@ export function MidYearReviewForm({
                             type="file"
                             accept=".png"
                             onChange={handleSignatureUpload}
-                            disabled={isUploadingSignature}
+                            disabled={isUploadingSignature || isReviewMode || isLocked}
                             className="h-8 text-xs"
                           />
                           {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -491,16 +513,16 @@ export function MidYearReviewForm({
                       onChange={(e) => setFormData(prev => ({ ...prev, appraiseeDate: e.target.value }))}
                       className="h-8 text-xs"
                       required
-                      disabled={isReviewMode || isUploadingSignature}
+                      disabled={isReviewMode || isUploadingSignature || isLocked}
                     />
                   </div>
                 </CardContent>
               </Card>
 
               {/* Appraiser Signature */}
-              <Card className={`p-4 ${!isReviewMode ? 'opacity-70' : ''}`}>
+              <Card className={`p-4 ${(!isReviewMode || isLocked) ? 'opacity-70' : ''}`}>
                 <CardHeader className="p-0 pb-4">
-                  <CardTitle className={`${isReviewMode ? 'bg-amber-800' : 'bg-gray-600'} text-white p-2 rounded text-sm font-medium text-center`}>
+                  <CardTitle className={`${(isReviewMode && !isLocked) ? 'bg-amber-800' : 'bg-gray-600'} text-white p-2 rounded text-sm font-medium text-center`}>
                     APPRAISER'S SIGNATURE
                   </CardTitle>
                 </CardHeader>
@@ -511,16 +533,16 @@ export function MidYearReviewForm({
                         {!formData.appraiserSignatureUrl ? (
                           <>
                             {/* <p className="text-sm text-muted-foreground">You have a signature on file</p> */}
-                            <Button type="button" onClick={handleSign} variant="default" size="sm">
+                            <Button disabled={isLocked} type="button" onClick={handleSign} variant="default" size="sm">
                               Sign
                             </Button>
                           </>
                         ) : (
                           <>
-                            {isReviewMode && (
+                            {(isReviewMode && !isLocked) && (
                               <div className="flex items-center gap-2 text-sm">
                                 <span className="text-green-600 font-bold">✓ Signed</span>
-                                <Button type="button" onClick={handleClearSignatures} variant="ghost" size="sm" className="h-6 text-xs text-red-500">
+                                <Button type="button" disabled={isLocked} onClick={handleClearSignatures} variant="ghost" size="sm" className="h-6 text-xs text-red-500">
                                   Remove
                                 </Button>
                               </div>
@@ -549,7 +571,7 @@ export function MidYearReviewForm({
                             type="file"
                             accept=".png"
                             onChange={handleSignatureUpload}
-                            disabled={isUploadingSignature || !isReviewMode}
+                            disabled={isUploadingSignature || !isReviewMode || isLocked}
                             className="h-8 text-xs"
                           />
                           {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -567,7 +589,7 @@ export function MidYearReviewForm({
                       onChange={(e) => setFormData(prev => ({ ...prev, appraiserDate: e.target.value }))}
                       className="h-8 text-xs"
                       required
-                      disabled={!isReviewMode || isUploadingSignature}
+                      disabled={!isReviewMode || isUploadingSignature || isLocked}
                     />
                   </div>
                 </CardContent>
@@ -591,7 +613,7 @@ export function MidYearReviewForm({
             <div className="flex gap-2">
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button type="button" variant="outline" size="lg" disabled={isLoading || isClearingForm}>
+                  <Button type="button" variant="outline" size="lg" disabled={isLoading || isClearingForm || isLocked}>
                     {isClearingForm ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Clearing...</> : <><Trash2 className="mr-2 h-4 w-4" /> Clear Form</>}
                   </Button>
                 </AlertDialogTrigger>
@@ -623,7 +645,9 @@ export function MidYearReviewForm({
                     {existingMidYearReviewId ? "Updating..." : "Saving..."}
                   </>
                 ) : (
-                  "Continue to Next Section"
+                  <>
+                    {isLocked ? 'Continue to Next Section' : 'Continue to Next Section'}
+                  </>
                 )}
               </Button>
             </div>

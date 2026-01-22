@@ -42,12 +42,13 @@ interface TrainingRecord {
   programme: string
 }
 
-export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isReviewMode = false, reviewUserId }: { 
-  onNext: (data: any) => void 
+export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isReviewMode = false, reviewUserId, isLocked = false }: {
+  onNext: (data: any) => void
   initialData?: any
   onBack?: () => void
   isReviewMode?: boolean
   reviewUserId?: string
+  isLocked?: boolean
 }) {
   const { user } = useAuthStore()
   const [isLoading, setIsLoading] = useState(false)
@@ -58,7 +59,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
     // Period of Report
     periodFrom: "",
     periodTo: "",
-    
+
     // Personal Details
     title: user?.title || "",
     otherTitle: user?.other_title || "",
@@ -66,16 +67,16 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
     firstName: user?.first_name || "",
     otherNames: user?.other_names || "",
     gender: user?.gender || "",
-    
+
     // Job Information
     presentJobTitle: user?.position || "",
     gradeSalary: user?.grade || "",
     division: user?.division || "",
     dateOfAppointment: user?.appointment_date || "",
-    
+
     // Training Records
     trainingRecords: [] as TrainingRecord[],
-    
+
     // Appraiser Information (Section 1 B - only in review mode)
     appraiserTitle: user?.title || "",
     appraiserOtherTitle: user?.other_title || "",
@@ -97,7 +98,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
     const loadExistingDraft = async () => {
       try {
         let personalInfoRecords
-        
+
         // In review mode, fetch the specific user's personal info
         if (isReviewMode && reviewUserId) {
           personalInfoRecords = await getPersonalInfoByUserId(reviewUserId)
@@ -105,15 +106,15 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
           // In normal mode, fetch the logged-in user's personal info
           personalInfoRecords = await getMyPersonalInfo()
         }
-        
+
         // Get the most recent record (draft)
         if (personalInfoRecords && personalInfoRecords.length > 0) {
           const latestRecord = personalInfoRecords[0]
-          
+
           // Populate form with existing data
           setFormData({
-            periodFrom: latestRecord.period_from.slice(0, 10)  || "",
-            periodTo: latestRecord.period_to.slice(0, 10)  || "",
+            periodFrom: latestRecord.period_from.slice(0, 10) || "",
+            periodTo: latestRecord.period_to.slice(0, 10) || "",
             title: latestRecord.title || "",
             otherTitle: latestRecord.other_title || "",
             surname: latestRecord.surname || "",
@@ -133,10 +134,10 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
             appraiserOtherNames: user?.other_names || "",
             appraiserPosition: user?.position || ""
           })
-          
+
           // Store the ID for updates
           setExistingPersonalInfoId(latestRecord.id)
-          
+
           toast.info("Loaded your draft personal information")
         }
       } catch (error) {
@@ -144,7 +145,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
         console.log("No existing draft found")
       }
     }
-    
+
     loadExistingDraft()
   }, [])
 
@@ -175,8 +176,15 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
 
+    if (isLocked) {
+      onNext({
+        ...formData,
+      })
+      return
+    }
+
+    setIsLoading(true)
     try {
       // Prepare data for API
       const personalInfoData: PersonalInfoData = {
@@ -203,8 +211,8 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
       }
 
       let savedPersonalInfo
-      
-      // Update existing or create new
+    
+    // Update existing or create new
       if (existingPersonalInfoId) {
         savedPersonalInfo = await updatePersonalInfo(existingPersonalInfoId, personalInfoData)
         toast.success("Personal information updated successfully!")
@@ -213,7 +221,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
         setExistingPersonalInfoId(savedPersonalInfo.id)
         toast.success("Personal information saved successfully!")
       }
-      
+
       // Pass data to parent component with the saved ID
       onNext({
         ...formData,
@@ -230,7 +238,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
 
   const handleClearForm = async () => {
     setIsClearingForm(true)
-    
+
     try {
       if (isReviewMode) {
         // In review mode, only clear appraiser fields (Section 1 B)
@@ -252,7 +260,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
         } else {
           toast.success("Form cleared")
         }
-        
+
         // Reset appraisee form fields only
         setFormData({
           periodFrom: "",
@@ -276,7 +284,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
           appraiserOtherNames: "",
           appraiserPosition: ""
         })
-        
+
         setExistingPersonalInfoId(null)
       }
     } catch (error) {
@@ -294,6 +302,16 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
       </CardHeader>
       <CardContent className="px-6">
         <form onSubmit={handleSubmit} className="">
+          {/* Locked Banner */}
+          {isLocked && (
+            <div className="mb-4 p-4 bg-amber-100 border border-amber-300 rounded-lg flex items-center gap-3">
+              <div className="text-amber-600 text-4xl">🔒</div>
+              <div>
+                <p className="font-semibold text-amber-800">This form is locked</p>
+                <p className="text-sm text-amber-700">Both appraisee and appraiser have completed the Performance Planning form. This section can no longer be edited.</p>
+              </div>
+            </div>
+          )}
           {/* Period of Report */}
           <Card className="p-2 rounded-lg">
             <div className="space-y-4 flex items-center justify-between gap-2">
@@ -307,6 +325,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                     value={formData.periodFrom}
                     onChange={(e) => handleInputChange("periodFrom", e.target.value)}
                     required
+                    disabled={isLocked}
                   />
                 </div>
                 <div className="space-y-2 flex gap-2 items-center">
@@ -317,6 +336,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                     value={formData.periodTo}
                     onChange={(e) => handleInputChange("periodTo", e.target.value)}
                     required
+                    disabled={isLocked}
                   />
                 </div>
               </div>
@@ -391,7 +411,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                     value={formData.surname}
                     onChange={(e) => handleInputChange("surname", e.target.value)}
                     required
-                    disabled={formData.surname !== ""}
+                    disabled={formData.surname !== "" || isLocked}
                   />
                 </div>
                 <div className="space-y-2">
@@ -401,7 +421,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                     value={formData.firstName}
                     onChange={(e) => handleInputChange("firstName", e.target.value)}
                     required
-                    disabled={formData.firstName !== ""}
+                    disabled={formData.firstName !== "" || isLocked}
                   />
                 </div>
                 <div className="space-y-2">
@@ -410,7 +430,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                     id="otherNames"
                     value={formData.otherNames}
                     onChange={(e) => handleInputChange("otherNames", e.target.value)}
-                    disabled
+                    disabled={formData.otherNames !== "" || isLocked}
                   />
                 </div>
               </div>
@@ -424,7 +444,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                       id="male"
                       checked={formData.gender === "Male"}
                       onCheckedChange={() => handleInputChange("gender", "Male")}
-                      disabled={formData.gender !== ""}
+                      disabled={formData.gender !== "" || isLocked}
                     />
                     <Label htmlFor="male">Male</Label>
                   </div>
@@ -433,7 +453,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                       id="female"
                       checked={formData.gender === "Female"}
                       onCheckedChange={() => handleInputChange("gender", "Female")}
-                      disabled={formData.gender !== ""}
+                      disabled={formData.gender !== "" || isLocked}
                     />
                     <Label htmlFor="female">Female</Label>
                   </div>
@@ -454,7 +474,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                     value={formData.presentJobTitle}
                     onChange={(e) => handleInputChange("presentJobTitle", e.target.value)}
                     required
-                    disabled={formData.presentJobTitle !== ""}
+                    disabled={formData.presentJobTitle !== "" || isLocked}
                   />
                 </div>
                 <div className="space-y-2">
@@ -464,7 +484,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                     value={formData.gradeSalary}
                     onChange={(e) => handleInputChange("gradeSalary", e.target.value)}
                     required
-                    // disabled={formData.gradeSalary !== ""}
+                    disabled={formData.gradeSalary !== "" || isLocked}
                   />
                 </div>
                 <div className="space-y-2">
@@ -474,7 +494,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                     value={formData.division}
                     onChange={(e) => handleInputChange("division", e.target.value)}
                     required
-                    disabled={formData.division !== ""}
+                    disabled={formData.division !== "" || isLocked}
                   />
                 </div>
                 <div className="space-y-2">
@@ -485,7 +505,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                     value={formData.dateOfAppointment}
                     onChange={(e) => handleInputChange("dateOfAppointment", e.target.value)}
                     required
-                    disabled={formData.dateOfAppointment !== ""}
+                    disabled={formData.dateOfAppointment !== "" || isLocked}
                   />
                 </div>
               </div>
@@ -505,6 +525,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                       value={newTrainingRecord.institution}
                       onChange={(e) => setNewTrainingRecord(prev => ({ ...prev, institution: e.target.value }))}
                       placeholder="Enter institution"
+                      disabled={isLocked}
                     />
                   </div>
                   <div className="space-y-2 flex flex-col items-center">
@@ -513,6 +534,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                       type="date"
                       value={newTrainingRecord.date}
                       onChange={(e) => setNewTrainingRecord(prev => ({ ...prev, date: e.target.value }))}
+                      disabled={isLocked}
                     />
                   </div>
                   <div className="space-y-2 flex flex-col items-center">
@@ -521,10 +543,11 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                       value={newTrainingRecord.programme}
                       onChange={(e) => setNewTrainingRecord(prev => ({ ...prev, programme: e.target.value }))}
                       placeholder="Enter programme"
+                      disabled={isLocked}
                     />
                   </div>
                   <div className="flex items-end">
-                    <Button type="button" onClick={addTrainingRecord} className="w-full">
+                    <Button type="button" onClick={addTrainingRecord} className="w-full" disabled={isLocked}>
                       Add Training
                     </Button>
                   </div>
@@ -549,7 +572,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                         <div className="flex items-center justify-center">
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button className="">
+                              <Button disabled={isLocked} className="">
                                 Edit
                               </Button>
                             </AlertDialogTrigger>
@@ -602,7 +625,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                           id="appraiser-mr"
                           checked={formData.appraiserTitle === "Mr"}
                           onCheckedChange={() => handleInputChange("appraiserTitle", "Mr")}
-                          disabled={formData.appraiserTitle !== ""}
+                          disabled={formData.appraiserTitle !== "" || isLocked}
                         />
                         <Label htmlFor="appraiser-mr">Mr.</Label>
                       </div>
@@ -611,7 +634,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                           id="appraiser-mrs"
                           checked={formData.appraiserTitle === "Mrs"}
                           onCheckedChange={() => handleInputChange("appraiserTitle", "Mrs")}
-                          disabled={formData.appraiserTitle !== ""}
+                          disabled={formData.appraiserTitle !== "" || isLocked}
                         />
                         <Label htmlFor="appraiser-mrs">Mrs.</Label>
                       </div>
@@ -620,7 +643,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                           id="appraiser-ms"
                           checked={formData.appraiserTitle === "Ms"}
                           onCheckedChange={() => handleInputChange("appraiserTitle", "Ms")}
-                          disabled={formData.appraiserTitle !== ""}
+                          disabled={formData.appraiserTitle !== "" || isLocked}
                         />
                         <Label htmlFor="appraiser-ms">Ms.</Label>
                       </div>
@@ -629,7 +652,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                           id="appraiser-other"
                           checked={formData.appraiserTitle === "Other"}
                           onCheckedChange={() => handleInputChange("appraiserTitle", "Other")}
-                          disabled={formData.appraiserTitle !== ""}
+                          disabled={formData.appraiserTitle !== "" || isLocked}
                         />
                         <Label htmlFor="appraiser-other">Other (Pls. specify):</Label>
                       </div>
@@ -639,7 +662,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                           onChange={(e) => handleInputChange("appraiserOtherTitle", e.target.value)}
                           placeholder="Specify title"
                           className="w-64"
-                          disabled={formData.appraiserTitle !== "Other"}
+                          disabled={formData.appraiserTitle !== "Other" || isLocked}
                         />
                       )}
                     </div>
@@ -653,7 +676,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                         id="appraiserSurname"
                         value={formData.appraiserSurname}
                         onChange={(e) => handleInputChange("appraiserSurname", e.target.value)}
-                        disabled={formData.appraiserSurname !== ""}
+                        disabled={formData.appraiserSurname !== "" || isLocked}
                       />
                     </div>
                     <div className="space-y-2">
@@ -662,7 +685,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                         id="appraiserFirstName"
                         value={formData.appraiserFirstName}
                         onChange={(e) => handleInputChange("appraiserFirstName", e.target.value)}
-                        disabled={formData.appraiserFirstName !== ""}
+                        disabled={formData.appraiserFirstName !== "" || isLocked}
                       />
                     </div>
                   </div>
@@ -674,7 +697,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                       id="appraiserOtherNames"
                       value={formData.appraiserOtherNames}
                       onChange={(e) => handleInputChange("appraiserOtherNames", e.target.value)}
-                      disabled
+                      disabled={formData.appraiserOtherNames !== "" || isLocked}
                     />
                   </div>
 
@@ -685,7 +708,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                       id="appraiserPosition"
                       value={formData.appraiserPosition}
                       onChange={(e) => handleInputChange("appraiserPosition", e.target.value)}
-                      disabled
+                      disabled={formData.appraiserPosition !== "" || isLocked}
                     />
                   </div>
                 </div>
@@ -698,11 +721,11 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
             {/* Clear Form Button */}
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   size="lg"
-                  disabled={isLoading || isClearingForm}
+                  disabled={isLoading || isClearingForm || isLocked}
                 >
                   {isClearingForm ? (
                     <>
@@ -721,7 +744,7 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                 <AlertDialogHeader>
                   <AlertDialogTitle>Clear Form?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    {existingPersonalInfoId 
+                    {existingPersonalInfoId
                       ? "This will delete your saved draft and clear all form fields. This action cannot be undone."
                       : "This will clear all form fields. You can fill them in again later."}
                   </AlertDialogDescription>
@@ -743,7 +766,9 @@ export function AppraiseePersonalInfoForm({ onNext, initialData, onBack, isRevie
                   {existingPersonalInfoId ? "Updating..." : "Saving..."}
                 </>
               ) : (
-                "Continue to Next Section"
+                <>
+                  {isLocked ? "Continue to Next Section" : "Continue to Next Section"}
+                </>
               )}
             </Button>
           </div>

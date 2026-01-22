@@ -39,13 +39,15 @@ export function FinalSectionsForm({
   onBack,
   isReviewMode = false,
   reviewUserId,
-  initialData
+  initialData,
+  isLocked = false
 }: {
   onNext: (data: any) => void
   onBack: () => void
   isReviewMode?: boolean
   reviewUserId?: string
   initialData?: any
+  isLocked?: boolean
 }) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
@@ -352,9 +354,9 @@ export function FinalSectionsForm({
       <CardContent className="px-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Section 6: Appraiser's Comments */}
-          <Card className={`p-4 ${!isReviewMode ? 'opacity-70' : ''}`}>
+          <Card className={`p-4 ${(!isReviewMode || isLocked) ? 'opacity-70' : ''}`}>
             <div className="space-y-4">
-              <div className="bg-amber-800 text-white p-2 rounded">
+              <div className={`${(isReviewMode && !isLocked) ? 'bg-amber-800' : 'bg-gray-600'} text-white p-2 rounded font-medium`}>
                 <h3 className="font-bold">SECTION 6: Annual Appraisal</h3>
               </div>
 
@@ -370,7 +372,7 @@ export function FinalSectionsForm({
                   onChange={(e) => setFormData(prev => ({ ...prev, appraiserComments: e.target.value }))}
                   placeholder={isReviewMode ? "Enter appraiser's comments..." : "Completed by appraiser during review"}
                   className="min-h-32 resize-none"
-                  disabled={!isReviewMode}
+                  disabled={!isReviewMode || isLocked}
                   rows={8}
                 />
               </div>
@@ -383,13 +385,13 @@ export function FinalSectionsForm({
                       {!formData.appraiserSignatureUrl ? (
                         <>
                           <p className="text-sm text-muted-foreground">You have a signature on file</p>
-                          <Button type="button" onClick={handleSign} variant="default" size="sm">
+                          <Button type="button" disabled={isLocked} onClick={handleSign} variant="default" size="sm">
                             Sign
                           </Button>
                         </>
                       ) : (
                         <>
-                          {isReviewMode && (
+                          {(isReviewMode && !isLocked) && (
                             <div className="flex items-center gap-2 text-sm">
                               <span className="text-green-600 font-bold">✓ Signed</span>
                               <Button
@@ -426,7 +428,7 @@ export function FinalSectionsForm({
                           type="file"
                           accept=".png"
                           onChange={handleSignatureUpload}
-                          disabled={isUploadingSignature}
+                          disabled={isUploadingSignature || isLocked}
                           className="h-8 text-xs"
                         />
                         {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -441,7 +443,7 @@ export function FinalSectionsForm({
                     value={formData.appraiserDate}
                     onChange={(e) => setFormData(prev => ({ ...prev, appraiserDate: e.target.value }))}
                     className="h-12"
-                    disabled={!isReviewMode}
+                    disabled={!isReviewMode || isLocked}
                   />
                 </div>
               </div>
@@ -449,9 +451,9 @@ export function FinalSectionsForm({
           </Card>
 
           {/* Section 7: Career Development */}
-          <Card className={`p-4 ${!isReviewMode ? 'opacity-70' : ''}`}>
+          <Card className={`p-4 ${(!isReviewMode || isLocked) ? 'opacity-70' : ''}`}>
             <div className="space-y-4">
-              <div className="bg-amber-800 text-white p-2 rounded">
+              <div className={`${(isReviewMode && !isLocked) ? 'bg-amber-800' : 'bg-gray-600'} text-white p-2 rounded font-medium`}>
                 <h3 className="font-bold">SECTION 7: Career Development</h3>
               </div>
 
@@ -467,7 +469,7 @@ export function FinalSectionsForm({
                   onChange={(e) => setFormData(prev => ({ ...prev, careerDevelopmentComments: e.target.value }))}
                   placeholder={isReviewMode ? "Enter training and development comments..." : "Completed by appraiser during review"}
                   className="min-h-24 resize-none"
-                  disabled={!isReviewMode}
+                  disabled={!isReviewMode || isLocked}
                   rows={6}
                 />
               </div>
@@ -475,9 +477,9 @@ export function FinalSectionsForm({
           </Card>
 
           {/* Section 8: Assessment Decision */}
-          <Card className={`p-4 ${!isReviewMode ? 'opacity-70' : ''}`}>
+          <Card className={`p-4 ${(!isReviewMode || isLocked) ? 'opacity-70' : ''}`}>
             <div className="space-y-4">
-              <div className="bg-amber-800 text-white p-2 rounded">
+              <div className={`${(isReviewMode && !isLocked) ? 'bg-amber-800' : 'bg-gray-600'} text-white p-2 rounded font-medium`}>
                 <h3 className="font-bold">SECTION 8: ASSESSMENT DECISION</h3>
               </div>
 
@@ -489,7 +491,7 @@ export function FinalSectionsForm({
                 <RadioGroup
                   value={formData.assessmentDecision}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, assessmentDecision: value }))}
-                  disabled={!isReviewMode}
+                  disabled={!isReviewMode || isLocked}
                   className="space-y-3"
                 >
                   <div className="flex items-center space-x-2">
@@ -532,9 +534,9 @@ export function FinalSectionsForm({
           </Card>
 
           {/* Section 9: Appraisee's Comments */}
-          <Card className={`p-4 ${isReviewMode ? 'opacity-50' : ''}`}>
+          <Card className={`p-4 ${(isReviewMode || isLocked) ? 'opacity-50' : ''}`}>
             <div className="space-y-4">
-              <div className="bg-amber-800 text-white p-2 rounded">
+              <div className={`${(!isReviewMode && !isLocked) ? 'bg-amber-800' : 'bg-gray-600'} text-white p-2 rounded font-medium`}>
                 <h3 className="font-bold">SECTION 9: Appraisee's Comments</h3>
               </div>
 
@@ -602,7 +604,7 @@ export function FinalSectionsForm({
                           placeholder="Enter your comments..."
                           className="min-h-24 resize-none"
                           rows={6}
-                          disabled={isReviewMode}
+                          disabled={isReviewMode || isLocked}
                         />
                       </div>
 
@@ -620,7 +622,7 @@ export function FinalSectionsForm({
                                 </>
                               ) : (
                                 <>
-                                  {!isReviewMode && (
+                                  {(!isReviewMode && !isLocked) && (
                                     <div className="flex items-center gap-2 text-sm">
                                       <span className="text-green-600 font-bold">✓ Signed</span>
                                       <Button
@@ -657,7 +659,7 @@ export function FinalSectionsForm({
                                   type="file"
                                   accept=".png"
                                   onChange={handleSignatureUpload}
-                                  disabled={isUploadingSignature}
+                                  disabled={isUploadingSignature || isReviewMode || isLocked}
                                   className="h-8 text-xs"
                                 />
                                 {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -673,7 +675,7 @@ export function FinalSectionsForm({
                             onChange={(e) => setFormData(prev => ({ ...prev, appraiseeDate: e.target.value }))}
                             className="h-12"
                             required
-                            disabled={isReviewMode}
+                            disabled={isReviewMode || isLocked}
                           />
                         </div>
                       </div>
@@ -924,7 +926,7 @@ export function FinalSectionsForm({
                   </>
                 ) : (
                   <>
-                    {isReviewMode ? "Submit Appraisal" : "Done"}
+                    {isReviewMode ? "Submit" : "Submit"}
                   </>
                 )}
               </Button>
