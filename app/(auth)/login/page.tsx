@@ -93,7 +93,7 @@ export default function LoginPage() {
                 <Input
                   id="emailOrEmployeeId"
                   type="text"
-                  placeholder="Enter your email or staff ID"
+                  placeholder="Enter your staff ID"
                   value={formData.emailOrEmployeeId}
                   onChange={(e) => setFormData((prev) => ({ ...prev, emailOrEmployeeId: e.target.value }))}
                   required
