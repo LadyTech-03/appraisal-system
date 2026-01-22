@@ -37,6 +37,24 @@ export const appraisalsApi = {
     }
   },
 
+  async getCurrentAppraisal(params?: Record<string, unknown>) {
+    try {
+      const response = await apiClient.get("/appraisals/current", { params })
+      return response.data?.data
+    } catch (error) {
+      throw parseApiError(error)
+    }
+  },
+
+  async updateManagerStep(employeeId: string, step: string) {
+    try {
+      const response = await apiClient.post("/appraisals/manager-step", { employeeId, step })
+      return response.data
+    } catch (error) {
+      throw parseApiError(error)
+    }
+  },
+
   async submitAppraisal() {
     try {
       const response = await apiClient.post("/appraisals/submit")

@@ -14,8 +14,19 @@ import { FinalSectionsForm } from "@/components/final-sections-form"
 import { FormUnavailable } from "@/components/form-unavailable"
 import { GuideNotesLayout, useGuideNotes } from "@/components/guide-notes/guide-notes-selector"
 import { Button } from "@/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { ArrowLeft, Check, Info, Loader, Loader2 } from "lucide-react"
 import { appraisalPeriodsApi, type AppraisalPeriod } from "@/lib/api/appraisalPeriods"
+import { appraisalsApi } from "@/lib/api/appraisals"
 import { toast } from "sonner"
 
 const steps = [
@@ -32,7 +43,7 @@ export default function CreateAppraisalPage() {
   const searchParams = useSearchParams()
   const { user } = useAuthStore()
   const guideState = useGuideNotes()
-  const [currentStep, setCurrentStep] = useState<'personal-info' | 'performance-planning' | 'mid-year-review' | 'end-year-review' | 'annual-appraisal' | 'final-sections'>('personal-info')
+  const [currentStep, setCurrentStep] = useState<'personal-info' | 'performance-planning' | 'mid-year-review' | 'end-year-review' | 'annual-appraisal' | 'final-sections'| null>(null)
   const [appraisalData, setAppraisalData] = useState<any>({
     personalInfo: null,
     performancePlanning: null,
@@ -43,12 +54,15 @@ export default function CreateAppraisalPage() {
   })
   const [availability, setAvailability] = useState<{ [key: string]: AppraisalPeriod }>({})
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(true)
+  const [showResumeDialog, setShowResumeDialog] = useState(false)
+  const [savedStep, setSavedStep] = useState<string | null>(null)
 
   // Fetch availability on mount
   useEffect(() => {
     const fetchAvailability = async () => {
       try {
         const periods = await appraisalPeriodsApi.getAvailability()
+        console.log(periods, 'periods')
         const availabilityMap = periods.reduce((acc, period) => {
           acc[period.section_name] = period
           return acc
@@ -85,6 +99,30 @@ export default function CreateAppraisalPage() {
       }
     }
   }, [searchParams])
+
+  // Check for in-progress appraisal and show resume dialog
+  useEffect(() => {
+    const checkCurrentAppraisal = async () => {
+      // Skip if URL already has a step parameter
+      if (searchParams.get('step')) return
+
+      try {
+        const currentAppraisal = await appraisalsApi.getCurrentAppraisal()
+        if (currentAppraisal && currentAppraisal.currentStep) {
+          setSavedStep(currentAppraisal.currentStep)
+          setShowResumeDialog(true)
+        } else {
+          setCurrentStep('personal-info')
+        }
+      } catch (error) {
+        console.log('No current appraisal found or error:', error)
+      }
+    }
+
+    if (user && !isLoadingAvailability) {
+      checkCurrentAppraisal()
+    }
+  }, [user, isLoadingAvailability, searchParams])
 
   if (!user) {
     return (
@@ -177,72 +215,111 @@ export default function CreateAppraisalPage() {
     setCurrentStep('annual-appraisal')
   }
 
+  // Get display name for a step
+  const getStepDisplayName = (stepId: string) => {
+    const step = steps.find(s => s.id === stepId)
+    return step?.name || stepId
+  }
+
+  // Handle resume confirmation
+  const handleResumeAppraisal = () => {
+    if (savedStep) {
+      setCurrentStep(savedStep as typeof currentStep)
+    }
+    setShowResumeDialog(false)
+  }
+
+  // Handle start over
+  const handleStartOver = () => {
+    setShowResumeDialog(false)
+    setCurrentStep('personal-info')
+  }
+
   return (
-    <div className="h-screen bg-gradient-to-b from-blue-50 to-blue-100 flex">
-      <Sidebar />
+    <>
+      {/* Resume Confirmation Dialog */}
+      <AlertDialog open={showResumeDialog} onOpenChange={setShowResumeDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Resume Your Appraisal?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have an appraisal in progress. You were on <strong>{getStepDisplayName(savedStep || '')}</strong>.
+              Would you like to resume from where you left off?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleStartOver}>Start Over</AlertDialogCancel>
+            <AlertDialogAction onClick={handleResumeAppraisal}>Resume</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Topbar />
+      <div className="h-screen bg-gradient-to-b from-blue-50 to-blue-100 flex">
+        <Sidebar />
 
-        <GuideNotesLayout guideState={guideState}>
-          <main className="flex-1 p-6 space-y-6 overflow-auto">
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <Topbar />
 
-            {/* Progress Indicator */}
-            <div className="w-full max-w-4xl mx-auto mb-8 px-4">
-              <div className="relative">
-                {/* Background Line */}
-                <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -translate-y-1/2 rounded-full" />
+          {currentStep && (
+            <GuideNotesLayout guideState={guideState}>
+              <main className="flex-1 p-6 space-y-6">
 
-                {/* Progress Line */}
-                <div
-                  className="absolute top-1/2 left-0 h-1 bg-primary -translate-y-1/2 rounded-full transition-all duration-500 ease-in-out"
-                  style={{
-                    width: `${(steps.findIndex(s => s.id === currentStep) / (steps.length - 1)) * 100}%`
-                  }}
-                />
+                {/* Progress Indicator */}
+                <div className="w-full max-w-4xl mx-auto mb-8 px-4">
+                <div className="relative">
+                  {/* Background Line */}
+                  <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -translate-y-1/2 rounded-full" />
 
-                {/* Steps */}
-                <div className="relative flex justify-between items-center w-full">
-                  {steps.map((step, index) => {
-                    const currentIndex = steps.findIndex(s => s.id === currentStep)
-                    const isCompleted = index < currentIndex || appraisalData[step.status]
-                    const isActive = step.id === currentStep
-                    const isPending = index > currentIndex
+                  {/* Progress Line */}
+                  <div
+                    className="absolute top-1/2 left-0 h-1 bg-primary -translate-y-1/2 rounded-full transition-all duration-500 ease-in-out"
+                    style={{
+                      width: `${(steps.findIndex(s => s.id === currentStep) / (steps.length - 1)) * 100}%`
+                    }}
+                  />
 
-                    return (
-                      <div key={step.id} className="flex flex-col items-center gap-2 group cursor-default">
-                        {/* Step Circle */}
-                        <div
-                          className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all duration-300 bg-background
+                  {/* Steps */}
+                  <div className="relative flex justify-between items-center w-full">
+                    {steps.map((step, index) => {
+                      const currentIndex = steps.findIndex(s => s.id === currentStep)
+                      const isCompleted = index < currentIndex || appraisalData[step.status]
+                      const isActive = step.id === currentStep
+                      const isPending = index > currentIndex
+
+                      return (
+                        <div key={step.id} className="flex flex-col items-center gap-2 group cursor-default">
+                          {/* Step Circle */}
+                          <div
+                            className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all duration-300 bg-background
                           ${isCompleted
-                              ? 'bg-primary border-primary text-primary-foreground scale-110'
-                              : isActive
-                                ? 'border-primary text-primary scale-125 ring-4 ring-primary/20'
-                                : 'border-gray-300 text-gray-400'
-                            }
+                                ? 'bg-primary border-primary text-primary-foreground scale-110'
+                                : isActive
+                                  ? 'border-primary text-primary scale-125 ring-4 ring-primary/20'
+                                  : 'border-gray-300 text-gray-400'
+                              }
                         `}
-                        >
-                          {isCompleted ? (
-                            <Check className="w-4 h-4" strokeWidth={3} />
-                          ) : (
-                            <span className="text-xs font-bold">{index + 1}</span>
-                          )}
-                        </div>
+                          >
+                            {isCompleted ? (
+                              <Check className="w-4 h-4" strokeWidth={3} />
+                            ) : (
+                              <span className="text-xs font-bold">{index + 1}</span>
+                            )}
+                          </div>
 
-                        {/* Step Label */}
-                        <span className={`absolute top-10 text-xs font-semibold whitespace-nowrap transition-colors duration-300
+                          {/* Step Label */}
+                          <span className={`absolute top-10 text-xs font-semibold whitespace-nowrap transition-colors duration-300
                         ${isActive ? 'text-primary' : isCompleted ? 'text-foreground' : 'text-muted-foreground'}
                       `}>
-                          {step.name}
-                        </span>
-                      </div>
-                    )
-                  })}
+                            {step.name}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="flex p-6 space-y-6 justify-center">
+              {/* <div className="flex p-6 space-y-6 justify-center"> */}
               {/* Form Content */}
               {currentStep === 'personal-info' ? (
                 isStepAvailable('personal-info') ? (
@@ -320,11 +397,13 @@ export default function CreateAppraisalPage() {
                   />
                 )
               )}
-            </div>
-          </main>
-        </GuideNotesLayout>
+              {/* </div> */}
+            </main>
+          </GuideNotesLayout>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 

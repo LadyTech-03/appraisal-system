@@ -102,7 +102,6 @@ export function FinalSectionsForm({
       try {
         // Load user profile for signature
         const profile = await authApi.getProfile()
-        console.log(profile, 'user profile')
         if (profile?.data?.signature_url && !isReviewMode) {
           setAppraiseeSignatureUrl(profile.data.signature_url)
         } else if (profile?.data?.signature_url && isReviewMode) {
@@ -114,14 +113,12 @@ export function FinalSectionsForm({
         let finalSections
         if (isReviewMode && reviewUserId) {
           finalSections = await getFinalSectionsByUserId(reviewUserId)
-          console.log(finalSections, 'first log')
           if (finalSections && finalSections.length > 0) {
             setAppraiseeSignatureUrl(finalSections[0].appraisee_signature_url || null)
             setUserId(finalSections[0].user_id || null)
           }
         } else {
           finalSections = await getMyFinalSections()
-          console.log(finalSections, 'second log')
           if (finalSections && finalSections.length > 0) {
             setAppraiserSignatureUrl(finalSections[0].appraiser_signature_url || null)
             setHodSignatureUrl(finalSections[0].hod_signature_url || null)
@@ -293,7 +290,7 @@ export function FinalSectionsForm({
         setExistingFinalSectionsId(savedSections.id)
       }
 
-      console.log(savedSections, 'savedSections')
+
 
       // Appraisal is automatically submitted via the service
       // toast.success("Appraisal submitted successfully!")
@@ -347,7 +344,7 @@ export function FinalSectionsForm({
   }
 
   return (
-    <Card className="max-w-6xl mx-auto">
+    <Card className="max-w-6xl mx-auto ">
       <CardHeader>
         <CardTitle>
         </CardTitle>

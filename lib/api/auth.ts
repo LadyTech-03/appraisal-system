@@ -1,7 +1,7 @@
 import apiClient, { parseApiError } from "./api"
 
 interface LoginPayload {
-  email: string
+  employee_id: string
   password: string
 }
 

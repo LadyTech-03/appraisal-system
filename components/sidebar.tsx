@@ -113,7 +113,7 @@ function SidebarContent() {
     }
   }, [user])
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     logout()
     router.replace("/login")
   }

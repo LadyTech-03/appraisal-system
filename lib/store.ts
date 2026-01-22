@@ -32,7 +32,7 @@ export const useAuthStore = create<AuthState & AuthPersistState & {
       login: async (emailOrEmployeeId: string, password: string) => {
         try {
           set({ error: null })
-          const payload = { email: emailOrEmployeeId, password }
+          const payload = { employee_id: emailOrEmployeeId, password }
           const response = await authApi.login(payload)
           const { token, user } = response.data
           setAuthToken(token)

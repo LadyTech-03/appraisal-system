@@ -10,15 +10,26 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, User, Loader2, Check } from "lucide-react"
 import { getPersonalInfoByUserId, PersonalInfo } from "@/lib/api/personalInfo"
+import { appraisalsApi } from "@/lib/api/appraisals"
 import { PerformancePlanningForm } from "@/components/performance-planning-form"
 import { MidYearReviewForm } from "@/components/mid-year-review-form"
 import { EndYearReviewForm } from "@/components/end-year-review-form"
 import { AnnualAppraisalForm } from "@/components/annual-appraisal-form"
 import { FinalSectionsForm } from "@/components/final-sections-form"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { AppraiseePersonalInfoForm } from "@/components/appraisee-personal-info-form"
 import { GuideNotesLayout, useGuideNotes } from "@/components/guide-notes/guide-notes-selector"
 
-type Step = 'personal-info' | 'performance-planning' | 'mid-year-review' | 'end-year-review' | 'annual-appraisal' | 'final-sections'
+type Step = 'personal-info' | 'performance-planning' | 'mid-year-review' | 'end-year-review' | 'annual-appraisal' | 'final-sections' | null
 
 const steps = [
   { id: 'personal-info', name: 'Personal Information', status: 'personalInfo' },
@@ -38,7 +49,7 @@ export default function TeamMemberAppraisalPage() {
   const { user } = useAuthStore()
   const [isLoading, setIsLoading] = useState(true)
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo | null>(null)
-  const [currentStep, setCurrentStep] = useState<Step>('personal-info')
+  const [currentStep, setCurrentStep] = useState<Step>(null)
   const [appraisalData, setAppraisalData] = useState<any>({
     personalInfo: null,
     performancePlanning: null,
@@ -47,25 +58,58 @@ export default function TeamMemberAppraisalPage() {
     annualAppraisal: null,
     finalSections: null
   })
+  const [savedStep, setSavedStep] = useState<string | null>(null)
+  const [showResumeDialog, setShowResumeDialog] = useState(false)
 
 
-    // Check for step parameter in URL
-    useEffect(() => {
-      const stepParam = searchParams.get('step')
-      if (stepParam) {
-        const stepMap: { [key: string]: typeof currentStep } = {
-          '1': 'personal-info',
-          '2': 'performance-planning',
-          '3': 'mid-year-review',
-          '4': 'end-year-review',
-          '5': 'final-sections',
-        }
-        const step = stepMap[stepParam]
-        if (step) {
-          setCurrentStep(step)
-        }
+
+  // Check for step parameter in URL
+  useEffect(() => {
+    const stepParam = searchParams.get('step')
+    if (stepParam) {
+      const stepMap: { [key: string]: typeof currentStep } = {
+        '1': 'personal-info',
+        '2': 'performance-planning',
+        '3': 'mid-year-review',
+        '4': 'end-year-review',
+        '5': 'final-sections',
       }
-    }, [searchParams])
+      const step = stepMap[stepParam]
+      if (step) {
+        setCurrentStep(step)
+      }
+    }
+  }, [searchParams])
+
+  // Check for in-progress appraisal and show resume dialog
+  useEffect(() => {
+    const checkCurrentAppraisal = async () => {
+      // Skip if URL already has a step parameter
+      if (searchParams.get('step')) return
+
+      try {
+        // Pass role=manager and employeeId to get manager's step for this employee's appraisal
+        const currentAppraisal = await appraisalsApi.getCurrentAppraisal({
+          role: 'manager',
+          employeeId: user_id
+        })
+        console.log(currentAppraisal, 'Manager current appraisal for employee')
+        if (currentAppraisal && currentAppraisal.currentStep) {
+          setSavedStep(currentAppraisal.currentStep)
+          setShowResumeDialog(true)
+        } else {
+          setCurrentStep('personal-info')
+        }
+      } catch (error) {
+        console.log('No current appraisal found or error:', error)
+        setCurrentStep('personal-info')
+      }
+    }
+
+    if (user && user_id) {
+      checkCurrentAppraisal()
+    }
+  }, [user, user_id, searchParams])
 
   // Fetch team member's personal info
   useEffect(() => {
@@ -101,29 +145,55 @@ export default function TeamMemberAppraisalPage() {
     )
   }
 
-  const handlePersonalInfoNext = (data: any) => {
+  const handlePersonalInfoNext = async (data: any) => {
     setAppraisalData((prev: any) => ({ ...prev, personalInfo: data }))
     setCurrentStep('performance-planning')
+    // Update manager's current step on server
+    try {
+      await appraisalsApi.updateManagerStep(user_id, 'performance-planning')
+    } catch (error) {
+      console.log('Failed to update manager step:', error)
+    }
   }
 
-  const handlePerformancePlanningNext = (data: any) => {
+  const handlePerformancePlanningNext = async (data: any) => {
     setAppraisalData((prev: any) => ({ ...prev, performancePlanning: data }))
     setCurrentStep('mid-year-review')
+    try {
+      await appraisalsApi.updateManagerStep(user_id, 'mid-year-review')
+    } catch (error) {
+      console.log('Failed to update manager step:', error)
+    }
   }
 
-  const handleMidYearReviewNext = (data: any) => {
+  const handleMidYearReviewNext = async (data: any) => {
     setAppraisalData((prev: any) => ({ ...prev, midYearReview: data }))
     setCurrentStep('end-year-review')
+    try {
+      await appraisalsApi.updateManagerStep(user_id, 'end-year-review')
+    } catch (error) {
+      console.log('Failed to update manager step:', error)
+    }
   }
 
-  const handleEndYearReviewNext = (data: any) => {
+  const handleEndYearReviewNext = async (data: any) => {
     setAppraisalData((prev: any) => ({ ...prev, endYearReview: data }))
     setCurrentStep('annual-appraisal')
+    try {
+      await appraisalsApi.updateManagerStep(user_id, 'annual-appraisal')
+    } catch (error) {
+      console.log('Failed to update manager step:', error)
+    }
   }
 
-  const handleAnnualAppraisalNext = (data: any) => {
+  const handleAnnualAppraisalNext = async (data: any) => {
     setAppraisalData((prev: any) => ({ ...prev, annualAppraisal: data }))
     setCurrentStep('final-sections')
+    try {
+      await appraisalsApi.updateManagerStep(user_id, 'final-sections')
+    } catch (error) {
+      console.log('Failed to update manager step:', error)
+    }
   }
 
   const handleFinalSectionsNext = (data: any) => {
@@ -189,135 +259,175 @@ export default function TeamMemberAppraisalPage() {
         return ''
     }
   }
+  // Get display name for a step
+  const getStepDisplayName = (stepId: string) => {
+    const step = steps.find(s => s.id === stepId)
+    return step?.name || stepId
+  }
+
+  // Handle resume confirmation
+  const handleResumeAppraisal = () => {
+    if (savedStep) {
+      setCurrentStep(savedStep as typeof currentStep)
+    }
+    setShowResumeDialog(false)
+  }
+
+  // Handle start over
+  const handleStartOver = () => {
+    setShowResumeDialog(false)
+    setCurrentStep('personal-info')
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 flex">
-      <Sidebar />
+    <>
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 flex">
+        <Sidebar />
 
-      <div className="flex-1 flex flex-col">
-        <Topbar />
+        <div className="flex-1 flex flex-col">
+          <Topbar />
 
-        <GuideNotesLayout guideState={guideState}>
-        <main className="flex-1 p-6 space-y-6">
-          {/* Progress Indicator */}
-          <div className="w-full max-w-4xl mx-auto mb-12 px-4">
-            <div className="relative">
-              {/* Background Line */}
-              <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -translate-y-1/2 rounded-full" />
+          {currentStep && (
+            <GuideNotesLayout guideState={guideState}>
+              <main className="flex-1 p-6 space-y-6">
+                {/* Progress Indicator */}
+                <div className="w-full max-w-4xl mx-auto mb-12 px-4">
+                  <div className="relative">
+                    {/* Background Line */}
+                    <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -translate-y-1/2 rounded-full" />
 
-              {/* Progress Line */}
-              <div
-                className="absolute top-1/2 left-0 h-1 bg-primary -translate-y-1/2 rounded-full transition-all duration-500 ease-in-out"
-                style={{
-                  width: `${(steps.findIndex(s => s.id === currentStep) / (steps.length - 1)) * 100}%`
-                }}
-              />
+                    {/* Progress Line */}
+                    <div
+                      className="absolute top-1/2 left-0 h-1 bg-primary -translate-y-1/2 rounded-full transition-all duration-500 ease-in-out"
+                      style={{
+                        width: `${(steps.findIndex(s => s.id === currentStep) / (steps.length - 1)) * 100}%`
+                      }}
+                    />
 
-              {/* Steps */}
-              <div className="relative flex justify-between items-center w-full">
-                {steps.map((step, index) => {
-                  const currentIndex = steps.findIndex(s => s.id === currentStep)
-                  const isCompleted = index < currentIndex || appraisalData[step.status]
-                  const isActive = step.id === currentStep
-                  const isPending = index > currentIndex
+                    {/* Steps */}
+                    <div className="relative flex justify-between items-center w-full">
+                      {steps.map((step, index) => {
+                        const currentIndex = steps.findIndex(s => s.id === currentStep)
+                        const isCompleted = index < currentIndex || appraisalData[step.status]
+                        const isActive = step.id === currentStep
+                        const isPending = index > currentIndex
 
-                  return (
-                    <div key={step.id} className="flex flex-col items-center gap-2 group cursor-default">
-                      {/* Step Circle */}
-                      <div
-                        className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all duration-300 bg-background
-                        ${isCompleted
-                            ? 'bg-primary border-primary text-primary-foreground scale-110'
-                            : isActive
-                              ? 'border-primary text-primary scale-125 ring-4 ring-primary/20'
-                              : 'border-gray-300 text-gray-400'
-                          }
-                      `}
-                      >
-                        {isCompleted ? (
-                          <Check className="w-4 h-4" strokeWidth={3} />
-                        ) : (
-                          <span className="text-xs font-bold">{index + 1}</span>
-                        )}
-                      </div>
+                        return (
+                          <div key={step.id} className="flex flex-col items-center gap-2 group cursor-default">
+                            {/* Step Circle */}
+                            <div
+                              className={`relative z-10 flex items-center justify-center w-8 h-8 rounded-full border-2 transition-all duration-300 bg-background
+                            ${isCompleted
+                                  ? 'bg-primary border-primary text-primary-foreground scale-110'
+                                  : isActive
+                                    ? 'border-primary text-primary scale-125 ring-4 ring-primary/20'
+                                    : 'border-gray-300 text-gray-400'
+                                }
+                          `}
+                            >
+                              {isCompleted ? (
+                                <Check className="w-4 h-4" strokeWidth={3} />
+                              ) : (
+                                <span className="text-xs font-bold">{index + 1}</span>
+                              )}
+                            </div>
 
-                      {/* Step Label */}
-                      <span className={`absolute top-10 text-xs font-semibold whitespace-nowrap transition-colors duration-300
-                      ${isActive ? 'text-primary' : isCompleted ? 'text-foreground' : 'text-muted-foreground'}
-                    `}>
-                        {step.name}
-                      </span>
+                            {/* Step Label */}
+                            <span className={`absolute top-10 text-xs font-semibold whitespace-nowrap transition-colors duration-300
+                          ${isActive ? 'text-primary' : isCompleted ? 'text-foreground' : 'text-muted-foreground'}
+                        `}>
+                              {step.name}
+                            </span>
+                          </div>
+                        )
+                      })}
                     </div>
-                  )
-                })}
-              </div>
-            </div>
-          </div>
+                  </div>
+                </div>
 
-          {/* Team Member Info */}
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <span className="ml-2 text-muted-foreground">Loading appraisal...</span>
-            </div>
-          ) : personalInfo ? (
-            <>
-              {/* Form Content */}
-              {
-              currentStep === 'personal-info' ? (
-                <AppraiseePersonalInfoForm 
-                  onNext={handlePersonalInfoNext}
-                  onBack={() => router.push("/team-appraisals")}
-                  isReviewMode={true}
-                  reviewUserId={user_id}
-                />
-              ) : currentStep === 'performance-planning' ? (
-                <PerformancePlanningForm 
-                  onNext={handlePerformancePlanningNext}
-                  onBack={handleBackToPersonalInfo}
-                  isReviewMode={true}
-                  reviewUserId={user_id}
-                />
-              ) : currentStep === 'mid-year-review' ? (
-                <MidYearReviewForm 
-                  onNext={handleMidYearReviewNext}
-                  onBack={handleBackToPerformancePlanning}
-                  isReviewMode={true}
-                  reviewUserId={user_id}
-                />
-              ) : currentStep === 'end-year-review' ? (
-                <EndYearReviewForm 
-                  onNext={handleEndYearReviewNext}
-                  onBack={handleBackToMidYearReview}
-                  isReviewMode={true}
-                  reviewUserId={user_id}
-                />
-              ) : currentStep === 'annual-appraisal' ? (
-                <AnnualAppraisalForm 
-                  onNext={handleAnnualAppraisalNext}
-                  onBack={handleBackToEndYearReview}
-                  isReviewMode={true}
-                  reviewUserId={user_id}
-                />
-              ) : (
-                <FinalSectionsForm 
-                  onNext={handleFinalSectionsNext}
-                  onBack={handleBackToAnnualAppraisal}
-                  isReviewMode={true}
-                  reviewUserId={user_id}
-                />
-              )}
-            </>
-          ) : (
-            <Card className="glass-card">
-              <CardContent className="p-12 text-center">
-                <p className="text-muted-foreground">No appraisal found for this team member.</p>
-              </CardContent>
-            </Card>
+                {/* Team Member Info */}
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <span className="ml-2 text-muted-foreground">Loading appraisal...</span>
+                  </div>
+                ) : personalInfo ? (
+                  <>
+                    {/* Form Content */}
+                    {
+                      currentStep === 'personal-info' ? (
+                        <AppraiseePersonalInfoForm
+                          onNext={handlePersonalInfoNext}
+                          onBack={() => router.push("/team-appraisals")}
+                          isReviewMode={true}
+                          reviewUserId={user_id}
+                        />
+                      ) : currentStep === 'performance-planning' ? (
+                        <PerformancePlanningForm
+                          onNext={handlePerformancePlanningNext}
+                          onBack={handleBackToPersonalInfo}
+                          isReviewMode={true}
+                          reviewUserId={user_id}
+                        />
+                      ) : currentStep === 'mid-year-review' ? (
+                        <MidYearReviewForm
+                          onNext={handleMidYearReviewNext}
+                          onBack={handleBackToPerformancePlanning}
+                          isReviewMode={true}
+                          reviewUserId={user_id}
+                        />
+                      ) : currentStep === 'end-year-review' ? (
+                        <EndYearReviewForm
+                          onNext={handleEndYearReviewNext}
+                          onBack={handleBackToMidYearReview}
+                          isReviewMode={true}
+                          reviewUserId={user_id}
+                        />
+                      ) : currentStep === 'annual-appraisal' ? (
+                        <AnnualAppraisalForm
+                          onNext={handleAnnualAppraisalNext}
+                          onBack={handleBackToEndYearReview}
+                          isReviewMode={true}
+                          reviewUserId={user_id}
+                        />
+                      ) : (
+                        <FinalSectionsForm
+                          onNext={handleFinalSectionsNext}
+                          onBack={handleBackToAnnualAppraisal}
+                          isReviewMode={true}
+                          reviewUserId={user_id}
+                        />
+                      )}
+                  </>
+                ) : (
+                  <Card className="glass-card">
+                    <CardContent className="p-12 text-center">
+                      <p className="text-muted-foreground">No appraisal found for this team member.</p>
+                    </CardContent>
+                  </Card>
+                )}
+              </main>
+            </GuideNotesLayout>
           )}
-        </main>
-        </GuideNotesLayout>
+        </div>
       </div>
-    </div>
+
+      {/* Resume Confirmation Dialog */}
+      <AlertDialog open={showResumeDialog} onOpenChange={setShowResumeDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Resume Your Review?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have an in-progress review for this team member. You were on <strong>{getStepDisplayName(savedStep || '')}</strong>.
+              Would you like to resume from where you left off?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleStartOver}>Start Over</AlertDialogCancel>
+            <AlertDialogAction onClick={handleResumeAppraisal}>Resume</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }
