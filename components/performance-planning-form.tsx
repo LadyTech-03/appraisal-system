@@ -609,7 +609,7 @@ export function PerformancePlanningForm({
                               className="data-[state=active]:bg-primary data-[state=active]:text-white transition-all"
                             >
                               <PenTool className="h-4 w-4 mr-2" />
-                              Draw
+                              Digital
                             </TabsTrigger>
                           </TabsList>
                           <TabsContent value="upload" className="space-y-3 p-1">
@@ -702,7 +702,7 @@ export function PerformancePlanningForm({
                               className="data-[state=active]:bg-primary data-[state=active]:text-white transition-all"
                             >
                               <PenTool className="h-4 w-4 mr-2" />
-                              Draw
+                              Digital
                             </TabsTrigger>
                           </TabsList>
                           <TabsContent value="upload" className="space-y-3 p-1">
