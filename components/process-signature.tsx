@@ -8,72 +8,64 @@ type ProcessOptions = {
 
   // Extra cleanup
   despeckle?: boolean;
+
+    // Minimum size for connected components to keep
+    minComponentSize?: number; // e.g. 50
+    // Whether to perform morphological closing to reconnect strokes
+    doClose?: boolean;
+    deltaBase?: number;
 };
 
-export const processSignature = async (
-  file: File,
-  opts: ProcessOptions = {}
-): Promise<Blob> => {
+export async function processSignature(file: File, opts: ProcessOptions = {}): Promise<Blob> {
   const {
     maxSide = 1600,
-    inkStrength = 1.15,
-    despeckle = true,
+    inkStrength = 0.95,
+    deltaBase = 8,
+    minComponentSize = 50,
+    doClose = true,
   } = opts;
 
   const img = await loadImageFromFile(file);
-
-  // Draw to canvas (optionally downscale)
   const { canvas, ctx, width, height } = drawToCanvas(img, maxSide);
 
-  // 1) Get pixels
   const imageData = ctx.getImageData(0, 0, width, height);
   const data = imageData.data;
 
-  // 2) Convert to grayscale (luma)
+  // 1) grayscale
   const gray = new Float32Array(width * height);
   for (let i = 0, p = 0; i < data.length; i += 4, p++) {
     const r = data[i], g = data[i + 1], b = data[i + 2];
-    // ITU-R BT.709 luma
     gray[p] = 0.2126 * r + 0.7152 * g + 0.0722 * b;
   }
 
-  // 3) Estimate background using a large blur (fast box blur)
-  // Think of this as "what the paper looks like" including lighting/shadows
-  const bg = boxBlur(gray, width, height, Math.max(8, Math.floor(Math.min(width, height) / 40)));
+  // 2) estimate background (large blur)
+  const bgRadius = Math.max(10, Math.floor(Math.min(width, height) / 35));
+  const bg = boxBlur(gray, width, height, bgRadius);
 
-  // 4) Normalize: remove lighting by dividing foreground by background
-  // normalized ~ 0 (dark ink) to 255 (clean background)
+  // 3) normalize to reduce lighting/background color effects
   const norm = new Float32Array(width * height);
   for (let i = 0; i < norm.length; i++) {
-    const b = Math.max(bg[i], 1); // avoid division by 0
-    // Scale to 0..255-ish
+    const b = Math.max(bg[i], 1);
     norm[i] = clamp((gray[i] / b) * 255, 0, 255);
   }
 
-  // 5) Adaptive threshold (local): produce a "ink mask"
-  // We compute a local mean and compare pixel against it
-  const radius = Math.max(6, Math.floor(Math.min(width, height) / 120));
-  const localMean = boxBlur(norm, width, height, radius);
+  // 4) adaptive threshold: compare to local mean
+  const localRadius = Math.max(6, Math.floor(Math.min(width, height) / 120));
+  const localMean = boxBlur(norm, width, height, localRadius);
 
-  // inkMask: 1 = ink, 0 = background
   const inkMask = new Uint8Array(width * height);
   for (let i = 0; i < inkMask.length; i++) {
-    // If pixel is sufficiently darker than its local neighborhood, it's ink
-    const delta = localMean[i] - norm[i];
-    // Scale decision boundary by inkStrength
-    inkMask[i] = delta > (12 * inkStrength) ? 1 : 0;
+    const delta = localMean[i] - norm[i]; // positive => darker than neighborhood
+    inkMask[i] = delta > (deltaBase * inkStrength) ? 1 : 0;
   }
 
-    // 6) Cleanup: remove isolated specks, close small gaps
-    let cleaned: Uint8Array = inkMask;
+  // 5) remove specks without eroding real strokes
+  let cleaned: Uint8Array = removeSmallComponents(inkMask, width, height, minComponentSize);
 
-    if (despeckle) {
-    cleaned = morphOpen(cleaned, width, height);  // remove tiny noise
-    cleaned = morphClose(cleaned, width, height); // reconnect strokes a bit
-    }
+  // 6) optional close to reconnect strokes (safe vs opening)
+  if (doClose) cleaned = morphClose(cleaned, width, height);
 
-  // 7) Build alpha matte and write back RGBA
-  // Keep original color but set alpha based on mask and "ink darkness"
+  // 7) output: keep original RGB but set alpha from darkness for smooth edges
   const out = ctx.createImageData(width, height);
   const outData = out.data;
 
@@ -86,23 +78,19 @@ export const processSignature = async (
       continue;
     }
 
-    // Use normalized darkness to make nicer edges:
-    // darker => more opaque
-    const darkness = clamp(255 - norm[p], 0, 255);
-    const alpha = clamp(darkness * 1.2, 0, 255);
+    const darkness = clamp(255 - norm[p], 0, 255); // darker = more opaque
+    const alpha = clamp(darkness * 1.35, 0, 255);
 
-    outData[i] = data[i];       // original R
-    outData[i + 1] = data[i+1]; // original G
-    outData[i + 2] = data[i+2]; // original B
+    outData[i] = data[i];
+    outData[i + 1] = data[i + 1];
+    outData[i + 2] = data[i + 2];
     outData[i + 3] = alpha;
   }
 
   ctx.putImageData(out, 0, 0);
 
-  // 8) Export PNG
-  const blob = await canvasToPngBlob(canvas);
-  return blob;
-};
+  return canvasToPngBlob(canvas);
+}
 
 // ---------- helpers ----------
 
@@ -156,8 +144,7 @@ function clamp(x: number, min: number, max: number) {
 }
 
 /**
- * Fast box blur using separable passes (horizontal + vertical).
- * radius controls smoothing strength.
+ * Fast box blur (separable).
  */
 function boxBlur(src: Float32Array, w: number, h: number, radius: number): Float32Array {
   if (radius <= 0) return src.slice();
@@ -166,10 +153,10 @@ function boxBlur(src: Float32Array, w: number, h: number, radius: number): Float
   const dst = new Float32Array(w * h);
   const windowSize = radius * 2 + 1;
 
-  // Horizontal pass
+  // horizontal
   for (let y = 0; y < h; y++) {
-    let sum = 0;
     const row = y * w;
+    let sum = 0;
 
     for (let x = -radius; x <= radius; x++) {
       const ix = clamp(x, 0, w - 1);
@@ -185,7 +172,7 @@ function boxBlur(src: Float32Array, w: number, h: number, radius: number): Float
     }
   }
 
-  // Vertical pass
+  // vertical
   for (let x = 0; x < w; x++) {
     let sum = 0;
 
@@ -206,10 +193,61 @@ function boxBlur(src: Float32Array, w: number, h: number, radius: number): Float
   return dst;
 }
 
-// Simple 3x3 morphology on binary mask
-function morphOpen(mask: Uint8Array, w: number, h: number): Uint8Array {
-  return dilate(erode(mask, w, h), w, h);
+/**
+ * Remove tiny isolated blobs (specks) without eroding thin strokes.
+ * This is usually safer than morphological opening for signatures.
+ */
+function removeSmallComponents(mask: Uint8Array, w: number, h: number, minSize: number): Uint8Array {
+  const out = new Uint8Array(mask); // copy
+  const visited = new Uint8Array(mask.length);
+  const stack: number[] = [];
+
+  // 8-neighborhood
+  const offsets = [-1, 1, -w, w, -w - 1, -w + 1, w - 1, w + 1];
+
+  for (let i = 0; i < out.length; i++) {
+    if (!out[i] || visited[i]) continue;
+
+    let count = 0;
+    const pixels: number[] = [];
+
+    stack.push(i);
+    visited[i] = 1;
+
+    while (stack.length) {
+      const p = stack.pop()!;
+      pixels.push(p);
+      count++;
+
+      const x = p % w;
+      const y = (p / w) | 0;
+
+      for (const off of offsets) {
+        const np = p + off;
+        if (np < 0 || np >= out.length) continue;
+
+        const nx = np % w;
+        const ny = (np / w) | 0;
+
+        // prevent wrap across rows
+        if (Math.abs(nx - x) > 1 || Math.abs(ny - y) > 1) continue;
+
+        if (!visited[np] && out[np]) {
+          visited[np] = 1;
+          stack.push(np);
+        }
+      }
+    }
+
+    if (count < minSize) {
+      for (const p of pixels) out[p] = 0;
+    }
+  }
+
+  return out;
 }
+
+// Morph close = dilate then erode (reconnect strokes a bit)
 function morphClose(mask: Uint8Array, w: number, h: number): Uint8Array {
   return erode(dilate(mask, w, h), w, h);
 }
@@ -222,7 +260,10 @@ function erode(mask: Uint8Array, w: number, h: number): Uint8Array {
       let ok = 1;
       for (let dy = -1; dy <= 1; dy++) {
         for (let dx = -1; dx <= 1; dx++) {
-          if (mask[i + dy * w + dx] === 0) { ok = 0; break; }
+          if (mask[i + dy * w + dx] === 0) {
+            ok = 0;
+            break;
+          }
         }
         if (!ok) break;
       }
@@ -240,7 +281,10 @@ function dilate(mask: Uint8Array, w: number, h: number): Uint8Array {
       let ok = 0;
       for (let dy = -1; dy <= 1; dy++) {
         for (let dx = -1; dx <= 1; dx++) {
-          if (mask[i + dy * w + dx] === 1) { ok = 1; break; }
+          if (mask[i + dy * w + dx] === 1) {
+            ok = 1;
+            break;
+          }
         }
         if (ok) break;
       }

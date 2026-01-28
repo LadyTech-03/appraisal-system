@@ -269,8 +269,8 @@ export function PerformancePlanningForm({
         // Use simple luminance-based background removal
         const blob = await processSignature(file, {
           maxSide: 1600,
-          inkStrength: 1.15,
-          despeckle: true
+          inkStrength: 0.8,
+          despeckle: true,
         });
         const processedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".png", { type: "image/png" })
 
