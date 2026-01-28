@@ -744,7 +744,7 @@ export function AnnualAppraisalForm({
                           <>
                             <p className="text-sm text-muted-foreground">You have a signature on file</p>
                             <Button disabled={isLocked} type="button" onClick={handleSign} variant="default" size="sm">
-                              Sign
+                              Sign Form
                             </Button>
                           </>
                         ) : (

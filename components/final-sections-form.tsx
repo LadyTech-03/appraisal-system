@@ -384,9 +384,9 @@ export function FinalSectionsForm({
                     <div className="space-y-2">
                       {!formData.appraiserSignatureUrl ? (
                         <>
-                          <p className="text-sm text-muted-foreground">You have a signature on file</p>
+                          {/* <p className="text-sm text-muted-foreground">You have a signature on file</p> */}
                           <Button type="button" disabled={isLocked} onClick={handleSign} variant="default" size="sm">
-                            Sign
+                            Sign Form
                           </Button>
                         </>
                       ) : (
@@ -615,9 +615,9 @@ export function FinalSectionsForm({
                             <div className="space-y-2">
                               {!formData.appraiseeSignatureUrl ? (
                                 <>
-                                  <p className="text-sm text-muted-foreground">You have a signature on file</p>
+                                  {/* <p className="text-sm text-muted-foreground">You have a signature on file</p> */}
                                   <Button type="button" onClick={handleSign} variant="default" size="sm">
-                                    Sign
+                                    Sign Form
                                   </Button>
                                 </>
                               ) : (
@@ -766,7 +766,7 @@ export function FinalSectionsForm({
                           <>
                             {/* <p className="text-sm text-muted-foreground">You have a signature on file</p> */}
                             <Button type="button" onClick={handleSign} variant="default" size="sm">
-                              Sign
+                              Sign Form
                             </Button>
                           </>
                         ) : (
