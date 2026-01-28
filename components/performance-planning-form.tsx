@@ -8,7 +8,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Trash2, Upload, Loader2, PlusCircle } from "lucide-react"
+import { Plus, Trash2, Upload, Loader2, PlusCircle, PenTool } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { SignaturePad } from "./signature-pad"
 import { toast } from "sonner"
 import {
   AlertDialog,
@@ -191,128 +193,49 @@ export function PerformancePlanningForm({
     }))
   }
 
-  // Import dynamically to avoid SSR issues with MediaPipe
-  // import { removeBackground } from "@imgly/background-removal"
-
-  // const processSignature = async (file: File): Promise<Blob> => {
-  //   return new Promise((resolve, reject) => {
-  //     const img = new window.Image(); // Use window.Image to avoid conflict with Next.js Image
-  //     img.src = URL.createObjectURL(file);
-  //     img.onload = () => {
-  //       try {
-  //         const canvas = document.createElement("canvas");
-  //         canvas.width = img.width;
-  //         canvas.height = img.height;
-  //         const ctx = canvas.getContext("2d");
-
-  //         if (!ctx) {
-  //           reject(new Error("Failed to get canvas context"));
-  //           return;
-  //         }
-
-  //         // Draw original image
-  //         ctx.drawImage(img, 0, 0);
-
-  //         // Get image data to manipulate pixels
-  //         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  //         const data = imageData.data;
-
-  //         // Threshold for "white" - can be adjusted
-  //         // 255 is pure white. 200 allows for some shadow/off-white.
-  //         const threshold = 200;
-
-  //         for (let i = 0; i < data.length; i += 4) {
-  //           const r = data[i];
-  //           const g = data[i + 1];
-  //           const b = data[i + 2];
-
-  //           // If pixel is light enough, make it transparent
-  //           // Using simple average or checking all channels
-  //           if (r > threshold && g > threshold && b > threshold) {
-  //             data[i + 3] = 0; // Set alpha to 0 (transparent)
-  //           }
-  //         }
-
-  //         // Put modified data back
-  //         ctx.putImageData(imageData, 0, 0);
-
-  //         canvas.toBlob((blob) => {
-  //           if (blob) {
-  //             resolve(blob);
-  //           } else {
-  //             reject(new Error("Failed to create blob from canvas"));
-  //           }
-  //           URL.revokeObjectURL(img.src);
-  //         }, "image/png");
-
-  //       } catch (error) {
-  //         reject(error);
-  //         URL.revokeObjectURL(img.src);
-  //       }
-  //     };
-  //     img.onerror = () => {
-  //       reject(new Error("Failed to load image"));
-  //       URL.revokeObjectURL(img.src);
-  //     };
-  //   });
-  // };
-
   const handleSignatureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
-    const isAppraisee = !isReviewMode
-
     if (file) {
-      setIsUploadingSignature(true)
-      try {
-        toast.info("Uploading signature")
+      await processAndUploadSignature(file)
+    }
+  }
 
-        // Use simple luminance-based background removal
+  const handleDrawnSignature = async (blob: Blob) => {
+    const file = new File([blob], "signature.png", { type: "image/png" })
+    await processAndUploadSignature(file, false) // Don't process drawn signature, it's already clean
+  }
+
+  const processAndUploadSignature = async (file: File, shouldProcess = true) => {
+    const isAppraisee = !isReviewMode
+    setIsUploadingSignature(true)
+    try {
+      toast.info("Uploading signature")
+
+      let finalFile = file;
+      if (shouldProcess) {
+        // Use simple luminance-based background removal for uploaded files
         const blob = await processSignature(file, {
           maxSide: 1600,
           inkStrength: 0.8,
           despeckle: true,
         });
-        const processedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".png", { type: "image/png" })
-
-        const result = await usersApi.uploadSignature(processedFile)
-        if (isAppraisee) {
-          setAppraiseeSignatureUrl(result.signatureUrl)
-        } else {
-          setAppraiserSignatureUrl(result.signatureUrl)
-        }
-        toast.success("Signature uploaded successfully")
-      } catch (error) {
-        console.error("Signature processing error:", error)
-        toast.error("Failed to upload signature")
-      } finally {
-        setIsUploadingSignature(false)
+        finalFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".png", { type: "image/png" })
       }
+
+      const result = await usersApi.uploadSignature(finalFile)
+      if (isAppraisee) {
+        setAppraiseeSignatureUrl(result.signatureUrl)
+      } else {
+        setAppraiserSignatureUrl(result.signatureUrl)
+      }
+      toast.success("Signature uploaded successfully")
+    } catch (error) {
+      console.error("Signature processing error:", error)
+      toast.error("Failed to upload signature")
+    } finally {
+      setIsUploadingSignature(false)
     }
   }
-
-  //   const handleSignatureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = event.target.files?.[0]
-  //   const isAppraisee = !isReviewMode
-  //   if (file && file.type === "image/png") {
-  //       setIsUploadingSignature(true)
-  //       try {
-  //           const result = await usersApi.uploadSignature(file)
-  //           if (isAppraisee) {
-  //               setAppraiseeSignatureUrl(result.signatureUrl)
-  //           } else {
-  //               setAppraiserSignatureUrl(result.signatureUrl)
-  //           }
-  //           toast.success("Signature uploaded successfully")
-  //       } catch (error) {
-  //           toast.error("Failed to upload signature")
-  //       } finally {
-  //           setIsUploadingSignature(false)
-  //       }
-  //   } else if (file) {
-  //       toast.error("Please upload a PNG image")
-  //   }
-  // }
-
 
   const handleSign = () => {
     if (appraiseeSignatureUrl && !isReviewMode) {
@@ -670,24 +593,50 @@ export function PerformancePlanningForm({
                       </div>
                     ) : (
                       <div className="space-y-2">
-                        <Label htmlFor="appraisee-signature" className="text-sm">Upload Signature</Label>
-                        <div className="flex gap-2">
-                          <Input
-                            id="appraisee-signature"
-                            type="file"
-                            accept="image/*"
-                            onChange={handleSignatureUpload}
-                            disabled={isUploadingSignature || isLocked}
-                            className="h-8 text-xs"
-                          />
-                          {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}
-                        </div>
+                        <Tabs defaultValue="upload" className="w-full border rounded-lg p-2 bg-slate-50/50">
+                          <TabsList className="grid grid-cols-2 mb-3 bg-slate-200/50 p-1">
+                            <TabsTrigger
+                              value="upload"
+                              disabled={isReviewMode || isLocked}
+                              className="data-[state=active]:bg-primary data-[state=active]:text-white transition-all"
+                            >
+                              <Upload className="h-4 w-4 mr-2" />
+                              Upload
+                            </TabsTrigger>
+                            <TabsTrigger
+                              value="draw"
+                              disabled={isReviewMode || isLocked}
+                              className="data-[state=active]:bg-primary data-[state=active]:text-white transition-all"
+                            >
+                              <PenTool className="h-4 w-4 mr-2" />
+                              Draw
+                            </TabsTrigger>
+                          </TabsList>
+                          <TabsContent value="upload" className="space-y-3 p-1">
+                            <Label htmlFor="appraisee-signature" className="text-sm font-medium">Upload Signature Image</Label>
+                            <div className="flex gap-2">
+                              <Input
+                                id="appraisee-signature"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleSignatureUpload}
+                                disabled={isUploadingSignature || isLocked}
+                                className="h-9 text-sm bg-white"
+                              />
+                              {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin self-center" />}
+                            </div>
+                            <p className="text-[10px] font-bold text-muted-foreground">Clear background images work best.</p>
+                          </TabsContent>
+                          <TabsContent value="draw" className="space-y-2 mt-0">
+                            <SignaturePad
+                              onSave={handleDrawnSignature}
+                              disabled={isUploadingSignature || isLocked}
+                              height={140}
+                            />
+                          </TabsContent>
+                        </Tabs>
                       </div>
                     )}
-                  </div>
-
-                  <div className="border-t pt-1">
-                    {/* <p className="text-xs text-muted-foreground">Signature line</p> */}
                   </div>
                 </CardContent>
               </Card>
@@ -737,24 +686,50 @@ export function PerformancePlanningForm({
                       </div>
                     ) : (
                       <div className="space-y-2">
-                        <Label htmlFor="appraiser-signature" className="text-sm">Upload Signature</Label>
-                        <div className="flex gap-2">
-                          <Input
-                            id="appraiser-signature"
-                            type="file"
-                            accept="image/*"
-                            onChange={handleSignatureUpload}
-                            disabled={isUploadingSignature || !isReviewMode || isLocked}
-                            className="h-8 text-xs"
-                          />
-                          {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin" />}
-                        </div>
+                        <Tabs defaultValue="upload" className="w-full border rounded-lg p-2 bg-slate-50/50">
+                          <TabsList className="grid grid-cols-2 mb-3 bg-slate-200/50 p-1">
+                            <TabsTrigger
+                              value="upload"
+                              disabled={!isReviewMode || isLocked}
+                              className="data-[state=active]:bg-primary data-[state=active]:text-white transition-all"
+                            >
+                              <Upload className="h-4 w-4 mr-2" />
+                              Upload
+                            </TabsTrigger>
+                            <TabsTrigger
+                              value="draw"
+                              disabled={!isReviewMode || isLocked}
+                              className="data-[state=active]:bg-primary data-[state=active]:text-white transition-all"
+                            >
+                              <PenTool className="h-4 w-4 mr-2" />
+                              Draw
+                            </TabsTrigger>
+                          </TabsList>
+                          <TabsContent value="upload" className="space-y-3 p-1">
+                            <Label htmlFor="appraiser-signature" className="text-sm font-medium">Upload Signature Image</Label>
+                            <div className="flex gap-2">
+                              <Input
+                                id="appraiser-signature"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleSignatureUpload}
+                                disabled={isUploadingSignature || !isReviewMode || isLocked}
+                                className="h-9 text-sm bg-white"
+                              />
+                              {isUploadingSignature && <Loader2 className="h-4 w-4 animate-spin self-center" />}
+                            </div>
+                            <p className="text-[10px] text-muted-foreground">Clear background images work best.</p>
+                          </TabsContent>
+                          <TabsContent value="draw" className="space-y-2 mt-0">
+                            <SignaturePad
+                              onSave={handleDrawnSignature}
+                              disabled={isUploadingSignature || !isReviewMode || isLocked}
+                              height={140}
+                            />
+                          </TabsContent>
+                        </Tabs>
                       </div>
                     )}
-                  </div>
-
-                  <div className="border-t pt-1">
-                    {/* <p className="text-xs text-muted-foreground">Signature line</p> */}
                   </div>
                 </CardContent>
               </Card>
