@@ -33,6 +33,7 @@ import { usersApi } from "@/lib/api/users"
 import { authApi } from "@/lib/api/auth"
 
 // // import { removeBackground } from "@imgly/background-removal"
+import { processSignature } from "./process-signature"
 
 interface KeyResultArea {
   id: string
@@ -193,68 +194,68 @@ export function PerformancePlanningForm({
   // Import dynamically to avoid SSR issues with MediaPipe
   // import { removeBackground } from "@imgly/background-removal"
 
-  const processSignature = async (file: File): Promise<Blob> => {
-    return new Promise((resolve, reject) => {
-      const img = new window.Image(); // Use window.Image to avoid conflict with Next.js Image
-      img.src = URL.createObjectURL(file);
-      img.onload = () => {
-        try {
-          const canvas = document.createElement("canvas");
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext("2d");
+  // const processSignature = async (file: File): Promise<Blob> => {
+  //   return new Promise((resolve, reject) => {
+  //     const img = new window.Image(); // Use window.Image to avoid conflict with Next.js Image
+  //     img.src = URL.createObjectURL(file);
+  //     img.onload = () => {
+  //       try {
+  //         const canvas = document.createElement("canvas");
+  //         canvas.width = img.width;
+  //         canvas.height = img.height;
+  //         const ctx = canvas.getContext("2d");
 
-          if (!ctx) {
-            reject(new Error("Failed to get canvas context"));
-            return;
-          }
+  //         if (!ctx) {
+  //           reject(new Error("Failed to get canvas context"));
+  //           return;
+  //         }
 
-          // Draw original image
-          ctx.drawImage(img, 0, 0);
+  //         // Draw original image
+  //         ctx.drawImage(img, 0, 0);
 
-          // Get image data to manipulate pixels
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          const data = imageData.data;
+  //         // Get image data to manipulate pixels
+  //         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  //         const data = imageData.data;
 
-          // Threshold for "white" - can be adjusted
-          // 255 is pure white. 200 allows for some shadow/off-white.
-          const threshold = 200;
+  //         // Threshold for "white" - can be adjusted
+  //         // 255 is pure white. 200 allows for some shadow/off-white.
+  //         const threshold = 200;
 
-          for (let i = 0; i < data.length; i += 4) {
-            const r = data[i];
-            const g = data[i + 1];
-            const b = data[i + 2];
+  //         for (let i = 0; i < data.length; i += 4) {
+  //           const r = data[i];
+  //           const g = data[i + 1];
+  //           const b = data[i + 2];
 
-            // If pixel is light enough, make it transparent
-            // Using simple average or checking all channels
-            if (r > threshold && g > threshold && b > threshold) {
-              data[i + 3] = 0; // Set alpha to 0 (transparent)
-            }
-          }
+  //           // If pixel is light enough, make it transparent
+  //           // Using simple average or checking all channels
+  //           if (r > threshold && g > threshold && b > threshold) {
+  //             data[i + 3] = 0; // Set alpha to 0 (transparent)
+  //           }
+  //         }
 
-          // Put modified data back
-          ctx.putImageData(imageData, 0, 0);
+  //         // Put modified data back
+  //         ctx.putImageData(imageData, 0, 0);
 
-          canvas.toBlob((blob) => {
-            if (blob) {
-              resolve(blob);
-            } else {
-              reject(new Error("Failed to create blob from canvas"));
-            }
-            URL.revokeObjectURL(img.src);
-          }, "image/png");
+  //         canvas.toBlob((blob) => {
+  //           if (blob) {
+  //             resolve(blob);
+  //           } else {
+  //             reject(new Error("Failed to create blob from canvas"));
+  //           }
+  //           URL.revokeObjectURL(img.src);
+  //         }, "image/png");
 
-        } catch (error) {
-          reject(error);
-          URL.revokeObjectURL(img.src);
-        }
-      };
-      img.onerror = () => {
-        reject(new Error("Failed to load image"));
-        URL.revokeObjectURL(img.src);
-      };
-    });
-  };
+  //       } catch (error) {
+  //         reject(error);
+  //         URL.revokeObjectURL(img.src);
+  //       }
+  //     };
+  //     img.onerror = () => {
+  //       reject(new Error("Failed to load image"));
+  //       URL.revokeObjectURL(img.src);
+  //     };
+  //   });
+  // };
 
   const handleSignatureUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -266,7 +267,11 @@ export function PerformancePlanningForm({
         toast.info("Uploading signature")
 
         // Use simple luminance-based background removal
-        const blob = await processSignature(file);
+        const blob = await processSignature(file, {
+          maxSide: 1600,
+          inkStrength: 1.15,
+          despeckle: true
+        });
         const processedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".png", { type: "image/png" })
 
         const result = await usersApi.uploadSignature(processedFile)
